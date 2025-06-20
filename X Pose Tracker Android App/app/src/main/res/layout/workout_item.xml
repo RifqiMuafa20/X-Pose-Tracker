@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:backgroundTint="@color/dark_gray_2"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/workout_icon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginVertical="8dp"
+            android:layout_marginStart="24dp"
+            android:background="@drawable/bg_circle_orange"
+            android:contentDescription="@string/workout_icon"
+            android:padding="15dp"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/workout_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/workout_name"
+            android:textColor="@color/white"
+            android:fontFamily="@font/poppins_medium"
+            android:textSize="12sp"
+            android:layout_margin="16dp"
+            app:layout_constraintStart_toEndOf="@+id/workout_icon"
+            app:layout_constraintTop_toTopOf="@id/workout_icon"/>
+
+        <TextView
+            android:id="@+id/workout_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/date_example"
+            android:textColor="@color/white"
+            android:fontFamily="@font/poppins_light"
+            android:textSize="11sp"
+            app:layout_constraintTop_toBottomOf="@+id/workout_name"
+            app:layout_constraintStart_toStartOf="@id/workout_name"/>
+
+        <TextView
+            android:id="@+id/workout_repetition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:text="@string/repetition"
+            android:layout_marginEnd="24dp"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

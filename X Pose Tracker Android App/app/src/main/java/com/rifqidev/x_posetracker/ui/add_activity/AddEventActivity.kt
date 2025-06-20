@@ -1,0 +1,92 @@
+package com.rifqidev.x_posetracker.ui.add_activity
+
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
+import com.rifqidev.x_posetracker.R
+import com.rifqidev.x_posetracker.data.ActivityEntity
+import com.rifqidev.x_posetracker.databinding.ActivityAddEventBinding
+import com.rifqidev.x_posetracker.utils.DateHelper
+import java.util.UUID
+
+class AddEventActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityAddEventBinding
+
+    private lateinit var viewModel: AddEventViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        binding = ActivityAddEventBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val factory = ViewModelFactory.getInstance(this.application)
+        viewModel = ViewModelProvider(this, factory)[AddEventViewModel::class.java]
+
+        binding.backButton.setOnClickListener {
+            showConfirmationDialog(R.string.cancel_confirmation, 0)
+        }
+
+        binding.continueButton.setOnClickListener {
+            when {
+                binding.nameInput.text.isNullOrEmpty() -> {
+                    showToast(getString(R.string.event_empty))
+                }
+
+                binding.supervisorInput.text.isNullOrEmpty() -> {
+                    showToast(getString(R.string.supervisor_empty))
+                }
+
+                binding.locationInput.text.isNullOrEmpty() -> {
+                    showToast(getString(R.string.location_empty))
+                }
+
+                else -> {
+                    showToast(getString(R.string.event_added))
+                    val event = ActivityEntity(
+                        idActivity = UUID.randomUUID().toString(),
+                        activityName = binding.nameInput.text.toString(),
+                        activityDate = DateHelper.getCurrentDate(),
+                        activitySupervisor = binding.supervisorInput.text.toString(),
+                        activityLocation = binding.locationInput.text.toString(),
+                        memberAmount = 0
+                    )
+
+                    viewModel.insertActivity(event)
+                    finish()
+                }
+            }
+        }
+
+        supportActionBar?.hide()
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showConfirmationDialog(message: Int, type: Int) {
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage(message)
+        builder.setPositiveButton(R.string.yes) { _, _ ->
+            if (type == 0) {
+                finish()
+            }
+        }
+        builder.setNegativeButton(R.string.no) { dialog, _ ->
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        showConfirmationDialog(R.string.cancel_confirmation, 0)
+    }
+}

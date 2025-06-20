@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.detail_member.DetailMemberActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginStart="32dp"
+            android:contentDescription="@string/back_button"
+            android:src="@drawable/back_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/detail_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:text="@string/member_detail"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@id/back_button"
+            app:layout_constraintBottom_toBottomOf="@id/back_button"
+            app:layout_constraintTop_toTopOf="@id/back_button" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/activity_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="@color/dark_gray_2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/back_button" >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/member_detail"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/member_detail"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    android:layout_margin="16sp"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/edit_activity"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/edit_activity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/edit"
+                    android:layout_marginEnd="16dp"
+                    android:textColor="@color/lime_green"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/member_detail"
+                    app:layout_constraintBottom_toBottomOf="@id/member_detail"/>
+
+                <ImageView
+                    android:id="@+id/member_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:contentDescription="@string/member_name"
+                    android:src="@drawable/person_icon_white"
+                    app:layout_constraintStart_toStartOf="@+id/member_detail"
+                    app:layout_constraintTop_toBottomOf="@+id/member_detail" />
+
+                <TextView
+                    android:id="@+id/member_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="@font/poppins_regular"
+                    android:text="@string/member_name"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintBottom_toBottomOf="@id/member_icon"
+                    app:layout_constraintStart_toEndOf="@+id/member_icon"
+                    app:layout_constraintTop_toTopOf="@id/member_icon"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <ImageView
+                    android:id="@+id/registration_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:contentDescription="@string/registration_number"
+                    android:src="@drawable/registration_icon_white"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/member_icon"
+                    app:layout_constraintTop_toBottomOf="@+id/member_icon" />
+
+                <TextView
+                    android:id="@+id/registration_number"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="@font/poppins_regular"
+                    android:text="@string/registration_number"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintBottom_toBottomOf="@id/registration_icon"
+                    app:layout_constraintStart_toEndOf="@+id/registration_icon"
+                    app:layout_constraintTop_toTopOf="@id/registration_icon"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/best_activity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="56dp"
+            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="@color/dark_gray_2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activity_detail" >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/best_achievements"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/best_achievement"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    android:layout_margin="16sp"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/record_activity"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/record_activity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/record"
+                    android:layout_marginEnd="16dp"
+                    android:textColor="@color/lime_green"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/best_achievements"
+                    app:layout_constraintBottom_toBottomOf="@id/best_achievements"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_workout"
+                    android:layout_width="match_parent"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:spanCount="1"
+                    tools:listitem="@layout/workout_item"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/best_achievements" />
+
+                <TextView
+                    android:id="@+id/no_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:layout_marginVertical="32dp"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    app:drawableTopCompat="@drawable/no_data_icon"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/best_achievements"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

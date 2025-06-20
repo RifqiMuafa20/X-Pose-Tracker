@@ -1,0 +1,129 @@
+package com.rifqidev.x_posetracker.ui.home
+
+import android.graphics.Color
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.rifqidev.x_posetracker.R
+import com.rifqidev.x_posetracker.adapter.ListWorkoutAdapter
+import com.rifqidev.x_posetracker.data.WorkoutItem
+import com.rifqidev.x_posetracker.databinding.FragmentHomeBinding
+import com.rifqidev.x_posetracker.utils.toBitmap
+
+class HomeFragment : Fragment() {
+    private var _binding: FragmentHomeBinding? = null
+
+    private val binding get() = _binding!!
+
+    private lateinit var homeViewModel: HomeViewModel
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        val root: View = binding.root
+
+        return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val factory = ViewModelFactory.getInstance(requireActivity().application)
+        homeViewModel = ViewModelProvider(requireActivity(), factory)[HomeViewModel::class.java]
+
+        homeViewModel.getUserProfile().observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                binding.fullname.text = user.userName
+                val profileImage = user.userProfile?.toBitmap()
+                if (user.userProfile != null) {
+                    binding.profileImage.setImageBitmap(profileImage)
+                } else {
+                    binding.profileImage.setImageResource(R.drawable.account_icon)
+                }
+            }
+        }
+
+        val chart = binding.chart
+
+        val entries = listOf(
+            Entry(0f, 40f),
+            Entry(1f, 30f),
+            Entry(2f, 35f),
+            Entry(3f, 50f),
+            Entry(4f, 15f),
+            Entry(5f, 25f),
+            Entry(6f, 40f),
+        )
+
+        val dataSet = LineDataSet(entries, "Progress").apply {
+            color = Color.rgb(187, 242, 70)
+            setCircleColor(Color.rgb(187, 242, 70))
+            circleRadius = 5f
+            circleHoleRadius = 2.5f
+            lineWidth = 3f
+            mode = LineDataSet.Mode.LINEAR
+            setDrawFilled(true)
+            fillDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.chart_gradien)
+        }
+
+        chart.data = LineData(dataSet)
+
+        val days = arrayOf("Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu")
+        chart.xAxis.apply {
+            valueFormatter = IndexAxisValueFormatter(days)
+            position = XAxis.XAxisPosition.BOTTOM
+            setDrawGridLines(false)
+            textColor = Color.WHITE
+        }
+
+        chart.axisLeft.apply {
+            textColor = Color.WHITE
+        }
+
+        dataSet.valueTextColor = Color.WHITE
+        chart.axisRight.isEnabled = false
+        chart.description.isEnabled = false
+        chart.legend.isEnabled = false
+
+        chart.invalidate()
+
+        val names = resources.getStringArray(R.array.categories_menu)
+
+        val iconResIds = listOf(
+            R.drawable.push_up_icon,
+            R.drawable.sit_up_icon,
+            R.drawable.pull_up_icon,
+            R.drawable.lunges_icon
+        )
+
+        val workoutItems = names.mapIndexed { index, name ->
+            WorkoutItem(
+                name = name,
+                iconResId = iconResIds[index],
+                date = "-",
+                repetition = "0"
+            )
+        }
+
+        val adapter = ListWorkoutAdapter(workoutItems)
+        binding.rvWorkout.adapter = adapter
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

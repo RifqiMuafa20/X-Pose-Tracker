@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.detail_activity.DetailEventActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginStart="32dp"
+            android:contentDescription="@string/back_button"
+            android:src="@drawable/back_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/detail_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:text="@string/activity_detail"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@id/back_button"
+            app:layout_constraintBottom_toBottomOf="@id/back_button"
+            app:layout_constraintTop_toTopOf="@id/back_button" />
+
+        <ImageView
+            android:id="@+id/delete_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:contentDescription="@string/delete_activity"
+            android:src="@drawable/delete_icon"
+            android:layout_marginEnd="32dp"
+            app:layout_constraintBottom_toBottomOf="@id/back_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/back_button" />
+        
+        <androidx.cardview.widget.CardView
+            android:id="@+id/activity_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="@color/dark_gray_2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/back_button" >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/activity_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/activity_name"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    android:layout_margin="16sp"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/edit_activity"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/edit_activity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/edit"
+                    android:layout_marginEnd="16dp"
+                    android:textColor="@color/lime_green"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/activity_name"
+                    app:layout_constraintBottom_toBottomOf="@id/activity_name"/>
+
+                <ImageView
+                    android:id="@+id/date_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:contentDescription="@string/activity_date"
+                    android:src="@drawable/date_icon_white"
+                    app:layout_constraintStart_toStartOf="@+id/activity_name"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_name" />
+
+                <TextView
+                    android:id="@+id/activity_date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="@font/poppins_regular"
+                    android:text="@string/activity_date"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintBottom_toBottomOf="@id/date_icon"
+                    app:layout_constraintStart_toEndOf="@+id/date_icon"
+                    app:layout_constraintTop_toTopOf="@id/date_icon"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <ImageView
+                    android:id="@+id/location_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/activity_location"
+                    android:src="@drawable/location_icon_white"
+                    app:layout_constraintStart_toStartOf="@+id/date_icon"
+                    app:layout_constraintTop_toBottomOf="@+id/date_icon" />
+
+                <TextView
+                    android:id="@+id/activity_location"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="@font/poppins_regular"
+                    android:text="@string/activity_location"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintBottom_toBottomOf="@id/location_icon"
+                    app:layout_constraintStart_toEndOf="@+id/location_icon"
+                    app:layout_constraintTop_toTopOf="@id/location_icon"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <ImageView
+                    android:id="@+id/supervisor_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/activity_supervisor"
+                    android:src="@drawable/supervisor_icon_white"
+                    app:layout_constraintStart_toStartOf="@+id/location_icon"
+                    app:layout_constraintTop_toBottomOf="@+id/location_icon" />
+
+                <TextView
+                    android:id="@+id/activity_supervisor"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="@font/poppins_regular"
+                    android:text="@string/activity_supervisor"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintBottom_toBottomOf="@id/supervisor_icon"
+                    app:layout_constraintStart_toEndOf="@+id/supervisor_icon"
+                    app:layout_constraintTop_toTopOf="@id/supervisor_icon"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <ImageView
+                    android:id="@+id/person_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/person_count"
+                    android:src="@drawable/person_icon_white"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/supervisor_icon"
+                    app:layout_constraintTop_toBottomOf="@+id/supervisor_icon" />
+
+                <TextView
+                    android:id="@+id/activity_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="@font/poppins_regular"
+                    android:text="@string/person_count"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintBottom_toBottomOf="@id/person_icon"
+                    app:layout_constraintStart_toEndOf="@+id/person_icon"
+                    app:layout_constraintTop_toTopOf="@id/person_icon"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/list_member"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="@color/dark_gray_2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activity_detail" >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/member_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/member"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    android:layout_margin="16sp"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/add_member"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/add_member"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add"
+                    android:layout_marginEnd="16dp"
+                    android:textColor="@color/lime_green"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/member_title"
+                    app:layout_constraintBottom_toBottomOf="@id/member_title"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_member"
+                    android:layout_width="match_parent"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="32dp"
+                    android:orientation="vertical"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:spanCount="1"
+                    tools:listitem="@layout/member_item"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/member_title" />
+
+                <TextView
+                    android:id="@+id/no_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:visibility="gone"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="32dp"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    android:textSize="14sp"
+                    app:drawableTopCompat="@drawable/no_data_icon"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/member_title"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <Button
+            android:id="@+id/continue_button"
+            style="@style/RoundedGreenButton"
+            android:layout_marginVertical="56dp"
+            android:text="@string/export"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/list_member" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

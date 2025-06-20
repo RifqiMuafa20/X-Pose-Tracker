@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.camera.CameraActivity">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/dark_gray_2"
+        app:cardCornerRadius="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/duration_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:text="@string/duration"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toStartOf="@id/type_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/type_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:text="@string/type"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toStartOf="@id/repetition_title"
+                app:layout_constraintStart_toEndOf="@id/duration_title"
+                app:layout_constraintTop_toTopOf="@id/duration_title" />
+
+            <TextView
+                android:id="@+id/repetition_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:text="@string/repetition_title"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/type_title"
+                app:layout_constraintTop_toTopOf="@id/duration_title" />
+
+            <TextView
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/orange_rounded"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="8dp"
+                android:text="@string/duration_example"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@id/duration_title"
+                app:layout_constraintStart_toStartOf="@id/duration_title"
+                app:layout_constraintTop_toBottomOf="@id/duration_title" />
+
+            <TextView
+                android:id="@+id/type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/orange_rounded"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="8dp"
+                android:text="@string/unknown"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@id/type_title"
+                app:layout_constraintStart_toStartOf="@id/type_title"
+                app:layout_constraintTop_toBottomOf="@id/type_title" />
+
+            <TextView
+                android:id="@+id/repetition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/orange_rounded"
+                android:fontFamily="@font/poppins_regular"
+                android:paddingHorizontal="36dp"
+                android:paddingVertical="8dp"
+                android:text="@string/repetition_example"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@id/repetition_title"
+                app:layout_constraintStart_toStartOf="@id/repetition_title"
+                app:layout_constraintTop_toBottomOf="@id/repetition_title" />
+
+            <androidx.camera.view.PreviewView
+                android:id="@+id/viewFinder"
+                android:layout_width="match_parent"
+                android:layout_height="360dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/duration" />
+
+            <com.rifqidev.x_posetracker.customview.OverlayView
+                android:id="@+id/overlay"
+                android:layout_width="match_parent"
+                android:layout_height="360dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/viewFinder"
+                app:layout_constraintStart_toStartOf="@id/viewFinder"
+                app:layout_constraintEnd_toEndOf="@id/viewFinder"/>
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <ImageView
+                android:id="@+id/push_ups_icon"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_circle_orange"
+                android:contentDescription="@string/workout_icon"
+                android:padding="10dp"
+                android:scaleType="centerInside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/viewFinder"
+                android:src="@drawable/push_up_icon" />
+
+            <TextView
+                android:id="@+id/push_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="@font/poppins_medium"
+                android:text="@string/push_up"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@id/push_ups_icon"
+                app:layout_constraintStart_toEndOf="@+id/push_ups_icon"
+                app:layout_constraintTop_toTopOf="@id/push_ups_icon" />
+
+            <TextView
+                android:id="@+id/push_up_rep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:text="@string/repetition_example"
+                android:textColor="@color/white"
+                android:layout_marginEnd="16dp"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@id/push_ups_icon"
+                app:layout_constraintEnd_toEndOf="@+id/guideline2"
+                app:layout_constraintTop_toTopOf="@id/push_ups_icon" />
+
+            <ImageView
+                android:id="@+id/situps_icon"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_circle_orange"
+                android:contentDescription="@string/workout_icon"
+                android:padding="10dp"
+                android:scaleType="centerInside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/push_ups_icon"
+                android:src="@drawable/sit_up_icon" />
+
+            <TextView
+                android:id="@+id/sit_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="@font/poppins_medium"
+                android:text="@string/sit_up"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@id/situps_icon"
+                app:layout_constraintStart_toEndOf="@+id/situps_icon"
+                app:layout_constraintTop_toTopOf="@id/situps_icon" />
+
+            <TextView
+                android:id="@+id/sit_up_rep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:text="@string/repetition_example"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintBottom_toBottomOf="@id/situps_icon"
+                app:layout_constraintEnd_toEndOf="@+id/guideline2"
+                app:layout_constraintTop_toTopOf="@id/situps_icon" />
+
+            <ImageView
+                android:id="@+id/pull_ups_icon"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_circle_orange"
+                android:contentDescription="@string/workout_icon"
+                android:padding="10dp"
+                android:scaleType="centerInside"
+                app:layout_constraintStart_toStartOf="@id/guideline2"
+                app:layout_constraintTop_toBottomOf="@+id/viewFinder"
+                android:src="@drawable/pull_up_icon" />
+
+            <TextView
+                android:id="@+id/pull_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="@font/poppins_medium"
+                android:text="@string/pull_up"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@id/pull_ups_icon"
+                app:layout_constraintStart_toEndOf="@+id/pull_ups_icon"
+                app:layout_constraintTop_toTopOf="@id/pull_ups_icon" />
+
+            <TextView
+                android:id="@+id/pull_up_rep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:text="@string/repetition_example"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:layout_marginEnd="32dp"
+                app:layout_constraintBottom_toBottomOf="@id/pull_ups_icon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/pull_ups_icon" />
+
+            <ImageView
+                android:id="@+id/lunges_icon"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_circle_orange"
+                android:contentDescription="@string/workout_icon"
+                android:padding="10dp"
+                android:scaleType="centerInside"
+                app:layout_constraintStart_toStartOf="@id/guideline2"
+                app:layout_constraintTop_toBottomOf="@+id/pull_ups_icon"
+                android:src="@drawable/lunges_icon" />
+
+            <TextView
+                android:id="@+id/lunges"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="@font/poppins_medium"
+                android:text="@string/lunges"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@id/lunges_icon"
+                app:layout_constraintStart_toEndOf="@+id/lunges_icon"
+                app:layout_constraintTop_toTopOf="@id/lunges_icon" />
+
+            <TextView
+                android:id="@+id/lunges_rep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:text="@string/repetition_example"
+                android:textSize="14sp"
+                android:layout_marginEnd="32dp"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="@id/lunges_icon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/lunges_icon" />
+
+            <ImageView
+                android:id="@+id/startCamera"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="32dp"
+                android:contentDescription="@string/switch_camera"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/situps_icon"
+                app:srcCompat="@drawable/baseline_adjust_24" />
+
+            <TextView
+                android:id="@+id/startText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/start"
+                android:fontFamily="@font/poppins_medium"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:layout_marginBottom="32dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/startCamera"
+                app:layout_constraintStart_toStartOf="@id/startCamera"
+                app:layout_constraintEnd_toEndOf="@id/startCamera"/>
+
+            <ImageView
+                android:id="@+id/switchCamera"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:contentDescription="@string/switch_camera"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginVertical="48dp"
+                app:layout_constraintStart_toStartOf="@id/startCamera"
+                app:layout_constraintTop_toBottomOf="@id/lunges_icon"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:srcCompat="@drawable/switch_camera" />
+
+            <TextView
+                android:id="@+id/countdownText"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:gravity="center"
+                android:textSize="96sp"
+                android:textColor="@color/lime_green"
+                android:visibility="gone"
+                android:background="#88000000"
+                android:fontFamily="@font/poppins_medium"
+                app:layout_constraintTop_toTopOf="@id/overlay"
+                app:layout_constraintBottom_toBottomOf="@id/overlay"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

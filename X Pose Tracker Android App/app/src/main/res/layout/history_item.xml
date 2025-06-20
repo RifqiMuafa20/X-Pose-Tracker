@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:backgroundTint="@color/dark_gray_2"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="16dp"
+    android:layout_marginBottom="8dp" >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/frame_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:contentDescription="@string/frame_image"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/item_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/private_training"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/poppins_medium"
+            android:textSize="12sp"
+            android:textColor="@color/red_orange"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@id/frame_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginHorizontal="12dp" />
+
+        <ImageView
+            android:id="@+id/date_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/date_icon"
+            android:src="@drawable/date_icon_white"
+            app:layout_constraintStart_toStartOf="@id/item_name"
+            app:layout_constraintTop_toBottomOf="@id/item_name" />
+
+        <TextView
+            android:id="@+id/item_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/date_example"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/poppins_regular"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            app:layout_constraintTop_toTopOf="@id/date_icon"
+            app:layout_constraintBottom_toBottomOf="@id/date_icon"
+            app:layout_constraintStart_toEndOf="@id/date_icon" />
+
+        <ImageView
+            android:id="@+id/time_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="4dp"
+            android:contentDescription="@string/time_icon"
+            android:src="@drawable/time_icon_white"
+            app:layout_constraintStart_toStartOf="@id/date_icon"
+            app:layout_constraintTop_toBottomOf="@id/date_icon" />
+
+        <TextView
+            android:id="@+id/item_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_example"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/poppins_regular"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            app:layout_constraintTop_toTopOf="@id/time_icon"
+            app:layout_constraintBottom_toBottomOf="@id/time_icon"
+            app:layout_constraintStart_toEndOf="@id/time_icon" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

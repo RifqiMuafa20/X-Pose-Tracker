@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="false"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.profile.ProfileFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/gym_backgound"
+            android:scaleType="centerCrop"
+            android:src="@drawable/gym_background"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:contentDescription="@string/profile_image"
+            android:scaleType="centerCrop"
+            android:src="@drawable/account_icon"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/imageView2"
+            app:layout_constraintTop_toTopOf="@+id/imageView2" />
+
+        <TextView
+            android:id="@+id/fullname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:text="@string/name_format"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="@+id/profile_image"
+            app:layout_constraintStart_toStartOf="@+id/profile_image"
+            app:layout_constraintTop_toBottomOf="@+id/profile_image" />
+
+        <TextView
+            android:id="@+id/edit_profile_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginHorizontal="32dp"
+            android:fontFamily="@font/poppins_medium"
+            android:gravity="center|start"
+            android:drawablePadding="16dp"
+            android:text="@string/edit_profile"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:drawableStartCompat="@drawable/edit_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imageView2" />
+
+        <TextView
+            android:id="@+id/tutorial_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginHorizontal="32dp"
+            android:fontFamily="@font/poppins_medium"
+            android:gravity="center|start"
+            android:drawablePadding="16dp"
+            android:text="@string/tutorial"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:drawableStartCompat="@drawable/tutorial_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/edit_profile_button" />
+
+        <TextView
+            android:id="@+id/faq_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="56dp"
+            android:layout_marginHorizontal="32dp"
+            android:fontFamily="@font/poppins_medium"
+            android:gravity="center|start"
+            android:drawablePadding="16dp"
+            android:text="@string/faq"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:drawableStartCompat="@drawable/faq_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tutorial_button" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

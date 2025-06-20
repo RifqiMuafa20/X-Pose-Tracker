@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/dark_gray_1"
+    tools:context=".ui.welcome.StepTwoFragment" >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginStart="32dp"
+            android:contentDescription="@string/back_button"
+            android:src="@drawable/back_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/step"
+            style="@style/TextLabel.SmallGray"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/step2"
+            app:layout_constraintStart_toEndOf="@+id/back_button"
+            app:layout_constraintTop_toTopOf="@id/back_button"
+            app:layout_constraintBottom_toBottomOf="@+id/back_button"/>
+
+        <TextView
+            android:id="@+id/step_title2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/step2_title"
+            style="@style/TextLabel.HeadingWhite"
+            app:layout_constraintStart_toStartOf="@id/back_button"
+            app:layout_constraintTop_toBottomOf="@+id/back_button" />
+
+        <TextView
+            android:id="@+id/weight_question"
+            style="@style/TextLabel.BodyWhite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/weight_title"
+            app:layout_constraintStart_toStartOf="@+id/step_title2"
+            app:layout_constraintTop_toBottomOf="@+id/step_title2" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/InputField.RoundedIcon"
+            android:id="@+id/WeightTextField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/weight_hint"
+            app:startIconDrawable="@drawable/weight_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/weight_question"
+            app:layout_constraintTop_toBottomOf="@+id/weight_question">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/weight_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/height_question"
+            style="@style/TextLabel.BodyWhite"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/height_title"
+            app:layout_constraintStart_toStartOf="@+id/WeightTextField"
+            app:layout_constraintTop_toBottomOf="@+id/WeightTextField" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/InputField.RoundedIcon"
+            android:id="@+id/HeightTextField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/height_hint"
+            app:startIconDrawable="@drawable/height_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/height_question"
+            app:layout_constraintTop_toBottomOf="@+id/height_question">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/height_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/continue_button"
+            style="@style/RoundedGreenButton"
+            android:text="@string/continue_"
+            android:layout_marginVertical="56dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/HeightTextField" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

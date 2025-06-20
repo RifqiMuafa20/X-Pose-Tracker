@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.add_activity.AddEventActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginStart="32dp"
+            android:contentDescription="@string/back_button"
+            android:src="@drawable/back_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/record_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:text="@string/add_activity"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@id/back_button"
+            app:layout_constraintBottom_toBottomOf="@id/back_button"
+            app:layout_constraintTop_toTopOf="@id/back_button" />
+
+        <TextView
+            android:id="@+id/name_question"
+            android:text="@string/activity_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextLabel.BodyWhite"
+            app:layout_constraintStart_toStartOf="@+id/back_button"
+            app:layout_constraintTop_toBottomOf="@+id/back_button" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/NameTextField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:startIconDrawable="@drawable/activity_icon"
+            style="@style/InputField.RoundedIcon"
+            android:hint="@string/activity_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/name_question"
+            app:layout_constraintTop_toBottomOf="@+id/name_question">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/name_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/supervisor_question"
+            android:text="@string/supervisor_name"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextLabel.BodyWhite"
+            app:layout_constraintStart_toStartOf="@+id/NameTextField"
+            app:layout_constraintTop_toBottomOf="@+id/NameTextField" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/supervisorTextField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:startIconDrawable="@drawable/supervisor_icon_white"
+            style="@style/InputField.RoundedIcon"
+            android:hint="@string/supervisor_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/supervisor_question"
+            app:layout_constraintTop_toBottomOf="@+id/supervisor_question">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/supervisor_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/location_question"
+            android:text="@string/location_name"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextLabel.BodyWhite"
+            app:layout_constraintStart_toStartOf="@+id/supervisorTextField"
+            app:layout_constraintTop_toBottomOf="@+id/supervisorTextField" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/locationTextField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:startIconDrawable="@drawable/location_icon_white"
+            style="@style/InputField.RoundedIcon"
+            android:hint="@string/location_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/location_question"
+            app:layout_constraintTop_toBottomOf="@+id/location_question">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/location_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/continue_button"
+            style="@style/RoundedGreenButton"
+            android:layout_marginVertical="56dp"
+            android:text="@string/save"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/locationTextField" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
