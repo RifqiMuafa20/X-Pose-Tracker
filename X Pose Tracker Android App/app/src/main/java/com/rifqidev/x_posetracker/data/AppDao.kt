@@ -13,6 +13,9 @@ interface AppDao {
     @Query("SELECT * FROM user_profile LIMIT 1")
     fun getUserProfileById(): LiveData<UserProfileEntity?>
 
+    @Update
+    fun updateUserProfile(profile: UserProfileEntity)
+
     //User Record
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUserRecord(record: UserRecordEntity)

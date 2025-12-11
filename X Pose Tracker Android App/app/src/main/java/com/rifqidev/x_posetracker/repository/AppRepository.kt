@@ -32,6 +32,10 @@ class AppRepository(application: Application) {
         executorService.execute { mAppDao.insertUserProfile(profile) }
     }
 
+    fun updateUserProfile(profile: UserProfileEntity) {
+        executorService.execute { mAppDao.updateUserProfile(profile) }
+    }
+
     // user records
 
     fun getUserRecords(userId: String): LiveData<List<UserRecordEntity>> =

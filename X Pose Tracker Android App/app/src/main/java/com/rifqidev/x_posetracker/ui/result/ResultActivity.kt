@@ -61,7 +61,6 @@ class ResultActivity : AppCompatActivity() {
         binding.time.text = "$duration detik"
 
         if(recordType == 2){
-            date = null
             binding.continueButton.visibility = View.INVISIBLE
             binding.deleteButton.visibility = View.VISIBLE
         }
@@ -130,7 +129,7 @@ class ResultActivity : AppCompatActivity() {
             WorkoutItem(
                 name = name,
                 iconResId = iconResIds[index],
-                date = date,
+                date = null,
                 repetition = repetition[index].toString()
             )
         }

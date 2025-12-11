@@ -14,6 +14,6 @@ class EditProfileViewModel(mApplication: Application) : ViewModel() {
     }
 
     fun updateUserProfile(userProfile: UserProfileEntity) {
-        repository.insertUserProfile(userProfile)
+        repository.updateUserProfile(userProfile)
     }
 }

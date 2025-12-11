@@ -211,7 +211,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/category_option_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:layout_width="124dp"
+                    android:layout_width="136dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp"
                     app:boxCornerRadiusTopStart="24dp"
@@ -286,7 +286,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/days_option_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:layout_width="124dp"
+                    android:layout_width="136dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp"
                     app:boxCornerRadiusTopStart="24dp"

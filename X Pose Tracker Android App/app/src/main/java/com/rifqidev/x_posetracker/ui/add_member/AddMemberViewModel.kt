@@ -17,8 +17,4 @@ class AddMemberViewModel(mApplication: Application) : ViewModel() {
             repository.insertActivityMember(member)
         }
     }
-
-    fun updateActivity(event: ActivityEntity) {
-        repository.updateActivity(event)
-    }
 }
