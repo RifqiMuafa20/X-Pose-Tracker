@@ -138,4 +138,27 @@ interface AppDao {
         startDate: String,
         endDate: String
     ): LiveData<List<BestCategoryAchievement>>
+
+    @Query("""
+        SELECT 
+            substr(record_date, 1, 10) AS date,
+            SUM(
+                CASE
+                    WHEN :category = 'Push-Up' THEN IFNULL(pushup_count, 0)
+                    WHEN :category = 'Sit-Up' THEN IFNULL(situp_count, 0)
+                    WHEN :category = 'Pull-Up' THEN IFNULL(pullup_count, 0)
+                    WHEN :category = 'Lunges' THEN IFNULL(lunges_count, 0)
+                    ELSE 0
+                END
+            ) AS totalValue
+        FROM user_record
+        WHERE substr(record_date, 1, 10) BETWEEN :startDate AND :endDate
+        GROUP BY substr(record_date, 1, 10)
+        ORDER BY date
+    """)
+    fun getWeeklyProgressByCategory(
+        category: String,
+        startDate: String,
+        endDate: String
+    ): LiveData<List<WeeklyProgress>>
 }

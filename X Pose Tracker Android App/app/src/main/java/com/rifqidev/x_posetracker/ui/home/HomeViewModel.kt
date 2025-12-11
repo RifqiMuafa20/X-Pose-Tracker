@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import com.rifqidev.x_posetracker.data.BestCategoryAchievement
 import com.rifqidev.x_posetracker.data.UserProfileEntity
+import com.rifqidev.x_posetracker.data.WeeklyProgress
 import com.rifqidev.x_posetracker.repository.AppRepository
 import com.rifqidev.x_posetracker.utils.DateHelper
 import java.util.Date
@@ -15,6 +16,15 @@ class HomeViewModel(mApplication: Application) : ViewModel() {
 
     private val repository: AppRepository = AppRepository(mApplication)
     private val _dateRange = MutableLiveData<Pair<String, String>>()
+
+    private val _selectedProgressCategory = MutableLiveData<String>("Push-Up")
+    val selectedProgressCategory: LiveData<String> = _selectedProgressCategory
+
+    init {
+        if(_dateRange.value == null) {
+            setTodayRange()
+        }
+    }
 
     fun getUserProfile(): LiveData<UserProfileEntity?> {
         return repository.getUserProfile()
@@ -33,7 +43,16 @@ class HomeViewModel(mApplication: Application) : ViewModel() {
             repository.getBestAchievements(start, end)
         }
 
-    fun setDateRange(start: String, end: String) {
+    val weeklyProgress = _selectedProgressCategory.switchMap { category ->
+        val (startDate, endDate) = DateHelper.getLast7DaysRange()
+        repository.getWeeklyProgressByCategory(category, startDate, endDate)
+    }
+
+    fun setProgressCategory(category: String) {
+        _selectedProgressCategory.value = category
+    }
+
+    private fun setDateRange(start: String, end: String) {
         _dateRange.value = start to end
     }
 

@@ -10,6 +10,7 @@ import com.rifqidev.x_posetracker.data.BestCategoryAchievement
 import com.rifqidev.x_posetracker.data.MemberRecordEntity
 import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.data.UserRecordEntity
+import com.rifqidev.x_posetracker.data.WeeklyProgress
 import java.util.Date
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -130,5 +131,9 @@ class AppRepository(application: Application) {
 
     fun getBestAchievements(startDate: String, endDate: String) : LiveData<List<BestCategoryAchievement>>{
         return mAppDao.getBestAchievementsPerCategoryInRange(startDate, endDate)
+    }
+
+    fun getWeeklyProgressByCategory(category: String, startDate: String, endDate: String): LiveData<List<WeeklyProgress>> {
+        return mAppDao.getWeeklyProgressByCategory(category, startDate, endDate)
     }
 }

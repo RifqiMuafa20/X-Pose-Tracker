@@ -33,6 +33,14 @@ data class BestCategoryAchievement(
     val bestDate: String?
 )
 
+data class WeeklyProgress(
+    @ColumnInfo(name = "date")
+    val date: String,
+
+    @ColumnInfo(name = "totalValue")
+    val totalValue: Int
+)
+
 @Entity(tableName = "user_profile")
 data class UserProfileEntity(
     @PrimaryKey

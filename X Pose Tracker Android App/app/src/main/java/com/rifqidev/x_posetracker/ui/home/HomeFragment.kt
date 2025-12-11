@@ -17,6 +17,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.adapter.ListWorkoutAdapter
 import com.rifqidev.x_posetracker.data.WorkoutItem
@@ -96,10 +97,6 @@ class HomeFragment : Fragment() {
 
         binding.categoryOption.setText(categoryOptions[0], false)
 
-        binding.categoryOption.setOnItemClickListener { _, _, position, _ ->
-            val categorySelected = categoryOptions[position]
-        }
-
         binding.categoryOption.setOnClickListener {
             categoryAdapter.filter.filter(null)
             binding.categoryOption.showDropDown()
@@ -112,47 +109,69 @@ class HomeFragment : Fragment() {
 
         val chart = binding.chart
 
-        val entries = listOf(
-            Entry(0f, 40f),
-            Entry(1f, 30f),
-            Entry(2f, 35f),
-            Entry(3f, 50f),
-            Entry(4f, 15f),
-            Entry(5f, 25f),
-            Entry(6f, 40f),
-        )
+        chart.setTouchEnabled(false)
+        chart.isDragEnabled = false
+        chart.setScaleEnabled(false)
+        chart.setScaleXEnabled(false)
+        chart.setScaleYEnabled(false)
+        chart.isDoubleTapToZoomEnabled = false
+        chart.setPinchZoom(false)
+        chart.isHighlightPerDragEnabled = false
+        chart.isHighlightPerTapEnabled = false
 
-        val dataSet = LineDataSet(entries, "Progress").apply {
-            color = Color.rgb(187, 242, 70)
-            setCircleColor(Color.rgb(187, 242, 70))
-            circleRadius = 5f
-            circleHoleRadius = 2.5f
-            lineWidth = 3f
-            mode = LineDataSet.Mode.LINEAR
-            setDrawFilled(true)
-            fillDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.chart_gradien)
+        homeViewModel.weeklyProgress.observe(viewLifecycleOwner) { list ->
+            val entries = list.mapIndexed { index, item ->
+                Entry(index.toFloat(), item.totalValue.toFloat())
+            }
+
+            val dataSet = LineDataSet(entries, "Progress").apply {
+                color = Color.rgb(187, 242, 70)
+                setCircleColor(Color.rgb(187, 242, 70))
+                circleRadius = 5f
+                circleHoleRadius = 2.5f
+                lineWidth = 3f
+                mode = LineDataSet.Mode.LINEAR
+                setDrawFilled(true)
+                fillDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.chart_gradien)
+                valueTextColor = Color.WHITE
+
+                valueFormatter = object : ValueFormatter() {
+                    override fun getPointLabel(entry: Entry?): String {
+                        return entry?.y?.toInt().toString()
+                    }
+                }
+            }
+
+            chart.data = LineData(dataSet)
+
+            val labels = list.map { it.date }.toTypedArray()
+
+            chart.xAxis.apply {
+                valueFormatter = IndexAxisValueFormatter(labels)
+                position = XAxis.XAxisPosition.BOTTOM
+                setDrawGridLines(false)
+                granularity = 1f
+                textColor = Color.WHITE
+            }
+
+            chart.axisLeft.valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString()
+                }
+            }
+
+            chart.axisLeft.textColor = Color.WHITE
+            chart.axisRight.isEnabled = false
+            chart.description.isEnabled = false
+            chart.legend.isEnabled = false
+
+            chart.invalidate()
         }
 
-        chart.data = LineData(dataSet)
-
-        val days = arrayOf("Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu")
-        chart.xAxis.apply {
-            valueFormatter = IndexAxisValueFormatter(days)
-            position = XAxis.XAxisPosition.BOTTOM
-            setDrawGridLines(false)
-            textColor = Color.WHITE
+        binding.categoryOption.setOnItemClickListener { _, _, position, _ ->
+            val selected = categoryOptions[position]
+            homeViewModel.setProgressCategory(selected)
         }
-
-        chart.axisLeft.apply {
-            textColor = Color.WHITE
-        }
-
-        dataSet.valueTextColor = Color.WHITE
-        chart.axisRight.isEnabled = false
-        chart.description.isEnabled = false
-        chart.legend.isEnabled = false
-
-        chart.invalidate()
 
         val names = resources.getStringArray(R.array.categories_menu)
 
@@ -186,18 +205,12 @@ class HomeFragment : Fragment() {
         binding.daysOption.setText(timeOptions[0], false)
 
         binding.daysOption.setOnItemClickListener { _, _, position, _ ->
-            val timeSelected = timeOptions[position]
-
-            if(timeSelected == "Hari ini") {
-                homeViewModel.setTodayRange()
-            } else if(timeSelected == "Minggu ini") {
-                homeViewModel.setThisWeekRange()
-            } else if(timeSelected == "Bulan ini") {
-                homeViewModel.setThisMonthRange()
-            } else if(timeSelected == "Tahun ini") {
-                homeViewModel.setThisYearRange()
-            } else if(timeSelected == "Semua") {
-                homeViewModel.setAllRange()
+            when (timeOptions[position]) {
+                "Hari ini"   -> homeViewModel.setTodayRange()
+                "Pekan ini"  -> homeViewModel.setThisWeekRange()
+                "Bulan ini"  -> homeViewModel.setThisMonthRange()
+                "Tahun ini"  -> homeViewModel.setThisYearRange()
+                "Semua"      -> homeViewModel.setAllRange()
             }
         }
 
@@ -210,8 +223,6 @@ class HomeFragment : Fragment() {
             timeAdapter.filter.filter(null)
             binding.daysOption.showDropDown()
         }
-
-        homeViewModel.setTodayRange()
 
         homeViewModel.bestAchievements.observe(viewLifecycleOwner) { achievements ->
             workoutItems.forEachIndexed { index, item ->

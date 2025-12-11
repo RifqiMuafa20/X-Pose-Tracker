@@ -7,6 +7,7 @@ import java.util.Locale
 
 object DateHelper {
     private val formatter = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
+    private val dateFormatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
 
     fun getCurrentDate(): String {
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
@@ -116,5 +117,16 @@ object DateHelper {
         val end = formatter.format(cal.time)
 
         return start to end
+    }
+
+    fun getLast7DaysRange(): Pair<String, String> {
+        val cal = Calendar.getInstance()
+
+        val endDate = dateFormatter.format(cal.time)
+
+        cal.add(Calendar.DAY_OF_YEAR, -6)
+        val startDate = dateFormatter.format(cal.time)
+
+        return startDate to endDate
     }
 }
