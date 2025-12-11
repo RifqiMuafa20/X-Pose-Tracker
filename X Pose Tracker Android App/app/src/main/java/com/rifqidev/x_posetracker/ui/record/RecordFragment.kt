@@ -35,6 +35,7 @@ class RecordFragment : Fragment() {
                 requireContext(),
                 PrivateRecordActivity::class.java
             )
+            intent.putExtra("record_type", 0)
             startActivity(intent)
         }
 

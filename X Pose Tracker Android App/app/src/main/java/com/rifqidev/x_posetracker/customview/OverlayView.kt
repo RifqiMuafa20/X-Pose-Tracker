@@ -91,8 +91,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 }
 
                 val centerPoints = listOf(
-                    12, 14, 24, 26, // kanan
                     11, 13, 23, 25, // kiri
+                    12, 14, 24, 26, // kanan
                 )
 
                 val angles = listOf(

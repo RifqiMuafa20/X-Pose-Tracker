@@ -9,8 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
-import android.view.OrientationEventListener
-import android.view.Surface
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -27,15 +25,20 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.rifqidev.x_posetracker.R
+import com.rifqidev.x_posetracker.data.AktivitasLatihan
+import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.databinding.ActivityCameraBinding
 import com.rifqidev.x_posetracker.ui.result.ResultActivity
+import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
 import com.rifqidev.x_posetracker.utils.RepetitionCounter
-import com.rifqidev.x_posetracker.utils.extractAngles
+import com.rifqidev.x_posetracker.utils.estimasiDurasi
+import com.rifqidev.x_posetracker.utils.hitungTotalKalori
 import com.rifqidev.x_posetracker.utils.processPose
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -53,7 +56,11 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var cameraFacing = CameraSelector.LENS_FACING_BACK
 
     private var activityType: String? = null
+    private var recordType: Int = 0
+    private var memberId: String = ""
     private var timer: CountDownTimer? = null
+    private var start: Boolean = false
+    private var userProfile: UserProfileEntity? = null
 
     private lateinit var poseClassifier: PoseClassificationHelper
     private val slidingWindow = mutableListOf<List<Float>>()
@@ -90,7 +97,15 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this)[CameraViewModel::class.java]
+        val factory = ViewModelFactory.getInstance(this.application)
+        viewModel =
+            ViewModelProvider(this, factory)[CameraViewModel::class.java]
+
+        viewModel.getUserProfile().observe(this) { user ->
+            if (user != null) {
+                userProfile = user
+            }
+        }
 
         poseClassifier = PoseClassificationHelper(this)
 
@@ -99,6 +114,8 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         }
 
         activityType = intent.getStringExtra("type") ?: "Unknown"
+        memberId = intent.getStringExtra("member_id") ?: ""
+        recordType = intent.getIntExtra("record_type", 0)
         val durationInSeconds = intent.getLongExtra("duration", 0L)
 
         // Initialize our background executor
@@ -109,6 +126,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         binding.startCamera.setOnClickListener {
             binding.startCamera.visibility = View.GONE
             binding.startText.visibility = View.GONE
+            start = true
 
             showCountdown {
                 if (durationInSeconds > 0) {
@@ -118,7 +136,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 setUpCamera()
             }
         }
-
 
         binding.switchCamera.setOnClickListener {
             cameraFacing = if (cameraFacing == CameraSelector.LENS_FACING_BACK)
@@ -266,26 +283,30 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                         binding.type.text = prediction
                     }
                 }
+            } else {
+                prediction = activityType.toString()
             }
 
-            val mainAngle = when (prediction) {
-                "Push-Up" -> inputForModel[7]
-                "Sit-Up" -> inputForModel[9]
-                "Pull-Up" -> inputForModel[7]
-                "Lunges" -> inputForModel[11]
-                else -> null
+            if (start) {
+                val mainAngle = when (prediction) {
+                    "Push-Up" -> inputForModel[7]
+                    "Sit-Up" -> inputForModel[9]
+                    "Pull-Up" -> inputForModel[7]
+                    "Lunges" -> inputForModel[11]
+                    else -> null
+                }
+
+                mainAngle?.let {
+                    repetitionCounters[prediction]?.update(it)
+                }
+
+                binding.repetition.text = repetitionCounters[prediction]?.count.toString()
+
+                binding.pushUpRep.text = repetitionCounters["Push-Up"]?.count.toString()
+                binding.sitUpRep.text = repetitionCounters["Sit-Up"]?.count.toString()
+                binding.pullUpRep.text = repetitionCounters["Pull-Up"]?.count.toString()
+                binding.lungesRep.text = repetitionCounters["Lunges"]?.count.toString()
             }
-
-            mainAngle?.let {
-                repetitionCounters[prediction]?.update(it)
-            }
-
-            binding.repetition.text = repetitionCounters[prediction]?.count.toString()
-
-            binding.pushUpRep.text = repetitionCounters["Push-Up"]?.count.toString()
-            binding.sitUpRep.text = repetitionCounters["Sit-Up"]?.count.toString()
-            binding.pullUpRep.text = repetitionCounters["Pull-Up"]?.count.toString()
-            binding.lungesRep.text = repetitionCounters["Lunges"]?.count.toString()
         }
     }
 
@@ -354,6 +375,29 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                     this@CameraActivity,
                     ResultActivity::class.java
                 )
+
+                val aktivitasSesi = listOf(
+                    AktivitasLatihan("Push-Up", durasiMenit = estimasiDurasi("Push-Up", repetitionCounters["Push-Up"]?.count ?: 0), repetisi = repetitionCounters["Push-Up"]?.count ?: 0),
+                    AktivitasLatihan("Sit-Up", durasiMenit = estimasiDurasi("Sit-Up", repetitionCounters["Sit-Up"]?.count ?: 0), repetisi = repetitionCounters["Sit-Up"]?.count ?: 0),
+                    AktivitasLatihan("Pull-Up", durasiMenit = estimasiDurasi("Pull-Up", repetitionCounters["Pull-Up"]?.count ?: 0), repetisi = repetitionCounters["Pull-Up"]?.count ?: 0),
+                    AktivitasLatihan("Lunges", durasiMenit = estimasiDurasi("Lunges", repetitionCounters["Lunges"]?.count ?: 0), repetisi = repetitionCounters["Lunges"]?.count ?: 0),
+                )
+
+                val userId = userProfile?.idUser
+                val beratBadan = userProfile?.userWeight?.toFloat()
+                val totalKalori = hitungTotalKalori(beratBadan, aktivitasSesi)
+
+                intent.putExtra("user_id", userId)
+                intent.putExtra("date", DateHelper.getCurrentDate())
+                intent.putExtra("time", DateHelper.getCurrentTime())
+                intent.putExtra("duration", durationInSeconds.toInt())
+                intent.putExtra("calorie", totalKalori.toInt())
+                intent.putExtra("push_up", repetitionCounters["Push-Up"]?.count ?: 0)
+                intent.putExtra("sit_up", repetitionCounters["Sit-Up"]?.count ?: 0)
+                intent.putExtra("pull_up", repetitionCounters["Pull-Up"]?.count ?: 0)
+                intent.putExtra("lunges", repetitionCounters["Lunges"]?.count ?: 0)
+                intent.putExtra("record_type", recordType)
+                intent.putExtra("member_id", memberId)
 
                 startActivity(intent)
                 finish()

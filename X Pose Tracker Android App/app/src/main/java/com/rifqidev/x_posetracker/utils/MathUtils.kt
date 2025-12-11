@@ -1,7 +1,9 @@
 package com.rifqidev.x_posetracker.utils
 
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
+import com.rifqidev.x_posetracker.data.AktivitasLatihan
 import kotlin.math.acos
+import kotlin.math.ceil
 import kotlin.math.sqrt
 
 fun calculateAngle(a: Landmark3D, b: Landmark3D, c: Landmark3D): Float {
@@ -47,6 +49,45 @@ fun extractAngles(landmarks: List<NormalizedLandmark>): List<Float> {
 
 fun processPose(landmarks: List<NormalizedLandmark>): List<Float> {
     return extractAngles(landmarks)
+}
+
+fun hitungKaloriAktivitas(
+    beratKg: Float,
+    aktivitas: AktivitasLatihan
+): Float {
+    val metMap = mapOf(
+        "Push-Up" to 8.0,
+        "Sit-Up" to 8.0,
+        "Pull-Up" to 9.0,
+        "Lunges" to 6.0
+    )
+
+    val met = metMap[aktivitas.jenis] ?: 6.0
+    val durasiJam = aktivitas.durasiMenit / 60.0
+
+    return (met * beratKg * durasiJam).toFloat()
+}
+
+fun hitungTotalKalori(
+    beratKg: Float?,
+    aktivitasList: List<AktivitasLatihan>
+): Float {
+    var totalKalori = 0f
+    for (aktivitas in aktivitasList) {
+        totalKalori += hitungKaloriAktivitas(beratKg!!, aktivitas)
+    }
+    return totalKalori
+}
+
+fun estimasiDurasi(jenis: String, repetisi: Int): Int {
+    val repsPerMinute = mapOf(
+        "Push-Up" to 30,
+        "Sit-Up" to 30,
+        "Pull-Up" to 15,
+        "Lunges" to 45
+    )
+    val rpm = repsPerMinute[jenis] ?: 15
+    return ceil(repetisi.toDouble() / rpm).toInt()
 }
 
 data class Landmark3D(val x: Float, val y: Float, val z: Float)

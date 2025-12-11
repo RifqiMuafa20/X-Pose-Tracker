@@ -15,6 +15,12 @@ data class WorkoutItem(
     val repetition: String?
 )
 
+data class AktivitasLatihan(
+    val jenis: String,
+    val durasiMenit: Int,
+    val repetisi: Int
+)
+
 data class FaqItem(
     val question: String,
     val answer: String,

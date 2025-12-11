@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.rifqidev.x_posetracker.ui.add_activity.AddEventViewModel
 import com.rifqidev.x_posetracker.ui.add_member.AddMemberViewModel
+import com.rifqidev.x_posetracker.ui.camera.CameraViewModel
 import com.rifqidev.x_posetracker.ui.detail_activity.DetailEventViewModel
 import com.rifqidev.x_posetracker.ui.detail_member.DetailMemberViewModel
 import com.rifqidev.x_posetracker.ui.edit_activity.EditEventViewModel
@@ -14,6 +15,7 @@ import com.rifqidev.x_posetracker.ui.history.HistoryViewModel
 import com.rifqidev.x_posetracker.ui.home.HomeViewModel
 import com.rifqidev.x_posetracker.ui.profile.ProfileViewModel
 import com.rifqidev.x_posetracker.ui.record_supervisor.SupervisorRecordViewModel
+import com.rifqidev.x_posetracker.ui.result.ResultViewModel
 import com.rifqidev.x_posetracker.ui.welcome.WelcomeViewModel
 
 class ViewModelFactory private constructor(private val mApplication: Application) :
@@ -60,6 +62,10 @@ class ViewModelFactory private constructor(private val mApplication: Application
             return EditMemberViewModel(mApplication) as T
         } else if (modelClass.isAssignableFrom(HistoryViewModel::class.java)) {
             return HistoryViewModel(mApplication) as T
+        } else if (modelClass.isAssignableFrom(CameraViewModel::class.java)) {
+            return CameraViewModel(mApplication) as T
+        } else if (modelClass.isAssignableFrom(ResultViewModel::class.java)) {
+            return ResultViewModel(mApplication) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
     }

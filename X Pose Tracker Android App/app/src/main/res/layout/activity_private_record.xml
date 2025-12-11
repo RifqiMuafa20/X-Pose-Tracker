@@ -73,7 +73,6 @@
                 android:padding="20dp"
                 android:textColor="@color/white"
                 android:inputType="none"
-                android:text="@string/choose_activity"
                 app:simpleItems="@array/category_menu"
                 tools:ignore="LabelFor" />
         </com.google.android.material.textfield.TextInputLayout>

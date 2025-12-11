@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -26,6 +28,11 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var homeViewModel: HomeViewModel
+    private lateinit var categoryOptions: Array<String>
+    private lateinit var categoryAdapter: ArrayAdapter<String>
+
+    private lateinit var timeOptions: Array<String>
+    private lateinit var timeAdapter: ArrayAdapter<String>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,6 +61,32 @@ class HomeFragment : Fragment() {
                     binding.profileImage.setImageResource(R.drawable.account_icon)
                 }
             }
+        }
+
+        categoryOptions = resources.getStringArray(R.array.categories_menu)
+
+        categoryAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_list_item_1,
+            categoryOptions
+        )
+
+        binding.categoryOption.setAdapter(categoryAdapter)
+
+        binding.categoryOption.setText(categoryOptions[0], false)
+
+        binding.categoryOption.setOnItemClickListener { _, _, position, _ ->
+            val categorySelected = categoryOptions[position]
+        }
+
+        binding.categoryOption.setOnClickListener {
+            categoryAdapter.filter.filter(null)
+            binding.categoryOption.showDropDown()
+        }
+
+        binding.categoryOptionLayout.setEndIconOnClickListener {
+            categoryAdapter.filter.filter(null)
+            binding.categoryOption.showDropDown()
         }
 
         val chart = binding.chart
@@ -100,6 +133,32 @@ class HomeFragment : Fragment() {
 
         chart.invalidate()
 
+        timeOptions = resources.getStringArray(R.array.days_menu)
+
+        timeAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_list_item_1,
+            timeOptions
+        )
+
+        binding.daysOption.setAdapter(timeAdapter)
+
+        binding.daysOption.setText(timeOptions[0], false)
+
+        binding.daysOption.setOnItemClickListener { _, _, position, _ ->
+            val timeSelected = timeOptions[position]
+        }
+
+        binding.daysOption.setOnClickListener {
+            timeAdapter.filter.filter(null)
+            binding.daysOption.showDropDown()
+        }
+
+        binding.daysOptionLayout.setEndIconOnClickListener {
+            timeAdapter.filter.filter(null)
+            binding.daysOption.showDropDown()
+        }
+
         val names = resources.getStringArray(R.array.categories_menu)
 
         val iconResIds = listOf(
@@ -113,7 +172,7 @@ class HomeFragment : Fragment() {
             WorkoutItem(
                 name = name,
                 iconResId = iconResIds[index],
-                date = "-",
+                date = null,
                 repetition = "0"
             )
         }

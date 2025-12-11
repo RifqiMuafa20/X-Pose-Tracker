@@ -21,6 +21,8 @@ class AppRepository(application: Application) {
         mAppDao = db.appDao()
     }
 
+    // user profile
+
     fun getUserProfile(): LiveData<UserProfileEntity?> {
         return mAppDao.getUserProfileById()
     }
@@ -29,6 +31,8 @@ class AppRepository(application: Application) {
         executorService.execute { mAppDao.insertUserProfile(profile) }
     }
 
+    // user records
+
     fun getUserRecords(userId: String): LiveData<List<UserRecordEntity>> =
         mAppDao.getUserRecordsByUserId(userId)
 
@@ -36,9 +40,11 @@ class AppRepository(application: Application) {
         executorService.execute { mAppDao.insertUserRecord(record) }
     }
 
-    fun deleteUserRecord(record: UserRecordEntity) {
-        executorService.execute { mAppDao.deleteUserRecord(record) }
+    fun deleteUserRecordById(recordId: String) {
+        executorService.execute { mAppDao.deleteUserRecordById(recordId) }
     }
+
+    // activity
 
     fun getAllActivities(): LiveData<List<ActivityEntity>> = mAppDao.getAllActivities()
 
@@ -54,6 +60,12 @@ class AppRepository(application: Application) {
         executorService.execute { mAppDao.deleteActivityById(activityId) }
     }
 
+    fun updateActivity(activity: ActivityEntity) {
+        executorService.execute { mAppDao.updateActivity(activity) }
+    }
+
+    // activity member
+
     fun getActivityMembers(activityId: String): LiveData<List<ActivityMemberEntity>> =
         mAppDao.getMembersByActivityId(activityId)
 
@@ -62,10 +74,6 @@ class AppRepository(application: Application) {
             mAppDao.insertActivityMember(member)
             mAppDao.incrementMemberCount(member.idActivity)
         }
-    }
-
-    fun updateActivity(activity: ActivityEntity) {
-        executorService.execute { mAppDao.updateActivity(activity) }
     }
 
     fun getMemberByMemberId(memberId: String): LiveData<ActivityMemberEntity?> {
@@ -83,15 +91,25 @@ class AppRepository(application: Application) {
         }
     }
 
-    fun getMemberRecords(memberId: String): LiveData<List<MemberRecordEntity>> =
-        mAppDao.getMemberRecordsByMemberId(memberId)
+    // member records
 
     fun insertMemberRecord(record: MemberRecordEntity) {
         executorService.execute { mAppDao.insertMemberRecord(record) }
     }
 
-    fun deleteMemberRecord(record: MemberRecordEntity) {
-        executorService.execute { mAppDao.deleteMemberRecord(record) }
+    fun getTopPullUpRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?> {
+        return mAppDao.getTopPullUpRecordByMemberId(memberId)
     }
 
+    fun getTopPushUpRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?> {
+        return mAppDao.getTopPushUpRecordByMemberId(memberId)
+    }
+
+    fun getTopSitUpRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?> {
+        return mAppDao.getTopSitUpRecordByMemberId(memberId)
+    }
+
+    fun getTopLungesRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?> {
+        return mAppDao.getTopLungesRecordByMemberId(memberId)
+    }
 }

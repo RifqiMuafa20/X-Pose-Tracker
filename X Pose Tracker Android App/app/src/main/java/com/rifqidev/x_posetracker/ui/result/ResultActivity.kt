@@ -1,16 +1,29 @@
 package com.rifqidev.x_posetracker.ui.result
 
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
 import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.adapter.ListWorkoutAdapter
+import com.rifqidev.x_posetracker.data.MemberRecordEntity
+import com.rifqidev.x_posetracker.data.UserRecordEntity
 import com.rifqidev.x_posetracker.data.WorkoutItem
 import com.rifqidev.x_posetracker.databinding.ActivityResultBinding
+import com.rifqidev.x_posetracker.ui.camera.CameraViewModel
+import com.rifqidev.x_posetracker.utils.DateHelper
+import java.util.UUID
 
 class ResultActivity : AppCompatActivity() {
     private lateinit var binding: ActivityResultBinding
+    private lateinit var viewModel: ResultViewModel
+
+    private var recordType: Int = 0
+    private var recordId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +33,73 @@ class ResultActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
 
+        val factory = ViewModelFactory.getInstance(this.application)
+        viewModel =
+            ViewModelProvider(this, factory)[ResultViewModel::class.java]
+
+        val userId = intent.getStringExtra("user_id")
+        var date = intent.getStringExtra("date")
+        val time = intent.getStringExtra("time")
+        val duration = intent.getIntExtra("duration", 0)
+        val calorie = intent.getIntExtra("calorie", 0)
+        val pushUp = intent.getIntExtra("push_up", 0)
+        val sitUp = intent.getIntExtra("sit_up", 0)
+        val pullUp = intent.getIntExtra("pull_up", 0)
+        val lunges = intent.getIntExtra("lunges", 0)
+        val memberId = intent.getStringExtra("member_id") ?: ""
+        recordId = intent.getStringExtra("record_id") ?: ""
+        recordType = intent.getIntExtra("record_type", 0)
+
         val names = resources.getStringArray(R.array.categories_menu)
+
+        binding.hour.text = time
+        binding.calorie.text = "$calorie cal"
+        binding.date.text = date?.let { DateHelper.formatDateToIndo(it) } ?: "-"
+        binding.time.text = "$duration detik"
+
+        if(recordType == 2){
+            date = null
+            binding.continueButton.visibility = View.GONE
+            binding.deleteButton.visibility = View.VISIBLE
+        } else {
+            binding.continueButton.setOnClickListener {
+                if(recordType == 0){
+                    val userRecord = UserRecordEntity(
+                        idRecord = UUID.randomUUID().toString(),
+                        idUser = userId!!,
+                        recordName = "Latihan${UUID.randomUUID()}",
+                        recordDuration = duration.toInt(),
+                        recordDate = date!!,
+                        recordTime = time!!,
+                        recordCalories = calorie,
+                        pushupCount = pushUp,
+                        situpCount = sitUp,
+                        pullupCount = pullUp,
+                        lungesCount = lunges,
+                        recordPhotos = null
+                    )
+
+                    viewModel.insertUserRecord(userRecord)
+                    finish()
+
+                } else if(recordType == 1){
+                    val memberRecord = MemberRecordEntity(
+                        idRecord = UUID.randomUUID().toString(),
+                        idMember = memberId,
+                        recordDate = date,
+                        recordTime = time,
+                        recordDuration = duration.toInt(),
+                        pushupCount = pushUp,
+                        situpCount = sitUp,
+                        pullupCount = pullUp,
+                        lungesCount = lunges
+                    )
+
+                    viewModel.insertMemberRecord(memberRecord)
+                    finish()
+                }
+            }
+        }
 
         val iconResIds = listOf(
             R.drawable.push_up_icon,
@@ -29,21 +108,28 @@ class ResultActivity : AppCompatActivity() {
             R.drawable.lunges_icon
         )
 
+        val repetition = listOf(
+            pushUp,
+            sitUp,
+            pullUp,
+            lunges
+        )
+
         val workoutItems = names.mapIndexed { index, name ->
             WorkoutItem(
                 name = name,
                 iconResId = iconResIds[index],
-                date = "-",
-                repetition = "0"
+                date = date,
+                repetition = repetition[index].toString()
             )
-        }
-
-        binding.continueButton.setOnClickListener {
-            finish()
         }
 
         val adapter = ListWorkoutAdapter(workoutItems)
         binding.rvWorkout.adapter = adapter
+
+        binding.deleteButton.setOnClickListener(){
+            showConfirmationDialog(R.string.delete_activity_confirmation, 1)
+        }
     }
 
     private fun showConfirmationDialog(message: Int, type: Int) {
@@ -51,6 +137,9 @@ class ResultActivity : AppCompatActivity() {
         builder.setMessage(message)
         builder.setPositiveButton(R.string.yes) { _, _ ->
             if (type == 0) {
+                finish()
+            } else if (type == 1) {
+                viewModel.deleteUserRecord(recordId)
                 finish()
             }
         }
@@ -63,6 +152,10 @@ class ResultActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        showConfirmationDialog(R.string.cancel_activity_confirmation, 0)
+        if(recordType == 2){
+            finish()
+        } else {
+            showConfirmationDialog(R.string.cancel_activity_confirmation, 0)
+        }
     }
 }

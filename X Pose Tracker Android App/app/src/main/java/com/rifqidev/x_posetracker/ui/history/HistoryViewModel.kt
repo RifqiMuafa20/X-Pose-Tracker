@@ -4,11 +4,18 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.rifqidev.x_posetracker.data.UserProfileEntity
+import com.rifqidev.x_posetracker.data.UserRecordEntity
+import com.rifqidev.x_posetracker.repository.AppRepository
 
 class HistoryViewModel(mApplication: Application) : ViewModel() {
+    private val repository: AppRepository = AppRepository(mApplication)
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is notifications Fragment"
+    fun getUserProfile(): LiveData<UserProfileEntity?> {
+        return repository.getUserProfile()
     }
-    val text: LiveData<String> = _text
+
+    fun getAllRecord(userId: String): LiveData<List<UserRecordEntity>> {
+        return repository.getUserRecords(userId)
+    }
 }

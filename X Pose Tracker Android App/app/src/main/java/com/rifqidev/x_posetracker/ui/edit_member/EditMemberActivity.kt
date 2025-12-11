@@ -29,7 +29,7 @@ class EditMemberActivity : AppCompatActivity() {
         val factory = ViewModelFactory.getInstance(this.application)
         viewModel = ViewModelProvider(this, factory)[EditMemberViewModel::class.java]
 
-        val memberId = intent.getStringExtra("member_id").toString()
+        val memberId = intent.getStringExtra("member_id") ?: ""
         var activityId: String? = null
 
         viewModel.getMemberById(memberId).observe(this) { member ->

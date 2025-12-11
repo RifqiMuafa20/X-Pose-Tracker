@@ -1,9 +1,14 @@
 package com.rifqidev.x_posetracker.ui.camera
 
+import android.app.Application
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import com.rifqidev.x_posetracker.data.UserProfileEntity
+import com.rifqidev.x_posetracker.data.UserRecordEntity
+import com.rifqidev.x_posetracker.repository.AppRepository
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
 
-class CameraViewModel : ViewModel() {
+class CameraViewModel(mApplication: Application) : ViewModel() {
     private var _model = PoseLandmarkerHelper.MODEL_POSE_LANDMARKER_FULL
     private var _delegate: Int = PoseLandmarkerHelper.DELEGATE_CPU
     private var _minPoseDetectionConfidence: Float =
@@ -12,6 +17,8 @@ class CameraViewModel : ViewModel() {
         .DEFAULT_POSE_TRACKING_CONFIDENCE
     private var _minPosePresenceConfidence: Float = PoseLandmarkerHelper
         .DEFAULT_POSE_PRESENCE_CONFIDENCE
+
+    private val repository: AppRepository = AppRepository(mApplication)
 
     val currentDelegate: Int get() = _delegate
     val currentModel: Int get() = _model
@@ -39,6 +46,10 @@ class CameraViewModel : ViewModel() {
 
     fun setMinPosePresenceConfidence(confidence: Float) {
         _minPosePresenceConfidence = confidence
+    }
+
+    fun getUserProfile(): LiveData<UserProfileEntity?> {
+        return repository.getUserProfile()
     }
 
     fun setModel(model: Int) {

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -73,10 +74,7 @@ class DetailEventActivity : AppCompatActivity() {
         }
 
         binding.deleteButton.setOnClickListener {
-            viewModel.deleteActivityById(activityId!!)
-
-            showToast(getString(R.string.deleted))
-            finish()
+            showConfirmationDialog((R.string.delete_event_confirmation), 0)
         }
 
         binding.addMember.setOnClickListener {
@@ -94,6 +92,24 @@ class DetailEventActivity : AppCompatActivity() {
         binding.backButton.setOnClickListener {
             finish()
         }
+    }
+
+    private fun showConfirmationDialog(message: Int, type: Int) {
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage(message)
+        builder.setPositiveButton(R.string.yes) { _, _ ->
+            if (type == 0) {
+                viewModel.deleteActivityById(activityId!!)
+
+                showToast(getString(R.string.deleted))
+                finish()
+            }
+        }
+        builder.setNegativeButton(R.string.no) { dialog, _ ->
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
     }
 
     private fun showToast(message: String) {

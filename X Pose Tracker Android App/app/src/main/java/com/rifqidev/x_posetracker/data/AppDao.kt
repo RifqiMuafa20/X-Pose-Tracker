@@ -20,8 +20,8 @@ interface AppDao {
     @Query("SELECT * FROM user_record WHERE id_user = :userId")
     fun getUserRecordsByUserId(userId: String): LiveData<List<UserRecordEntity>>
 
-    @Delete
-    fun deleteUserRecord(record: UserRecordEntity)
+    @Query("DELETE FROM user_record WHERE id_record = :recordId")
+    fun deleteUserRecordById(recordId: String)
 
     //Activity
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -65,9 +65,15 @@ interface AppDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertMemberRecord(record: MemberRecordEntity)
 
-    @Query("SELECT * FROM member_record WHERE id_member = :memberId")
-    fun getMemberRecordsByMemberId(memberId: String): LiveData<List<MemberRecordEntity>>
+    @Query("SELECT * FROM member_record WHERE id_member = :memberId ORDER BY pullup_count DESC LIMIT 1")
+    fun getTopPullUpRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?>
 
-    @Delete
-    fun deleteMemberRecord(record: MemberRecordEntity)
+    @Query("SELECT * FROM member_record WHERE id_member = :memberId ORDER BY pushup_count DESC LIMIT 1")
+    fun getTopPushUpRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?>
+
+    @Query("SELECT * FROM member_record WHERE id_member = :memberId ORDER BY situp_count DESC LIMIT 1")
+    fun getTopSitUpRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?>
+
+    @Query("SELECT * FROM member_record WHERE id_member = :memberId ORDER BY lunges_count DESC LIMIT 1")
+    fun getTopLungesRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?>
 }

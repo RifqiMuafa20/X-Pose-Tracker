@@ -40,6 +40,16 @@ class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.ActivityViewHolder>()
         holder.itemView.setOnClickListener {
             val intent = Intent(it.context, ResultActivity::class.java)
             intent.putExtra("record_id", item.idRecord)
+            intent.putExtra("date", item.recordDate)
+            intent.putExtra("time", item.recordTime)
+            intent.putExtra("duration", item.recordDuration)
+            intent.putExtra("calorie", item.recordCalories)
+            intent.putExtra("push_up", item.pushupCount)
+            intent.putExtra("sit_up", item.situpCount)
+            intent.putExtra("pull_up", item.pullupCount)
+            intent.putExtra("lunges", item.lungesCount)
+            intent.putExtra("record_type", 2)
+
             it.context.startActivity(intent)
         }
     }

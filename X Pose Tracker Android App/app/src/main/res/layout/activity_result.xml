@@ -24,6 +24,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <ImageView
+            android:id="@+id/delete_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:contentDescription="@string/delete_record"
+            android:src="@drawable/delete_icon"
+            android:layout_marginEnd="32dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/result_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/result_title" />
+
         <androidx.cardview.widget.CardView
             android:id="@+id/card"
             android:layout_width="match_parent"
@@ -132,7 +144,8 @@
                     android:id="@+id/hour_icon"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_margin="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="56dp"
                     android:contentDescription="@string/date_icon"
                     android:src="@drawable/time_icon_white"
                     app:layout_constraintStart_toStartOf="@id/guideline3"

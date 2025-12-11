@@ -2,6 +2,7 @@ package com.rifqidev.x_posetracker.ui.record_private
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -21,12 +22,11 @@ class PrivateRecordActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        val recordType = intent.getIntExtra("record_type", 0)
+        val memberId = intent.getStringExtra("member_id") ?: ""
+
         val menuItems = resources.getStringArray(R.array.category_menu)
         binding.categoryOption.setText(menuItems[0], false)
-
-        binding.backButton.setOnClickListener {
-            showConfirmationDialog(R.string.cancel_activity_confirmation, 0)
-        }
 
         binding.continueButton.setOnClickListener {
             when {
@@ -48,10 +48,16 @@ class PrivateRecordActivity : AppCompatActivity() {
                     val intent = Intent(this, CameraActivity::class.java)
                     intent.putExtra("type", activityType)
                     intent.putExtra("duration", duration)
+                    intent.putExtra("member_id", memberId)
+                    intent.putExtra("record_type", recordType)
                     startActivity(intent)
                     finish()
                 }
             }
+        }
+
+        binding.backButton.setOnClickListener {
+            finish()
         }
     }
 
@@ -59,23 +65,8 @@ class PrivateRecordActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun showConfirmationDialog(message: Int, type: Int) {
-        val builder = AlertDialog.Builder(this)
-        builder.setMessage(message)
-        builder.setPositiveButton(R.string.yes) { _, _ ->
-            if (type == 0) {
-                finish()
-            }
-        }
-        builder.setNegativeButton(R.string.no) { dialog, _ ->
-            dialog.dismiss()
-        }
-        val dialog = builder.create()
-        dialog.show()
-    }
-
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        showConfirmationDialog(R.string.cancel_activity_confirmation, 0)
+        finish()
     }
 }

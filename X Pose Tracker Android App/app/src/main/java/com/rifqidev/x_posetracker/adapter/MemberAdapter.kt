@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.data.ActivityMemberEntity
@@ -46,8 +47,15 @@ class MemberAdapter(
             it.context.startActivity(intent)
         }
 
-        holder.deleteButton.setOnClickListener {
-            onDeleteClick(item)
+        holder.deleteButton.setOnClickListener { view ->
+            AlertDialog.Builder(view.context)
+                .setTitle(R.string.delete_member)
+                .setMessage("Apakah Anda yakin ingin menghapus ${item.memberName}?")
+                .setPositiveButton(R.string.yes) { _, _ ->
+                    onDeleteClick(item)
+                }
+                .setNegativeButton(R.string.no, null)
+                .show()
         }
     }
 

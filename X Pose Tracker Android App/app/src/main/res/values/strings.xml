@@ -62,16 +62,16 @@
 
     <string-array name="category_menu">
         <item>Auto Detection</item>
-        <item>Push Up</item>
-        <item>Sit Up</item>
-        <item>Pull Up</item>
+        <item>Push-Up</item>
+        <item>Sit-Up</item>
+        <item>Pull-Up</item>
         <item>Lunges</item>
     </string-array>
 
     <string-array name="categories_menu">
-        <item>Push Up</item>
-        <item>Sit Up</item>
-        <item>Pull Up</item>
+        <item>Push-Up</item>
+        <item>Sit-Up</item>
+        <item>Pull-Up</item>
         <item>Lunges</item>
     </string-array>
 
@@ -103,7 +103,7 @@
     <string name="supervisor_tracker">Pengawas</string>
     <string name="type_activity">Jenis Aktivitas</string>
     <string name="choose_activity">Pilih Jenis Aktivitas</string>
-    <string name="activity_duration">Durasi Aktivitas</string>
+    <string name="activity_duration">Durasi Aktivitas (Detik)</string>
     <string name="activity">Aktivitas Kegiatan</string>
     <string name="add_activity">Tambah Kegiatan</string>
     <string name="activity_title">Judul Kegiatan</string>
@@ -183,6 +183,9 @@
     <string name="tutorial_activity">Tutorial Penggunaan</string>
     <string name="tutor">Tutorial Menggunakan Aplikasi X Pose Tracker</string>
     <string name="cancel_activity_confirmation">Apakah Anda yakin ingin membatalkan aktivitas?</string>
+    <string name="delete_event_confirmation">Apakah Anda yakin ingin menghapus kegiatan ini?</string>
+    <string name="delete_record">Hapus Rekaman</string>
+    <string name="delete_activity_confirmation">Apakah Anda yakin ingin menghapus rekaman ini?</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

@@ -13,6 +13,7 @@ import com.rifqidev.x_posetracker.databinding.ActivityDetailMemberBinding
 import com.rifqidev.x_posetracker.ui.camera.CameraActivity
 import com.rifqidev.x_posetracker.ui.edit_member.EditMemberActivity
 import com.rifqidev.x_posetracker.ui.record_private.PrivateRecordActivity
+import java.util.Date
 
 class DetailMemberActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailMemberBinding
@@ -30,7 +31,7 @@ class DetailMemberActivity : AppCompatActivity() {
         val factory = ViewModelFactory.getInstance(this.application)
         viewModel = ViewModelProvider(this, factory)[DetailMemberViewModel::class.java]
 
-        memberId = intent.getStringExtra("member_id").toString()
+        memberId = intent.getStringExtra("member_id") ?: ""
 
         viewModel.getMemberById(memberId).observe(this) { member ->
             if (member != null) {
@@ -39,7 +40,7 @@ class DetailMemberActivity : AppCompatActivity() {
             }
         }
 
-        val names = resources.getStringArray(R.array.category_menu)
+        val names = resources.getStringArray(R.array.categories_menu)
 
         val iconResIds = listOf(
             R.drawable.push_up_icon,
@@ -48,17 +49,55 @@ class DetailMemberActivity : AppCompatActivity() {
             R.drawable.lunges_icon
         )
 
-        val workoutItems = names.mapIndexed { index, name ->
-            WorkoutItem(
-                name = name,
-                iconResId = iconResIds[index],
-                date = "-",
-                repetition = "0"
-            )
-        }
+        val workoutItems = mutableListOf(
+            WorkoutItem(names[0], iconResIds[0], date = null, repetition = "0"),
+            WorkoutItem(names[1], iconResIds[1], date = null, repetition = "0"),
+            WorkoutItem(names[2], iconResIds[2], date = null, repetition = "0"),
+            WorkoutItem(names[3], iconResIds[3], date = null, repetition = "0")
+        )
 
         val adapter = ListWorkoutAdapter(workoutItems)
         binding.rvWorkout.adapter = adapter
+
+        viewModel.getTopPushUpRecordByMemberId(memberId).observe(this) { record ->
+            record?.let {
+                workoutItems[0] = workoutItems[0].copy(
+                    date = it.recordDate,
+                    repetition = it.pushupCount.toString()
+                )
+                adapter.notifyItemChanged(0)
+            }
+        }
+
+        viewModel.getTopSitUpRecordByMemberId(memberId).observe(this) { record ->
+            record?.let {
+                workoutItems[1] = workoutItems[1].copy(
+                    date = it.recordDate,
+                    repetition = it.situpCount.toString()
+                )
+                adapter.notifyItemChanged(1)
+            }
+        }
+
+        viewModel.getTopPullUpRecordByMemberId(memberId).observe(this) { record ->
+            record?.let {
+                workoutItems[2] = workoutItems[2].copy(
+                    date = it.recordDate,
+                    repetition = it.pullupCount.toString()
+                )
+                adapter.notifyItemChanged(2)
+            }
+        }
+
+        viewModel.getTopLungesRecordByMemberId(memberId).observe(this) { record ->
+            record?.let {
+                workoutItems[3] = workoutItems[3].copy(
+                    date = it.recordDate,
+                    repetition = it.lungesCount.toString()
+                )
+                adapter.notifyItemChanged(3)
+            }
+        }
 
         binding.backButton.setOnClickListener {
             finish()
@@ -75,6 +114,8 @@ class DetailMemberActivity : AppCompatActivity() {
 
         binding.recordActivity.setOnClickListener {
             val intent = Intent(this, PrivateRecordActivity::class.java)
+            intent.putExtra("record_type", 1)
+            intent.putExtra("member_id", memberId)
             startActivity(intent)
         }
 

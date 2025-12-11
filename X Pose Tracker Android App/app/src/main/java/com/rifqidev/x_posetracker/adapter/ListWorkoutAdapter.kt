@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.data.WorkoutItem
+import com.rifqidev.x_posetracker.utils.DateHelper
 
 class ListWorkoutAdapter(private val items: List<WorkoutItem>) :
     RecyclerView.Adapter<ListWorkoutAdapter.WorkoutViewHolder>() {
@@ -29,7 +30,7 @@ class ListWorkoutAdapter(private val items: List<WorkoutItem>) :
         val item = items[position]
         holder.icon.setImageResource(item.iconResId)
         holder.name.text = item.name
-        holder.date.text = item.date
+        holder.date.text = item.date?.let { DateHelper.formatDateToIndo(it) } ?: ""
         holder.repetition.text = "${item.repetition} X"
     }
 
