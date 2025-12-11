@@ -51,15 +51,12 @@ fun processPose(landmarks: List<NormalizedLandmark>): List<Float> {
     return extractAngles(landmarks)
 }
 
-fun hitungKaloriAktivitas(
-    beratKg: Float,
-    aktivitas: AktivitasLatihan
-): Float {
+fun hitungKaloriAktivitas(beratKg: Float, aktivitas: AktivitasLatihan): Float {
     val metMap = mapOf(
         "Push-Up" to 8.0,
-        "Sit-Up" to 8.0,
+        "Sit-Up" to 5.0,
         "Pull-Up" to 9.0,
-        "Lunges" to 6.0
+        "Lunges" to 4.0
     )
 
     val met = metMap[aktivitas.jenis] ?: 6.0
@@ -68,10 +65,7 @@ fun hitungKaloriAktivitas(
     return (met * beratKg * durasiJam).toFloat()
 }
 
-fun hitungTotalKalori(
-    beratKg: Float?,
-    aktivitasList: List<AktivitasLatihan>
-): Float {
+fun hitungTotalKalori(beratKg: Float?, aktivitasList: List<AktivitasLatihan>): Float {
     var totalKalori = 0f
     for (aktivitas in aktivitasList) {
         totalKalori += hitungKaloriAktivitas(beratKg!!, aktivitas)
@@ -79,7 +73,7 @@ fun hitungTotalKalori(
     return totalKalori
 }
 
-fun estimasiDurasi(jenis: String, repetisi: Int): Int {
+fun estimasiDurasi(jenis: String, repetisi: Int): Double {
     val repsPerMinute = mapOf(
         "Push-Up" to 30,
         "Sit-Up" to 30,
@@ -87,7 +81,7 @@ fun estimasiDurasi(jenis: String, repetisi: Int): Int {
         "Lunges" to 45
     )
     val rpm = repsPerMinute[jenis] ?: 15
-    return ceil(repetisi.toDouble() / rpm).toInt()
+    return repetisi.toDouble() / rpm
 }
 
 data class Landmark3D(val x: Float, val y: Float, val z: Float)

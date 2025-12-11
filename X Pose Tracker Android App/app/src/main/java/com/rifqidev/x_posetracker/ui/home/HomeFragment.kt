@@ -2,6 +2,7 @@ package com.rifqidev.x_posetracker.ui.home
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +21,9 @@ import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.adapter.ListWorkoutAdapter
 import com.rifqidev.x_posetracker.data.WorkoutItem
 import com.rifqidev.x_posetracker.databinding.FragmentHomeBinding
+import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.toBitmap
+import java.time.LocalDate
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -60,6 +63,24 @@ class HomeFragment : Fragment() {
                 } else {
                     binding.profileImage.setImageResource(R.drawable.account_icon)
                 }
+            }
+        }
+
+        val todayDate = DateHelper.getCurrentDateOnly()
+
+        homeViewModel.getTodayDuration(todayDate).observe(viewLifecycleOwner) { duration ->
+            if (duration != null) {
+                binding.durationValue.text = DateHelper.formatTime(duration.toLong())
+            } else {
+                binding.durationValue.text = DateHelper.formatTime(0L)
+            }
+        }
+
+        homeViewModel.getTodayCalories(todayDate).observe(viewLifecycleOwner) { calories ->
+            if (calories != null) {
+                binding.calorieValue.text = String.format("%.2f", calories)
+            } else {
+                binding.calorieValue.text = String.format("%.2f", 0.0)
             }
         }
 

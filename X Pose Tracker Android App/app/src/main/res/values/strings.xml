@@ -186,6 +186,7 @@
     <string name="delete_event_confirmation">Apakah Anda yakin ingin menghapus kegiatan ini?</string>
     <string name="delete_record">Hapus Rekaman</string>
     <string name="delete_activity_confirmation">Apakah Anda yakin ingin menghapus rekaman ini?</string>
+    <string name="user_record_added">Record berhasil tersimpan</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

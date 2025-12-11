@@ -43,6 +43,8 @@ import com.rifqidev.x_posetracker.utils.processPose
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import android.graphics.Bitmap
+import java.io.ByteArrayOutputStream
 
 class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListener {
     private lateinit var binding: ActivityCameraBinding
@@ -66,6 +68,10 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private val slidingWindow = mutableListOf<List<Float>>()
 
     private lateinit var backgroundExecutor: ExecutorService
+
+    private var midRecordPhotoBytes: ByteArray? = null
+    private var midPhotoCaptured: Boolean = false
+    private var elapsedSeconds: Long = 0L
 
     private val repetitionCounters = mapOf(
         "Push-Up" to RepetitionCounter("Push-Up", thresholdDown = 70f, thresholdUp = 160f),
@@ -363,21 +369,38 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     }
 
     private fun startCountdown(durationInSeconds: Long) {
+        elapsedSeconds = 0L
+        midPhotoCaptured = false
+
+        val halfPoint = durationInSeconds / 2
+
         timer = object : CountDownTimer(durationInSeconds * 1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val secondsRemaining = millisUntilFinished / 1000
                 binding.duration.text = formatTime(secondsRemaining)
+
+                elapsedSeconds++
+
+                if (!midPhotoCaptured && elapsedSeconds >= halfPoint && recordType == 0) {
+                    capturePreviewFrame()
+                    midPhotoCaptured = true
+                }
             }
 
             override fun onFinish() {
                 binding.duration.text = "00:00"
+
+                if (!midPhotoCaptured && recordType == 0) {
+                    capturePreviewFrame()
+                }
+
                 val intent = Intent(
                     this@CameraActivity,
                     ResultActivity::class.java
                 )
 
                 val aktivitasSesi = listOf(
-                    AktivitasLatihan("Push-Up", durasiMenit = estimasiDurasi("Push-Up", repetitionCounters["Push-Up"]?.count ?: 0), repetisi = repetitionCounters["Push-Up"]?.count ?: 0),
+                    AktivitasLatihan("Push-Up", durasiMenit = estimasiDurasi("Push-Up", repetitionCounters["Push-Up"]?.count ?: 0).toDouble(), repetisi = repetitionCounters["Push-Up"]?.count ?: 0),
                     AktivitasLatihan("Sit-Up", durasiMenit = estimasiDurasi("Sit-Up", repetitionCounters["Sit-Up"]?.count ?: 0), repetisi = repetitionCounters["Sit-Up"]?.count ?: 0),
                     AktivitasLatihan("Pull-Up", durasiMenit = estimasiDurasi("Pull-Up", repetitionCounters["Pull-Up"]?.count ?: 0), repetisi = repetitionCounters["Pull-Up"]?.count ?: 0),
                     AktivitasLatihan("Lunges", durasiMenit = estimasiDurasi("Lunges", repetitionCounters["Lunges"]?.count ?: 0), repetisi = repetitionCounters["Lunges"]?.count ?: 0),
@@ -391,13 +414,14 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 intent.putExtra("date", DateHelper.getCurrentDate())
                 intent.putExtra("time", DateHelper.getCurrentTime())
                 intent.putExtra("duration", durationInSeconds.toInt())
-                intent.putExtra("calorie", totalKalori.toInt())
+                intent.putExtra("calorie", totalKalori.toDouble())
                 intent.putExtra("push_up", repetitionCounters["Push-Up"]?.count ?: 0)
                 intent.putExtra("sit_up", repetitionCounters["Sit-Up"]?.count ?: 0)
                 intent.putExtra("pull_up", repetitionCounters["Pull-Up"]?.count ?: 0)
                 intent.putExtra("lunges", repetitionCounters["Lunges"]?.count ?: 0)
                 intent.putExtra("record_type", recordType)
                 intent.putExtra("member_id", memberId)
+                intent.putExtra("record_photo_bytes", midRecordPhotoBytes)
 
                 startActivity(intent)
                 finish()
@@ -438,6 +462,14 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         }
 
         showNext()
+    }
+
+    private fun capturePreviewFrame() {
+        val previewBitmap: Bitmap = binding.viewFinder.bitmap ?: return
+
+        val stream = ByteArrayOutputStream()
+        previewBitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+        midRecordPhotoBytes = stream.toByteArray()
     }
 
     private fun showConfirmationDialog(message: Int, type: Int) {

@@ -76,4 +76,11 @@ interface AppDao {
 
     @Query("SELECT * FROM member_record WHERE id_member = :memberId ORDER BY lunges_count DESC LIMIT 1")
     fun getTopLungesRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?>
+
+    //home page
+    @Query("SELECT SUM(record_calories) FROM user_record WHERE record_date LIKE :todayDate || '%'")
+    fun getTodayCalories(todayDate: String): LiveData<Double?>
+
+    @Query("SELECT SUM(record_duration) FROM user_record WHERE record_date LIKE :todayDate || '%'")
+    fun getTodayDurations(todayDate: String): LiveData<Int?>
 }

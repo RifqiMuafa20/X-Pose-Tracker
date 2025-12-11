@@ -3,6 +3,7 @@ package com.rifqidev.x_posetracker.ui.result
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +17,7 @@ import com.rifqidev.x_posetracker.data.WorkoutItem
 import com.rifqidev.x_posetracker.databinding.ActivityResultBinding
 import com.rifqidev.x_posetracker.ui.camera.CameraViewModel
 import com.rifqidev.x_posetracker.utils.DateHelper
+import com.rifqidev.x_posetracker.utils.toBitmap
 import java.util.UUID
 
 class ResultActivity : AppCompatActivity() {
@@ -41,7 +43,7 @@ class ResultActivity : AppCompatActivity() {
         var date = intent.getStringExtra("date")
         val time = intent.getStringExtra("time")
         val duration = intent.getIntExtra("duration", 0)
-        val calorie = intent.getIntExtra("calorie", 0)
+        val calorie = intent.getDoubleExtra("calorie", 0.0)
         val pushUp = intent.getIntExtra("push_up", 0)
         val sitUp = intent.getIntExtra("sit_up", 0)
         val pullUp = intent.getIntExtra("pull_up", 0)
@@ -49,55 +51,64 @@ class ResultActivity : AppCompatActivity() {
         val memberId = intent.getStringExtra("member_id") ?: ""
         recordId = intent.getStringExtra("record_id") ?: ""
         recordType = intent.getIntExtra("record_type", 0)
+        val recordPhotoBytes: ByteArray? = intent.getByteArrayExtra("record_photo_bytes")
 
         val names = resources.getStringArray(R.array.categories_menu)
 
         binding.hour.text = time
-        binding.calorie.text = "$calorie cal"
+        binding.calorie.text = String.format("%.2f kkal", calorie)
         binding.date.text = date?.let { DateHelper.formatDateToIndo(it) } ?: "-"
         binding.time.text = "$duration detik"
 
         if(recordType == 2){
             date = null
-            binding.continueButton.visibility = View.GONE
+            binding.continueButton.visibility = View.INVISIBLE
             binding.deleteButton.visibility = View.VISIBLE
-        } else {
-            binding.continueButton.setOnClickListener {
-                if(recordType == 0){
-                    val userRecord = UserRecordEntity(
-                        idRecord = UUID.randomUUID().toString(),
-                        idUser = userId!!,
-                        recordName = "Latihan${UUID.randomUUID()}",
-                        recordDuration = duration.toInt(),
-                        recordDate = date!!,
-                        recordTime = time!!,
-                        recordCalories = calorie,
-                        pushupCount = pushUp,
-                        situpCount = sitUp,
-                        pullupCount = pullUp,
-                        lungesCount = lunges,
-                        recordPhotos = null
-                    )
+        }
 
-                    viewModel.insertUserRecord(userRecord)
-                    finish()
+        binding.continueButton.setOnClickListener {
+            if(recordType == 0){
+                val userRecord = UserRecordEntity(
+                    idRecord = UUID.randomUUID().toString(),
+                    idUser = userId!!,
+                    recordName = "Latihan${UUID.randomUUID()}",
+                    recordDuration = duration.toInt(),
+                    recordDate = date!!,
+                    recordTime = time!!,
+                    recordCalories = calorie,
+                    pushupCount = pushUp,
+                    situpCount = sitUp,
+                    pullupCount = pullUp,
+                    lungesCount = lunges,
+                    recordPhotos = recordPhotoBytes
+                )
 
-                } else if(recordType == 1){
-                    val memberRecord = MemberRecordEntity(
-                        idRecord = UUID.randomUUID().toString(),
-                        idMember = memberId,
-                        recordDate = date,
-                        recordTime = time,
-                        recordDuration = duration.toInt(),
-                        pushupCount = pushUp,
-                        situpCount = sitUp,
-                        pullupCount = pullUp,
-                        lungesCount = lunges
-                    )
+                viewModel.insertUserRecord(userRecord)
+                showToast(getString(R.string.user_record_added))
+                finish()
 
-                    viewModel.insertMemberRecord(memberRecord)
-                    finish()
-                }
+            } else if(recordType == 1){
+                val memberRecord = MemberRecordEntity(
+                    idRecord = UUID.randomUUID().toString(),
+                    idMember = memberId,
+                    recordDate = date,
+                    recordTime = time,
+                    recordDuration = duration,
+                    pushupCount = pushUp,
+                    situpCount = sitUp,
+                    pullupCount = pullUp,
+                    lungesCount = lunges
+                )
+
+                viewModel.insertMemberRecord(memberRecord)
+                showToast(getString(R.string.user_record_added))
+                finish()
+            }
+        }
+
+        if(recordType == 0 || recordType == 2){
+            if (recordPhotoBytes != null) {
+                binding.frameImage.setImageBitmap(recordPhotoBytes.toBitmap())
             }
         }
 
@@ -148,6 +159,10 @@ class ResultActivity : AppCompatActivity() {
         }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     @Deprecated("Deprecated in Java")

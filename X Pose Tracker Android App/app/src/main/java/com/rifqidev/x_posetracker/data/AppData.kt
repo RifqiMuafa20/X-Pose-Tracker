@@ -17,7 +17,7 @@ data class WorkoutItem(
 
 data class AktivitasLatihan(
     val jenis: String,
-    val durasiMenit: Int,
+    val durasiMenit: Double,
     val repetisi: Int
 )
 
@@ -59,7 +59,7 @@ data class UserRecordEntity(
     @ColumnInfo(name = "record_duration") val recordDuration: Int?,
     @ColumnInfo(name = "record_date") val recordDate: String?,
     @ColumnInfo(name = "record_time") val recordTime: String?,
-    @ColumnInfo(name = "record_calories") val recordCalories: Int?,
+    @ColumnInfo(name = "record_calories") val recordCalories: Double?,
     @ColumnInfo(name = "pushup_count") val pushupCount: Int?,
     @ColumnInfo(name = "situp_count") val situpCount: Int?,
     @ColumnInfo(name = "pullup_count") val pullupCount: Int?,

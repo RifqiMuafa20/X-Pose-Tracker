@@ -29,7 +29,7 @@
             android:layout_marginHorizontal="32dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:layout_marginBottom="56dp"
+            android:layout_marginBottom="76dp"
             android:orientation="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:spanCount="1"

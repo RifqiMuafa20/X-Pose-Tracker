@@ -1,0 +1,384 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "2ff79e8256b0ce36db70acf986abd9d4",
+    "entities": [
+      {
+        "tableName": "user_profile",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_user` TEXT NOT NULL, `user_name` TEXT, `user_gender` TEXT, `user_birth` TEXT, `user_weight` INTEGER, `user_height` INTEGER, `user_goal` TEXT, `user_profile` BLOB, PRIMARY KEY(`id_user`))",
+        "fields": [
+          {
+            "fieldPath": "idUser",
+            "columnName": "id_user",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userName",
+            "columnName": "user_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userGender",
+            "columnName": "user_gender",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userBirth",
+            "columnName": "user_birth",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userWeight",
+            "columnName": "user_weight",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userHeight",
+            "columnName": "user_height",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userGoal",
+            "columnName": "user_goal",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userProfile",
+            "columnName": "user_profile",
+            "affinity": "BLOB",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_user"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "user_record",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_record` TEXT NOT NULL, `id_user` TEXT NOT NULL, `record_name` TEXT, `record_duration` INTEGER, `record_date` TEXT, `record_time` TEXT, `record_calories` REAL, `pushup_count` INTEGER, `situp_count` INTEGER, `pullup_count` INTEGER, `lunges_count` INTEGER, `record_photos` BLOB, PRIMARY KEY(`id_record`), FOREIGN KEY(`id_user`) REFERENCES `user_profile`(`id_user`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idRecord",
+            "columnName": "id_record",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idUser",
+            "columnName": "id_user",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recordName",
+            "columnName": "record_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recordDuration",
+            "columnName": "record_duration",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recordDate",
+            "columnName": "record_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recordTime",
+            "columnName": "record_time",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recordCalories",
+            "columnName": "record_calories",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pushupCount",
+            "columnName": "pushup_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "situpCount",
+            "columnName": "situp_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pullupCount",
+            "columnName": "pullup_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lungesCount",
+            "columnName": "lunges_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recordPhotos",
+            "columnName": "record_photos",
+            "affinity": "BLOB",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_record"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_user_record_id_user",
+            "unique": false,
+            "columnNames": [
+              "id_user"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_user_record_id_user` ON `${TABLE_NAME}` (`id_user`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "user_profile",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_user"
+            ],
+            "referencedColumns": [
+              "id_user"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "activity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_activity` TEXT NOT NULL, `activity_name` TEXT, `activity_date` TEXT, `activity_supervisor` TEXT, `activity_location` TEXT, `member_amount` INTEGER, PRIMARY KEY(`id_activity`))",
+        "fields": [
+          {
+            "fieldPath": "idActivity",
+            "columnName": "id_activity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activityName",
+            "columnName": "activity_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "activityDate",
+            "columnName": "activity_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "activitySupervisor",
+            "columnName": "activity_supervisor",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "activityLocation",
+            "columnName": "activity_location",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "memberAmount",
+            "columnName": "member_amount",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_activity"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "activity_member",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_member` TEXT NOT NULL, `id_activity` TEXT NOT NULL, `member_name` TEXT, `member_registration_number` TEXT, PRIMARY KEY(`id_member`), FOREIGN KEY(`id_activity`) REFERENCES `activity`(`id_activity`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idMember",
+            "columnName": "id_member",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idActivity",
+            "columnName": "id_activity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "memberName",
+            "columnName": "member_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "memberRegistrationNumber",
+            "columnName": "member_registration_number",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_member"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_activity_member_id_activity",
+            "unique": false,
+            "columnNames": [
+              "id_activity"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_activity_member_id_activity` ON `${TABLE_NAME}` (`id_activity`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "activity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_activity"
+            ],
+            "referencedColumns": [
+              "id_activity"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "member_record",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_record` TEXT NOT NULL, `id_member` TEXT NOT NULL, `record_date` TEXT, `record_time` TEXT, `record_duration` INTEGER, `pushup_count` INTEGER, `pullup_count` INTEGER, `situp_count` INTEGER, `lunges_count` INTEGER, PRIMARY KEY(`id_record`), FOREIGN KEY(`id_member`) REFERENCES `activity_member`(`id_member`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idRecord",
+            "columnName": "id_record",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idMember",
+            "columnName": "id_member",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recordDate",
+            "columnName": "record_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recordTime",
+            "columnName": "record_time",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recordDuration",
+            "columnName": "record_duration",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pushupCount",
+            "columnName": "pushup_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pullupCount",
+            "columnName": "pullup_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "situpCount",
+            "columnName": "situp_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lungesCount",
+            "columnName": "lunges_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_record"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_member_record_id_member",
+            "unique": false,
+            "columnNames": [
+              "id_member"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_member_record_id_member` ON `${TABLE_NAME}` (`id_member`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "activity_member",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_member"
+            ],
+            "referencedColumns": [
+              "id_member"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2ff79e8256b0ce36db70acf986abd9d4')"
+    ]
+  }
+}

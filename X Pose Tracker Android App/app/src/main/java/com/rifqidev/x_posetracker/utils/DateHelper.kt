@@ -11,6 +11,12 @@ object DateHelper {
         return dateFormat.format(date)
     }
 
+    fun getCurrentDateOnly(): String {
+        val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+        val date = Date()
+        return dateFormat.format(date)
+    }
+
     fun getCurrentTime(): String {
         val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
         val time = Date()

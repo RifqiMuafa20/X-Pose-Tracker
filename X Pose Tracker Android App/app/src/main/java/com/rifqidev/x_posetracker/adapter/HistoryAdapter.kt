@@ -49,6 +49,7 @@ class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.ActivityViewHolder>()
             intent.putExtra("pull_up", item.pullupCount)
             intent.putExtra("lunges", item.lungesCount)
             intent.putExtra("record_type", 2)
+            intent.putExtra("record_photo_bytes", item.recordPhotos)
 
             it.context.startActivity(intent)
         }

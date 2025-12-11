@@ -9,6 +9,7 @@ import com.rifqidev.x_posetracker.data.AppDatabase
 import com.rifqidev.x_posetracker.data.MemberRecordEntity
 import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.data.UserRecordEntity
+import java.util.Date
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -111,5 +112,14 @@ class AppRepository(application: Application) {
 
     fun getTopLungesRecordByMemberId(memberId: String): LiveData<MemberRecordEntity?> {
         return mAppDao.getTopLungesRecordByMemberId(memberId)
+    }
+
+    // home page
+    fun getTodayCalories(date: String): LiveData<Double?> {
+        return mAppDao.getTodayCalories(date)
+    }
+
+    fun getTodayDuration(date: String): LiveData<Int?> {
+        return mAppDao.getTodayDurations(date)
     }
 }
