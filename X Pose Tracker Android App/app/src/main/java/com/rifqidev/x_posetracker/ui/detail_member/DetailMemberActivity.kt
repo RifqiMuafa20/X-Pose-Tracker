@@ -61,41 +61,49 @@ class DetailMemberActivity : AppCompatActivity() {
 
         viewModel.getTopPushUpRecordByMemberId(memberId).observe(this) { record ->
             record?.let {
-                workoutItems[0] = workoutItems[0].copy(
-                    date = it.recordDate,
-                    repetition = it.pushupCount.toString()
-                )
-                adapter.notifyItemChanged(0)
+                if (it.pushupCount != 0) {
+                    workoutItems[0] = workoutItems[0].copy(
+                        date = it.recordDate,
+                        repetition = it.pushupCount.toString()
+                    )
+                    adapter.notifyItemChanged(0)
+                }
             }
         }
 
         viewModel.getTopSitUpRecordByMemberId(memberId).observe(this) { record ->
             record?.let {
-                workoutItems[1] = workoutItems[1].copy(
-                    date = it.recordDate,
-                    repetition = it.situpCount.toString()
-                )
-                adapter.notifyItemChanged(1)
+                if (it.situpCount != 0) {
+                    workoutItems[1] = workoutItems[1].copy(
+                        date = it.recordDate,
+                        repetition = it.situpCount.toString()
+                    )
+                    adapter.notifyItemChanged(1)
+                }
             }
         }
 
         viewModel.getTopPullUpRecordByMemberId(memberId).observe(this) { record ->
             record?.let {
-                workoutItems[2] = workoutItems[2].copy(
-                    date = it.recordDate,
-                    repetition = it.pullupCount.toString()
-                )
-                adapter.notifyItemChanged(2)
+                if (it.pullupCount != 0) {
+                    workoutItems[2] = workoutItems[2].copy(
+                        date = it.recordDate,
+                        repetition = it.pullupCount.toString()
+                    )
+                    adapter.notifyItemChanged(2)
+                }
             }
         }
 
         viewModel.getTopLungesRecordByMemberId(memberId).observe(this) { record ->
             record?.let {
-                workoutItems[3] = workoutItems[3].copy(
-                    date = it.recordDate,
-                    repetition = it.lungesCount.toString()
-                )
-                adapter.notifyItemChanged(3)
+                if (it.lungesCount != 0) {
+                    workoutItems[3] = workoutItems[3].copy(
+                        date = it.recordDate,
+                        repetition = it.lungesCount.toString()
+                    )
+                    adapter.notifyItemChanged(3)
+                }
             }
         }
 

@@ -6,6 +6,7 @@ import com.rifqidev.x_posetracker.data.ActivityEntity
 import com.rifqidev.x_posetracker.data.ActivityMemberEntity
 import com.rifqidev.x_posetracker.data.AppDao
 import com.rifqidev.x_posetracker.data.AppDatabase
+import com.rifqidev.x_posetracker.data.BestCategoryAchievement
 import com.rifqidev.x_posetracker.data.MemberRecordEntity
 import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.data.UserRecordEntity
@@ -125,5 +126,9 @@ class AppRepository(application: Application) {
 
     fun getTodayDuration(date: String): LiveData<Int?> {
         return mAppDao.getTodayDurations(date)
+    }
+
+    fun getBestAchievements(startDate: String, endDate: String) : LiveData<List<BestCategoryAchievement>>{
+        return mAppDao.getBestAchievementsPerCategoryInRange(startDate, endDate)
     }
 }

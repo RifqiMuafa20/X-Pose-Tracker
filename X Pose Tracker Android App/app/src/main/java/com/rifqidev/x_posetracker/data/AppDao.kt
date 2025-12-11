@@ -86,4 +86,56 @@ interface AppDao {
 
     @Query("SELECT SUM(record_duration) FROM user_record WHERE record_date LIKE :todayDate || '%'")
     fun getTodayDurations(todayDate: String): LiveData<Int?>
+
+    @Query("""
+        SELECT 'Push-Up' AS category, t.bestCount, t.bestDate
+        FROM (
+            SELECT pushup_count AS bestCount, record_date AS bestDate
+            FROM user_record
+            WHERE pushup_count IS NOT NULL
+              AND record_date BETWEEN :startDate AND :endDate
+            ORDER BY pushup_count DESC
+            LIMIT 1
+        ) t
+    
+        UNION ALL
+    
+        SELECT 'Sit-Up', t.bestCount, t.bestDate
+        FROM (
+            SELECT situp_count AS bestCount, record_date AS bestDate
+            FROM user_record
+            WHERE situp_count IS NOT NULL
+              AND record_date BETWEEN :startDate AND :endDate
+            ORDER BY situp_count DESC
+            LIMIT 1
+        ) t
+    
+        UNION ALL
+    
+        SELECT 'Pull-Up', t.bestCount, t.bestDate
+        FROM (
+            SELECT pullup_count AS bestCount, record_date AS bestDate
+            FROM user_record
+            WHERE pullup_count IS NOT NULL
+              AND record_date BETWEEN :startDate AND :endDate
+            ORDER BY pullup_count DESC
+            LIMIT 1
+        ) t
+    
+        UNION ALL
+    
+        SELECT 'Lunges', t.bestCount, t.bestDate
+        FROM (
+            SELECT lunges_count AS bestCount, record_date AS bestDate
+            FROM user_record
+            WHERE lunges_count IS NOT NULL
+              AND record_date BETWEEN :startDate AND :endDate
+            ORDER BY lunges_count DESC
+            LIMIT 1
+        ) t
+    """)
+    fun getBestAchievementsPerCategoryInRange(
+        startDate: String,
+        endDate: String
+    ): LiveData<List<BestCategoryAchievement>>
 }

@@ -154,6 +154,25 @@ class HomeFragment : Fragment() {
 
         chart.invalidate()
 
+        val names = resources.getStringArray(R.array.categories_menu)
+
+        val iconResIds = listOf(
+            R.drawable.push_up_icon,
+            R.drawable.sit_up_icon,
+            R.drawable.pull_up_icon,
+            R.drawable.lunges_icon
+        )
+
+        val workoutItems = mutableListOf(
+            WorkoutItem(names[0], iconResIds[0], date = null, repetition = "0"),
+            WorkoutItem(names[1], iconResIds[1], date = null, repetition = "0"),
+            WorkoutItem(names[2], iconResIds[2], date = null, repetition = "0"),
+            WorkoutItem(names[3], iconResIds[3], date = null, repetition = "0")
+        )
+
+        val adapter = ListWorkoutAdapter(workoutItems)
+        binding.rvWorkout.adapter = adapter
+
         timeOptions = resources.getStringArray(R.array.days_menu)
 
         timeAdapter = ArrayAdapter(
@@ -168,6 +187,18 @@ class HomeFragment : Fragment() {
 
         binding.daysOption.setOnItemClickListener { _, _, position, _ ->
             val timeSelected = timeOptions[position]
+
+            if(timeSelected == "Hari ini") {
+                homeViewModel.setTodayRange()
+            } else if(timeSelected == "Minggu ini") {
+                homeViewModel.setThisWeekRange()
+            } else if(timeSelected == "Bulan ini") {
+                homeViewModel.setThisMonthRange()
+            } else if(timeSelected == "Tahun ini") {
+                homeViewModel.setThisYearRange()
+            } else if(timeSelected == "Semua") {
+                homeViewModel.setAllRange()
+            }
         }
 
         binding.daysOption.setOnClickListener {
@@ -180,26 +211,33 @@ class HomeFragment : Fragment() {
             binding.daysOption.showDropDown()
         }
 
-        val names = resources.getStringArray(R.array.categories_menu)
+        homeViewModel.setTodayRange()
 
-        val iconResIds = listOf(
-            R.drawable.push_up_icon,
-            R.drawable.sit_up_icon,
-            R.drawable.pull_up_icon,
-            R.drawable.lunges_icon
-        )
+        homeViewModel.bestAchievements.observe(viewLifecycleOwner) { achievements ->
+            workoutItems.forEachIndexed { index, item ->
+                workoutItems[index] = item.copy(date = null, repetition = "0")
+            }
 
-        val workoutItems = names.mapIndexed { index, name ->
-            WorkoutItem(
-                name = name,
-                iconResId = iconResIds[index],
-                date = null,
-                repetition = "0"
-            )
+            achievements.forEach { achievement ->
+                val index = when (achievement.category) {
+                    "Push-Up" -> 0
+                    "Sit-Up"  -> 1
+                    "Pull-Up" -> 2
+                    "Lunges"  -> 3
+                    else -> null
+                }
+
+                index?.let { i ->
+                    if(achievement.bestCount == 0) return@forEach
+                    workoutItems[i] = workoutItems[i].copy(
+                        date = achievement.bestDate,
+                        repetition = achievement.bestCount.toString()
+                    )
+                }
+            }
+
+            adapter.notifyDataSetChanged()
         }
-
-        val adapter = ListWorkoutAdapter(workoutItems)
-        binding.rvWorkout.adapter = adapter
     }
 
     override fun onDestroyView() {

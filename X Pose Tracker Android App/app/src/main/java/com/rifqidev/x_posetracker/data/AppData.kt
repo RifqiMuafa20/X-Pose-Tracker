@@ -27,6 +27,12 @@ data class FaqItem(
     var isExpanded: Boolean = false
 )
 
+data class BestCategoryAchievement(
+    val category: String,
+    val bestCount: Int,
+    val bestDate: String?
+)
+
 @Entity(tableName = "user_profile")
 data class UserProfileEntity(
     @PrimaryKey
