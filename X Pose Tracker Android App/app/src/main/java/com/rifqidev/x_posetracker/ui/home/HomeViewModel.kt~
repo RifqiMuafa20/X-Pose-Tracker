@@ -16,6 +16,7 @@ class HomeViewModel(mApplication: Application) : ViewModel() {
     private val _dateRange = MutableLiveData<Pair<String, String>>()
 
     private val _selectedProgressCategory = MutableLiveData<String>("Push-Up")
+    val selectedProgressCategory: LiveData<String> = _selectedProgressCategory
 
     init {
         if(_dateRange.value == null) {

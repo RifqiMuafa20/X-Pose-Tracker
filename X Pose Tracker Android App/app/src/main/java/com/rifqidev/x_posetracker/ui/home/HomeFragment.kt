@@ -20,6 +20,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.adapter.ListWorkoutAdapter
+import com.rifqidev.x_posetracker.data.WeeklyProgress
 import com.rifqidev.x_posetracker.data.WorkoutItem
 import com.rifqidev.x_posetracker.databinding.FragmentHomeBinding
 import com.rifqidev.x_posetracker.utils.DateHelper
@@ -67,7 +68,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        val todayDate = DateHelper.getCurrentDateOnly()
+        val todayDate = DateHelper.getCurrentDate()
 
         homeViewModel.getTodayDuration(todayDate).observe(viewLifecycleOwner) { duration ->
             if (duration != null) {
@@ -119,8 +120,16 @@ class HomeFragment : Fragment() {
         chart.isHighlightPerDragEnabled = false
         chart.isHighlightPerTapEnabled = false
 
-        homeViewModel.weeklyProgress.observe(viewLifecycleOwner) { list ->
-            val entries = list.mapIndexed { index, item ->
+        homeViewModel.weeklyProgress.observe(viewLifecycleOwner) { dbList ->
+            val (startDate, endDate) = DateHelper.getLast7DaysRange()
+            val allDates = DateHelper.getDateRange(startDate, endDate)
+            val dataMap = dbList.associateBy { it.date }
+
+            val completeList = allDates.map { date ->
+                dataMap[date] ?: WeeklyProgress(date = date, totalValue = 0)
+            }
+
+            val entries = completeList.mapIndexed { index, item ->
                 Entry(index.toFloat(), item.totalValue.toFloat())
             }
 
@@ -144,12 +153,14 @@ class HomeFragment : Fragment() {
 
             chart.data = LineData(dataSet)
 
-            val labels = list.map { it.date }.toTypedArray()
+            val labels = completeList.map { DateHelper.getMonthDay(it.date) }.toTypedArray()
 
             chart.xAxis.apply {
                 valueFormatter = IndexAxisValueFormatter(labels)
                 position = XAxis.XAxisPosition.BOTTOM
                 setDrawGridLines(false)
+                axisMinimum = 0f
+                axisMaximum = 6f
                 granularity = 1f
                 textColor = Color.WHITE
             }
@@ -160,7 +171,12 @@ class HomeFragment : Fragment() {
                 }
             }
 
-            chart.axisLeft.textColor = Color.WHITE
+            chart.axisLeft.apply {
+                textColor = Color.WHITE
+                axisMinimum = 0f
+                spaceTop = 2f
+            }
+
             chart.axisRight.isEnabled = false
             chart.description.isEnabled = false
             chart.legend.isEnabled = false
@@ -207,7 +223,7 @@ class HomeFragment : Fragment() {
         binding.daysOption.setOnItemClickListener { _, _, position, _ ->
             when (timeOptions[position]) {
                 "Hari ini"   -> homeViewModel.setTodayRange()
-                "Pekan ini"  -> homeViewModel.setThisWeekRange()
+                "Minggu ini"  -> homeViewModel.setThisWeekRange()
                 "Bulan ini"  -> homeViewModel.setThisMonthRange()
                 "Tahun ini"  -> homeViewModel.setThisYearRange()
                 "Semua"      -> homeViewModel.setAllRange()

@@ -13,7 +13,7 @@ import androidx.room.RoomDatabase
         ActivityMemberEntity::class,
         MemberRecordEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 
@@ -33,7 +33,9 @@ abstract class AppDatabase : RoomDatabase() {
                         AppDatabase::class.java,
                         "app_database"
                     )
+                        .fallbackToDestructiveMigration()
                         .build()
+                        .also { INSTANCE = it }
                 }
             }
             return INSTANCE as AppDatabase

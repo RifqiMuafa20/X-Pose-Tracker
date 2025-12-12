@@ -6,32 +6,29 @@ import java.util.Date
 import java.util.Locale
 
 object DateHelper {
-    private val formatter = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
-    private val dateFormatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+    private val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+    private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    private val indoFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
+    private val monthDayFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
 
     fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
         val date = Date()
-        return dateFormat.format(date)
+        return formatter.format(date)
     }
 
-    fun getCurrentDateOnly(): String {
-        val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-        val date = Date()
-        return dateFormat.format(date)
+    fun getMonthDay(dateString: String): String {
+        val date = formatter.parse(dateString)
+        return monthDayFormat.format(date!!)
     }
 
     fun getCurrentTime(): String {
-        val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
         val time = Date()
         return timeFormat.format(time)
     }
 
     fun formatDateToIndo(dateString: String): String {
-        val inputFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
-        val outputFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
-        val date = inputFormat.parse(dateString)
-        return outputFormat.format(date!!)
+        val date = formatter.parse(dateString)
+        return indoFormat.format(date!!)
     }
 
     fun formatTime(seconds: Long): String {
@@ -43,14 +40,12 @@ object DateHelper {
     fun getTodayRange(): Pair<String, String> {
         val cal = Calendar.getInstance()
 
-        // Start of day
         cal.set(Calendar.HOUR_OF_DAY, 0)
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
         val start = formatter.format(cal.time)
 
-        // End of day
         cal.set(Calendar.HOUR_OF_DAY, 23)
         cal.set(Calendar.MINUTE, 59)
         cal.set(Calendar.SECOND, 59)
@@ -62,14 +57,12 @@ object DateHelper {
     fun getThisWeekRange(): Pair<String, String> {
         val cal = Calendar.getInstance()
 
-        // Monday
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         cal.set(Calendar.HOUR_OF_DAY, 0)
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         val start = formatter.format(cal.time)
 
-        // Sunday
         cal.add(Calendar.DAY_OF_WEEK, 6)
         cal.set(Calendar.HOUR_OF_DAY, 23)
         cal.set(Calendar.MINUTE, 59)
@@ -82,14 +75,12 @@ object DateHelper {
     fun getThisMonthRange(): Pair<String, String> {
         val cal = Calendar.getInstance()
 
-        // First day
         cal.set(Calendar.DAY_OF_MONTH, 1)
         cal.set(Calendar.HOUR_OF_DAY, 0)
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         val start = formatter.format(cal.time)
 
-        // Last day
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH))
         cal.set(Calendar.HOUR_OF_DAY, 23)
         cal.set(Calendar.MINUTE, 59)
@@ -102,14 +93,12 @@ object DateHelper {
     fun getThisYearRange(): Pair<String, String> {
         val cal = Calendar.getInstance()
 
-        // First day
         cal.set(Calendar.DAY_OF_YEAR, 1)
         cal.set(Calendar.HOUR_OF_DAY, 0)
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         val start = formatter.format(cal.time)
 
-        // Last day
         cal.set(Calendar.DAY_OF_YEAR, cal.getActualMaximum(Calendar.DAY_OF_YEAR))
         cal.set(Calendar.HOUR_OF_DAY, 23)
         cal.set(Calendar.MINUTE, 59)
@@ -122,11 +111,33 @@ object DateHelper {
     fun getLast7DaysRange(): Pair<String, String> {
         val cal = Calendar.getInstance()
 
-        val endDate = dateFormatter.format(cal.time)
+        val endDate = formatter.format(cal.time)
 
         cal.add(Calendar.DAY_OF_YEAR, -6)
-        val startDate = dateFormatter.format(cal.time)
+        val startDate = formatter.format(cal.time)
 
         return startDate to endDate
+    }
+
+    fun getDateRange(startDate: String, endDate: String): List<String> {
+        val dates = mutableListOf<String>()
+
+        try {
+            val start = formatter.parse(startDate)
+            val end = formatter.parse(endDate)
+            val calendar = Calendar.getInstance()
+            if (start != null) {
+                calendar.time = start
+            }
+
+            while (calendar.time <= end) {
+                dates.add(formatter.format(calendar.time))
+                calendar.add(Calendar.DAY_OF_YEAR, 1)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return dates
     }
 }

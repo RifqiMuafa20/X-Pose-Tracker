@@ -20,7 +20,7 @@ interface AppDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUserRecord(record: UserRecordEntity)
 
-    @Query("SELECT * FROM user_record WHERE id_user = :userId")
+    @Query("SELECT * FROM user_record WHERE id_user = :userId ORDER BY record_date DESC")
     fun getUserRecordsByUserId(userId: String): LiveData<List<UserRecordEntity>>
 
     @Query("DELETE FROM user_record WHERE id_record = :recordId")
@@ -141,7 +141,7 @@ interface AppDao {
 
     @Query("""
         SELECT 
-            substr(record_date, 1, 10) AS date,
+            record_date AS date,
             SUM(
                 CASE
                     WHEN :category = 'Push-Up' THEN IFNULL(pushup_count, 0)
@@ -152,9 +152,9 @@ interface AppDao {
                 END
             ) AS totalValue
         FROM user_record
-        WHERE substr(record_date, 1, 10) BETWEEN :startDate AND :endDate
-        GROUP BY substr(record_date, 1, 10)
-        ORDER BY date
+        WHERE record_date BETWEEN :startDate AND :endDate
+        GROUP BY record_date
+        ORDER BY record_date
     """)
     fun getWeeklyProgressByCategory(
         category: String,
