@@ -1,0 +1,10 @@
+              precision    recall  f1-score   support
+
+      Lunges       0.97      1.00      0.99        36
+     Pull-Up       1.00      0.97      0.98        30
+     Push-Up       1.00      0.96      0.98        27
+      Sit-Up       0.98      1.00      0.99        46
+
+    accuracy                           0.99       139
+   macro avg       0.99      0.98      0.98       139
+weighted avg       0.99      0.99      0.99       139

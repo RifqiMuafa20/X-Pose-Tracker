@@ -1,0 +1,19 @@
+{
+    "scenario": "2D_angles",
+    "mean_accuracy": 0.9933074470119871,
+    "std_accuracy": 0.00866736675410197,
+    "mean_test_loss": 0.060381485807004864,
+    "std_test_loss": 0.09389132882210419,
+    "mean_macro_precision": 0.993426880237542,
+    "mean_macro_recall": 0.9905362114629965,
+    "mean_macro_f1": 0.9917134487674155,
+    "mean_train_time_sec": 32.83962804079056,
+    "mean_epochs": 34.0,
+    "best_hyperparameters": {
+        "lstm_units": 128,
+        "dropout_lstm": 0.4,
+        "dense_units": 128,
+        "dropout_dense": 0.4,
+        "learning_rate": 0.0005
+    }
+}

@@ -1,0 +1,25 @@
+{
+  "input_shape": [
+    30,
+    13
+  ],
+  "num_classes": 4,
+  "best_hp": {
+    "lstm_units": 32,
+    "dropout_lstm": 0.3,
+    "dense_units": 32,
+    "dropout_dense": 0.4,
+    "learning_rate": 0.0005
+  },
+  "epochs_max": 50,
+  "batch_size": 16,
+  "val_split": 0.2,
+  "early_stopping_patience": 10,
+  "lstm_layers": 2,
+  "labels": [
+    "Lunges",
+    "Pull-Up",
+    "Push-Up",
+    "Sit-Up"
+  ]
+}

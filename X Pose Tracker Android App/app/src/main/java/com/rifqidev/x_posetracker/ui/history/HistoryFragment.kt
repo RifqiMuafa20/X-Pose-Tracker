@@ -33,9 +33,7 @@ class HistoryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.noData.visibility = View.VISIBLE
-
+        
         val factory = ViewModelFactory.getInstance(requireActivity().application)
         viewModel = ViewModelProvider(requireActivity(), factory)[HistoryViewModel::class.java]
 
