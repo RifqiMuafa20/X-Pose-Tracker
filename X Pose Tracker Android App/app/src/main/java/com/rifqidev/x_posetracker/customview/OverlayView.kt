@@ -11,113 +11,100 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 import com.rifqidev.x_posetracker.R
-import com.rifqidev.x_posetracker.utils.Landmark3D
-import com.rifqidev.x_posetracker.utils.calculateAngle
+import com.rifqidev.x_posetracker.utils.AngleFallbackState
+import com.rifqidev.x_posetracker.utils.extractAngles
 import kotlin.math.max
 import kotlin.math.min
 
-class OverlayView(context: Context?, attrs: AttributeSet?) :
-    View(context, attrs) {
+class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
     private var results: PoseLandmarkerResult? = null
-    private var pointPaint = Paint()
-    private var linePaint = Paint()
 
-    private var scaleFactor: Float = 1f
-    private var imageWidth: Int = 1
-    private var imageHeight: Int = 1
-
-    init {
-        initPaints()
+    private val pointPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.YELLOW
+        strokeWidth = LANDMARK_STROKE_WIDTH
+        style = Paint.Style.FILL
     }
+
+    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context!!, R.color.mp_color_primary)
+        strokeWidth = LANDMARK_STROKE_WIDTH
+        style = Paint.Style.STROKE
+    }
+
+    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context!!, R.color.red_accent)
+        strokeWidth = LANDMARK_STROKE_WIDTH
+        textSize = 32f
+        textAlign = Paint.Align.CENTER
+        isFakeBoldText = true
+    }
+
+    private var scaleFactor = 1f
+    private var imageWidth = 1
+    private var imageHeight = 1
+    private var offsetX = 0f
+    private var offsetY = 0f
+
+    private val angleState = AngleFallbackState()
+
+    private val showAngleIndices = intArrayOf(0, 1, 3, 4, 6, 7, 9, 10, 12)
+    private val showAnchorLandmarks = intArrayOf(11, 13, 23, 25, 12, 14, 24, 26, 0)
 
     fun clear() {
         results = null
-        pointPaint.reset()
-        linePaint.reset()
         invalidate()
-        initPaints()
     }
 
-    private fun initPaints() {
-        linePaint.color =
-            ContextCompat.getColor(context!!, R.color.mp_color_primary)
-        linePaint.strokeWidth = LANDMARK_STROKE_WIDTH
-        linePaint.style = Paint.Style.STROKE
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
 
-        pointPaint.color = Color.YELLOW
-        pointPaint.strokeWidth = LANDMARK_STROKE_WIDTH
-        pointPaint.style = Paint.Style.FILL
-    }
+        val res = results ?: return
+        val first = res.landmarks().firstOrNull() ?: return
 
-    override fun draw(canvas: Canvas) {
-        super.draw(canvas)
-        results?.let { poseLandmarkerResult ->
-            for(landmark in poseLandmarkerResult.landmarks()) {
-                for(normalizedLandmark in landmark) {
-                    canvas.drawPoint(
-                        normalizedLandmark.x() * imageWidth * scaleFactor,
-                        normalizedLandmark.y() * imageHeight * scaleFactor,
-                        pointPaint
-                    )
-                }
+        fun tx(xNorm: Float) = xNorm * imageWidth * scaleFactor + offsetX
+        fun ty(yNorm: Float) = yNorm * imageHeight * scaleFactor + offsetY
 
-                PoseLandmarker.POSE_LANDMARKS.forEach {
-                    canvas.drawLine(
-                        poseLandmarkerResult.landmarks().get(0).get(it!!.start()).x() * imageWidth * scaleFactor,
-                        poseLandmarkerResult.landmarks().get(0).get(it.start()).y() * imageHeight * scaleFactor,
-                        poseLandmarkerResult.landmarks().get(0).get(it.end()).x() * imageWidth * scaleFactor,
-                        poseLandmarkerResult.landmarks().get(0).get(it.end()).y() * imageHeight * scaleFactor,
-                        linePaint)
-                }
+        for (landmarkList in res.landmarks()) {
+            for (nl in landmarkList) {
+                canvas.drawPoint(tx(nl.x()), ty(nl.y()), pointPaint)
             }
+        }
 
-            val textPaint = Paint().apply {
-                color = ContextCompat.getColor(context!!, R.color.red_accent)
-                strokeWidth = LANDMARK_STROKE_WIDTH
-                textSize = 32f
-                textAlign = Paint.Align.CENTER
-                isFakeBoldText = true
-                isAntiAlias = true
-            }
+        PoseLandmarker.POSE_LANDMARKS.forEach { c ->
+            if (c == null) return@forEach
+            val s = first[c.start()]
+            val e = first[c.end()]
+            canvas.drawLine(
+                tx(s.x()), ty(s.y()),
+                tx(e.x()), ty(e.y()),
+                linePaint
+            )
+        }
 
-            val allLandmarks = poseLandmarkerResult.landmarks()
-            if (allLandmarks.isNotEmpty()) {
-                val landmarks = allLandmarks.first()
+        val angles13 = extractAngles(first, angleState)
 
-                val get = { index: Int ->
-                    val lm = landmarks[index]
-                    Landmark3D(lm.x(), lm.y(), lm.z())
-                }
+        fun midX(a: Int, b: Int) = (first[a].x() + first[b].x()) / 2f
+        fun midY(a: Int, b: Int) = (first[a].y() + first[b].y()) / 2f
 
-                val centerPoints = listOf(
-                    11, 13, 23, 25, // kiri
-                    12, 14, 24, 26, // kanan
+        val torsoTextX = tx((midX(11, 12) + midX(23, 24)) / 2f)
+        val torsoTextY = ty((midY(11, 12) + midY(23, 24)) / 2f)
+
+        for (i in showAngleIndices.indices) {
+            val angleIdx = showAngleIndices[i]
+            val angle = angles13.getOrNull(angleIdx) ?: continue
+
+            if (angleIdx == 12) {
+                canvas.drawText("${angle.toInt()}°", torsoTextX, torsoTextY, textPaint)
+            } else {
+                val lmIdx = showAnchorLandmarks[i]
+                val lm = first[lmIdx]
+                canvas.drawText(
+                    "${angle.toInt()}°",
+                    tx(lm.x()) + 10f,
+                    ty(lm.y()) - 10f,
+                    textPaint
                 )
-
-                val angles = listOf(
-                    // left Body
-                    calculateAngle(get(13), get(11), get(23)), // left_shoulder: elbow - shoulder - hip
-                    calculateAngle(get(11), get(13), get(15)), // left_elbow: shoulder - elbow - wrist
-                    calculateAngle(get(11), get(23), get(25)), // left_hip: shoulder - hip - knee
-                    calculateAngle(get(23), get(25), get(27)), // left_knee: hip - knee - ankle
-
-                    // right Body
-                    calculateAngle(get(14), get(12), get(24)), // right_shoulder: elbow - shoulder - hip
-                    calculateAngle(get(12), get(14), get(16)), // right_elbow: shoulder - elbow - wrist
-                    calculateAngle(get(12), get(24), get(26)), // right_hip: shoulder - hip - knee
-                    calculateAngle(get(24), get(26), get(28)), // right_knee: hip - knee - ankle
-                )
-
-                for ((i, angle) in angles.withIndex()) {
-                    val landmark = landmarks[centerPoints[i]]
-                    canvas.drawText(
-                        "${angle.toInt()}°",
-                        landmark.x() * imageWidth * scaleFactor + 10,
-                        landmark.y() * imageHeight * scaleFactor - 10,
-                        textPaint
-                    )
-                }
             }
         }
     }
@@ -129,19 +116,28 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         runningMode: RunningMode = RunningMode.IMAGE
     ) {
         results = poseLandmarkerResults
-
         this.imageHeight = imageHeight
         this.imageWidth = imageWidth
 
-        scaleFactor = when (runningMode) {
-            RunningMode.IMAGE,
-            RunningMode.VIDEO -> {
-                min(width * 1f / imageWidth, height * 1f / imageHeight)
-            }
-            RunningMode.LIVE_STREAM -> {
-                max(width * 1f / imageWidth, height * 1f / imageHeight)
-            }
+        if (width == 0 || height == 0) {
+            post { setResults(poseLandmarkerResults, imageHeight, imageWidth, runningMode) }
+            return
         }
+
+        val viewW = width.toFloat()
+        val viewH = height.toFloat()
+
+        val scaleX = viewW / imageWidth
+        val scaleY = viewH / imageHeight
+
+        scaleFactor =
+            if (runningMode == RunningMode.LIVE_STREAM) max(scaleX, scaleY) else min(scaleX, scaleY)
+
+        val scaledW = imageWidth * scaleFactor
+        val scaledH = imageHeight * scaleFactor
+        offsetX = (viewW - scaledW) / 2f
+        offsetY = (viewH - scaledH) / 2f
+
         invalidate()
     }
 

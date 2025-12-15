@@ -1,0 +1,37 @@
+package com.rifqidev.x_posetracker.utils
+
+class AngleFallbackState {
+    private val previousAngles = mutableMapOf<String, Float?>(
+        "left_shoulder" to null,
+        "left_elbow" to null,
+        "left_wrist" to null,
+        "left_hip" to null,
+        "left_knee" to null,
+        "left_ankle" to null,
+
+        "right_shoulder" to null,
+        "right_elbow" to null,
+        "right_wrist" to null,
+        "right_hip" to null,
+        "right_knee" to null,
+        "right_ankle" to null
+    )
+
+    private var previousTorsoAngle: Float? = null
+
+    fun getPrev(joint: String) = previousAngles[joint]
+    fun setPrev(joint: String, value: Float) {
+        previousAngles[joint] = value
+    }
+
+    fun getOpposite(joint: String): String =
+        if (joint.startsWith("left"))
+            joint.replace("left", "right")
+        else
+            joint.replace("right", "left")
+
+    fun getPrevTorso() = previousTorsoAngle
+    fun setPrevTorso(value: Float) {
+        previousTorsoAngle = value
+    }
+}

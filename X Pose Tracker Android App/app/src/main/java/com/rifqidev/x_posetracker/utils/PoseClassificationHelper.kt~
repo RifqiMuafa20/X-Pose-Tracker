@@ -11,7 +11,7 @@ class PoseClassificationHelper(context: Context) {
     private val input = Array(1) { Array(30) { FloatArray(13) } }
     private val output = Array(1) { FloatArray(NUM_CLASSES) }
 
-    private val voteWindow = 5
+    private val voteWindow = 7
     private val voteBuf = IntArray(voteWindow) { -1 }
     private var voteIdx = 0
     private var voteSize = 0

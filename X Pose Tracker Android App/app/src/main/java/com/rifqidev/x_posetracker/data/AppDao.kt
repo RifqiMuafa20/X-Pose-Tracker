@@ -20,7 +20,7 @@ interface AppDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUserRecord(record: UserRecordEntity)
 
-    @Query("SELECT * FROM user_record WHERE id_user = :userId ORDER BY record_date DESC")
+    @Query("SELECT * FROM user_record WHERE id_user = :userId ORDER BY record_date DESC, record_time DESC")
     fun getUserRecordsByUserId(userId: String): LiveData<List<UserRecordEntity>>
 
     @Query("DELETE FROM user_record WHERE id_record = :recordId")

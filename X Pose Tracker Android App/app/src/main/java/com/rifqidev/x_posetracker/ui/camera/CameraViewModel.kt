@@ -4,12 +4,10 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.rifqidev.x_posetracker.data.UserProfileEntity
-import com.rifqidev.x_posetracker.data.UserRecordEntity
 import com.rifqidev.x_posetracker.repository.AppRepository
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
 
 class CameraViewModel(mApplication: Application) : ViewModel() {
-    private var _model = PoseLandmarkerHelper.MODEL_POSE_LANDMARKER_FULL
     private var _delegate: Int = PoseLandmarkerHelper.DELEGATE_CPU
     private var _minPoseDetectionConfidence: Float =
         PoseLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE
@@ -21,7 +19,6 @@ class CameraViewModel(mApplication: Application) : ViewModel() {
     private val repository: AppRepository = AppRepository(mApplication)
 
     val currentDelegate: Int get() = _delegate
-    val currentModel: Int get() = _model
     val currentMinPoseDetectionConfidence: Float
         get() =
             _minPoseDetectionConfidence
@@ -50,9 +47,5 @@ class CameraViewModel(mApplication: Application) : ViewModel() {
 
     fun getUserProfile(): LiveData<UserProfileEntity?> {
         return repository.getUserProfile()
-    }
-
-    fun setModel(model: Int) {
-        _model = model
     }
 }

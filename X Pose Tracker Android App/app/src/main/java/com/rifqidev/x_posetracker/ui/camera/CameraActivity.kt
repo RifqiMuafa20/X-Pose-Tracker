@@ -5,10 +5,15 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.hardware.camera2.CaptureRequest
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.SystemClock
 import android.util.Log
+import android.util.Range
+import android.util.Size
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -16,7 +21,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.AspectRatio
+import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -26,25 +31,26 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
+import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.data.AktivitasLatihan
 import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.databinding.ActivityCameraBinding
 import com.rifqidev.x_posetracker.ui.result.ResultActivity
+import com.rifqidev.x_posetracker.utils.AngleFallbackState
 import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
 import com.rifqidev.x_posetracker.utils.RepetitionCounter
-import com.rifqidev.x_posetracker.utils.estimasiDurasi
-import com.rifqidev.x_posetracker.utils.hitungTotalKalori
-import com.rifqidev.x_posetracker.utils.processPose
+import com.rifqidev.x_posetracker.utils.calculateTotalCalories
+import com.rifqidev.x_posetracker.utils.estimateDuration
+import com.rifqidev.x_posetracker.utils.extractAngles
+import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import android.graphics.Bitmap
-import java.io.ByteArrayOutputStream
 
 class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListener {
     private lateinit var binding: ActivityCameraBinding
@@ -64,14 +70,25 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var start: Boolean = false
     private var userProfile: UserProfileEntity? = null
 
+    private val angleState = AngleFallbackState()
+    private var prediction = ""
     private lateinit var poseClassifier: PoseClassificationHelper
-    private val slidingWindow = mutableListOf<List<Float>>()
 
     private lateinit var backgroundExecutor: ExecutorService
 
     private var midRecordPhotoBytes: ByteArray? = null
     private var midPhotoCaptured: Boolean = false
     private var elapsedSeconds: Long = 0L
+
+    private var lastOverlayTs = 0L
+    private val OVERLAY_INTERVAL_MS = 100L
+
+    private var clsTick = 0
+    private val CLS_EVERY_N_FRAMES = 10
+
+    private val windowPose = Array(30) { FloatArray(13) }
+    private var windowSize = 0
+    private var windowIdx = 0
 
     private val repetitionCounters = mapOf(
         "Push-Up" to RepetitionCounter("Push-Up", thresholdDown = 70f, thresholdUp = 160f),
@@ -132,13 +149,15 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         binding.startCamera.setOnClickListener {
             binding.startCamera.visibility = View.GONE
             binding.startText.visibility = View.GONE
+
             start = true
+            prediction = ""
+            angleState.reset()
 
             showCountdown {
                 if (durationInSeconds > 0) {
                     startCountdown(durationInSeconds)
                 }
-                // Mulai pendeteksian pose setelah countdown
                 setUpCamera()
             }
         }
@@ -199,23 +218,36 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             CameraSelector.Builder().requireLensFacing(cameraFacing).build()
 
         // Preview. Only using the 4:3 ratio because this is the closest to our models
-        preview = Preview.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
+        val previewBuilder = Preview.Builder()
+            .setTargetResolution(Size(480, 360))
             .setTargetRotation(binding.viewFinder.display.rotation)
-            .build()
+
+        Camera2Interop.Extender(previewBuilder).setCaptureRequestOption(
+            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+            Range(30, 30)
+        )
+
+        preview = previewBuilder.build()
 
         // ImageAnalysis. Using RGBA 8888 to match how our models work
-        imageAnalyzer =
-            ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                .setTargetRotation(binding.viewFinder.display.rotation)
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
-                // The analyzer can then be assigned to the instance
-                .also {
-                    it.setAnalyzer(backgroundExecutor) { image ->
-                        detectPose(image)
-                    }
-                }
+        val analysisBuilder = ImageAnalysis.Builder()
+            .setTargetResolution(Size(480, 360))
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+
+        val interop = Camera2Interop.Extender(analysisBuilder)
+
+        // Request 30 FPS
+        interop.setCaptureRequestOption(
+            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+            Range(30, 30)
+        )
+
+        imageAnalyzer = analysisBuilder.build().also {
+            it.setAnalyzer(backgroundExecutor) { image ->
+                detectPose(image)
+            }
+        }
 
         // Must unbind the use-cases before rebinding them
         cameraProvider.unbindAll()
@@ -255,64 +287,27 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         }
     }
 
-    override fun onResults(
-        resultBundle: PoseLandmarkerHelper.ResultBundle
-    ) {
+    override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
+        val now = SystemClock.uptimeMillis()
+        val shouldDrawOverlay = (now - lastOverlayTs) >= OVERLAY_INTERVAL_MS
+        if (shouldDrawOverlay) lastOverlayTs = now
+
         runOnUiThread {
-            binding.overlay.setResults(
-                resultBundle.results.first(),
-                resultBundle.inputImageHeight,
-                resultBundle.inputImageWidth,
-                RunningMode.LIVE_STREAM
-            )
-
-            // binding.inferenceTime.text = String.format("%d ms", resultBundle.inferenceTime)
-
-            // Force a redraw of overlay
-            binding.overlay.invalidate()
-
-            var prediction = ""
+            if (shouldDrawOverlay) {
+                binding.overlay.setResults(
+                    resultBundle.results.first(),
+                    resultBundle.inputImageHeight,
+                    resultBundle.inputImageWidth,
+                    RunningMode.LIVE_STREAM
+                )
+                binding.overlay.invalidate()
+            }
 
             val result = resultBundle.results.firstOrNull() ?: return@runOnUiThread
-            val inputForModel = processPose(result.landmarks().firstOrNull() ?: return@runOnUiThread)
+            val poseLandmarks = result.landmarks().firstOrNull() ?: return@runOnUiThread
 
-            if(activityType == resources.getStringArray(R.array.category_menu)[0].toString()) {
-                if (inputForModel.isNotEmpty()) {
-                    slidingWindow.add(inputForModel)
-
-                    if (slidingWindow.size > 30) {
-                        slidingWindow.removeAt(0)
-                    }
-
-                    if (slidingWindow.size == 30) {
-                        prediction = poseClassifier.runModel(slidingWindow.toList())
-                        binding.type.text = prediction
-                    }
-                }
-            } else {
-                prediction = activityType.toString()
-            }
-
-            if (start) {
-                val mainAngle = when (prediction) {
-                    "Push-Up" -> inputForModel[7]
-                    "Sit-Up" -> inputForModel[9]
-                    "Pull-Up" -> inputForModel[7]
-                    "Lunges" -> inputForModel[11]
-                    else -> null
-                }
-
-                mainAngle?.let {
-                    repetitionCounters[prediction]?.update(it)
-                }
-
-                binding.repetition.text = repetitionCounters[prediction]?.count.toString()
-
-                binding.pushUpRep.text = repetitionCounters["Push-Up"]?.count.toString()
-                binding.sitUpRep.text = repetitionCounters["Sit-Up"]?.count.toString()
-                binding.pullUpRep.text = repetitionCounters["Pull-Up"]?.count.toString()
-                binding.lungesRep.text = repetitionCounters["Lunges"]?.count.toString()
-            }
+            if (start) onPoseFrame(poseLandmarks)
+            else binding.type.text = activityType ?: "Unknown"
         }
     }
 
@@ -353,6 +348,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         )
 
         poseClassifier.close()
+        binding.overlay.clear()
     }
 
     private fun hideSystemUI() {
@@ -400,15 +396,43 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 )
 
                 val aktivitasSesi = listOf(
-                    AktivitasLatihan("Push-Up", durasiMenit = estimasiDurasi("Push-Up", repetitionCounters["Push-Up"]?.count ?: 0).toDouble(), repetisi = repetitionCounters["Push-Up"]?.count ?: 0),
-                    AktivitasLatihan("Sit-Up", durasiMenit = estimasiDurasi("Sit-Up", repetitionCounters["Sit-Up"]?.count ?: 0), repetisi = repetitionCounters["Sit-Up"]?.count ?: 0),
-                    AktivitasLatihan("Pull-Up", durasiMenit = estimasiDurasi("Pull-Up", repetitionCounters["Pull-Up"]?.count ?: 0), repetisi = repetitionCounters["Pull-Up"]?.count ?: 0),
-                    AktivitasLatihan("Lunges", durasiMenit = estimasiDurasi("Lunges", repetitionCounters["Lunges"]?.count ?: 0), repetisi = repetitionCounters["Lunges"]?.count ?: 0),
+                    AktivitasLatihan(
+                        "Push-Up",
+                        durasiMenit = estimateDuration(
+                            "Push-Up",
+                            repetitionCounters["Push-Up"]?.count ?: 0
+                        ).toDouble(),
+                        repetisi = repetitionCounters["Push-Up"]?.count ?: 0
+                    ),
+                    AktivitasLatihan(
+                        "Sit-Up",
+                        durasiMenit = estimateDuration(
+                            "Sit-Up",
+                            repetitionCounters["Sit-Up"]?.count ?: 0
+                        ),
+                        repetisi = repetitionCounters["Sit-Up"]?.count ?: 0
+                    ),
+                    AktivitasLatihan(
+                        "Pull-Up",
+                        durasiMenit = estimateDuration(
+                            "Pull-Up",
+                            repetitionCounters["Pull-Up"]?.count ?: 0
+                        ),
+                        repetisi = repetitionCounters["Pull-Up"]?.count ?: 0
+                    ),
+                    AktivitasLatihan(
+                        "Lunges",
+                        durasiMenit = estimateDuration(
+                            "Lunges",
+                            repetitionCounters["Lunges"]?.count ?: 0
+                        ),
+                        repetisi = repetitionCounters["Lunges"]?.count ?: 0
+                    ),
                 )
 
                 val userId = userProfile?.idUser
                 val beratBadan = userProfile?.userWeight?.toFloat()
-                val totalKalori = hitungTotalKalori(beratBadan, aktivitasSesi)
+                val totalKalori = calculateTotalCalories(beratBadan, aktivitasSesi)
 
                 intent.putExtra("user_id", userId)
                 intent.putExtra("date", DateHelper.getCurrentDate())
@@ -495,5 +519,51 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     companion object {
         private const val REQUIRED_PERMISSION = Manifest.permission.CAMERA
         private const val TAG = "Pose Landmarker"
+    }
+
+    private fun onPoseFrame(poseLandmarks: List<NormalizedLandmark>) {
+        val angles13 = extractAngles(
+            landmarks = poseLandmarks,
+            state = angleState
+        )
+
+        val autoLabel = resources.getStringArray(R.array.category_menu)[0]
+        val isAuto = activityType == autoLabel
+
+        val dst = windowPose[windowIdx]
+        for (j in 0 until 13) dst[j] = angles13[j]
+
+        windowIdx = (windowIdx + 1) % 30
+        if (windowSize < 30) windowSize++
+
+        if (isAuto && windowSize == 30) {
+            clsTick++
+            if (clsTick % CLS_EVERY_N_FRAMES == 0) {
+                prediction = poseClassifier.runModel(windowPose, windowIdx)
+                binding.type.text = prediction
+            }
+        } else {
+            prediction = activityType ?: "Unknown"
+            binding.type.text = prediction
+        }
+
+        val mainAngle = when (prediction) {
+            "Push-Up" -> angles13[7]
+            "Sit-Up" -> angles13[9]
+            "Pull-Up" -> angles13[7]
+            "Lunges" -> angles13[11]
+            else -> null
+        }
+
+        mainAngle?.let {
+            repetitionCounters[prediction]?.update(it)
+        }
+
+        binding.repetition.text = repetitionCounters[prediction]?.count.toString()
+
+        binding.pushUpRep.text = repetitionCounters["Push-Up"]?.count.toString()
+        binding.sitUpRep.text = repetitionCounters["Sit-Up"]?.count.toString()
+        binding.pullUpRep.text = repetitionCounters["Pull-Up"]?.count.toString()
+        binding.lungesRep.text = repetitionCounters["Lunges"]?.count.toString()
     }
 }

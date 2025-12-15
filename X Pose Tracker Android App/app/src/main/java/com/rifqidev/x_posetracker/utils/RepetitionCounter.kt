@@ -19,9 +19,4 @@ class RepetitionCounter(
             isDown = false
         }
     }
-
-    fun reset() {
-        isDown = false
-        count = 0
-    }
 }

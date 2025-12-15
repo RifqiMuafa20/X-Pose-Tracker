@@ -21,16 +21,21 @@ class PoseLandmarkerHelper(
     var minPoseDetectionConfidence: Float = DEFAULT_POSE_DETECTION_CONFIDENCE,
     var minPoseTrackingConfidence: Float = DEFAULT_POSE_TRACKING_CONFIDENCE,
     var minPosePresenceConfidence: Float = DEFAULT_POSE_PRESENCE_CONFIDENCE,
-    var currentModel: Int = MODEL_POSE_LANDMARKER_LITE,
     var currentDelegate: Int = DELEGATE_CPU,
     var runningMode: RunningMode = RunningMode.IMAGE,
     val context: Context,
     val poseLandmarkerHelperListener: LandmarkerListener? = null
 ) {
-
     // For this example this needs to be a var so it can be reset on changes.
     // If the Pose Landmarker will not change, a lazy val would be preferable.
     private var poseLandmarker: PoseLandmarker? = null
+    private var bitmapBuffer: Bitmap? = null
+
+    private var rotatedBitmap: Bitmap? = null
+    private var rotatedCanvas: android.graphics.Canvas? = null
+    private val rotateMatrix = Matrix()
+
+    private var lastFrameTimestamp = 0L
 
     init {
         setupPoseLandmarker()
@@ -130,52 +135,70 @@ class PoseLandmarkerHelper(
     }
 
     // Convert the ImageProxy to MP Image and feed it to PoselandmakerHelper.
-    fun detectLiveStream(
-        imageProxy: ImageProxy,
-        isFrontCamera: Boolean
-    ) {
-        if (runningMode != RunningMode.LIVE_STREAM) {
-            throw IllegalArgumentException(
-                "Attempting to call detectLiveStream" +
-                        " while not using RunningMode.LIVE_STREAM"
-            )
+    fun detectLiveStream(imageProxy: ImageProxy, isFrontCamera: Boolean) {
+        check(runningMode == RunningMode.LIVE_STREAM) {
+            "detectLiveStream() requires RunningMode.LIVE_STREAM"
         }
-        val frameTime = SystemClock.uptimeMillis()
 
-        // Copy out RGB bits from the frame to a bitmap buffer
-        val bitmapBuffer =
-            Bitmap.createBitmap(
-                imageProxy.width,
-                imageProxy.height,
-                Bitmap.Config.ARGB_8888
-            )
+        // Monotonic timestamp
+        val now = SystemClock.uptimeMillis()
+        val frameTime = if (now <= lastFrameTimestamp) lastFrameTimestamp + 1 else now
+        lastFrameTimestamp = frameTime
 
-        imageProxy.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.planes[0].buffer) }
-        imageProxy.close()
+        // Reuse bitmap buffer
+        if (bitmapBuffer == null ||
+            bitmapBuffer!!.width != imageProxy.width ||
+            bitmapBuffer!!.height != imageProxy.height
+        ) {
+            bitmapBuffer =
+                Bitmap.createBitmap(imageProxy.width, imageProxy.height, Bitmap.Config.ARGB_8888)
+        }
 
-        val matrix = Matrix().apply {
-            // Rotate the frame received from the camera to be in the same direction as it'll be shown
-            postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
+        // Copy pixels (use{} will close imageProxy)
+        imageProxy.use { proxy ->
+            bitmapBuffer!!.copyPixelsFromBuffer(proxy.planes[0].buffer)
+        }
 
-            // flip image if user use front camera
-            if (isFrontCamera) {
-                postScale(
-                    -1f,
-                    1f,
-                    imageProxy.width.toFloat(),
-                    imageProxy.height.toFloat()
-                )
+        val src = bitmapBuffer!!
+
+        val rot = (imageProxy.imageInfo.rotationDegrees % 360 + 360) % 360
+        val outW = if (rot == 90 || rot == 270) src.height else src.width
+        val outH = if (rot == 90 || rot == 270) src.width else src.height
+
+        if (rotatedBitmap == null || rotatedBitmap!!.width != outW || rotatedBitmap!!.height != outH) {
+            rotatedBitmap = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
+            rotatedCanvas = android.graphics.Canvas(rotatedBitmap!!)
+        }
+
+        rotateMatrix.reset()
+
+        when (rot) {
+            90 -> {
+                rotateMatrix.postRotate(90f)
+                rotateMatrix.postTranslate(outW.toFloat(), 0f)
+            }
+
+            180 -> {
+                rotateMatrix.postRotate(180f)
+                rotateMatrix.postTranslate(outW.toFloat(), outH.toFloat())
+            }
+
+            270 -> {
+                rotateMatrix.postRotate(270f)
+                rotateMatrix.postTranslate(0f, outH.toFloat())
             }
         }
-        val rotatedBitmap = Bitmap.createBitmap(
-            bitmapBuffer, 0, 0, bitmapBuffer.width, bitmapBuffer.height,
-            matrix, true
-        )
 
-        // Convert the input Bitmap object to an MPImage object to run inference
-        val mpImage = BitmapImageBuilder(rotatedBitmap).build()
+        if (isFrontCamera) {
+            rotateMatrix.postScale(-1f, 1f, outW / 2f, outH / 2f)
+        }
 
-        detectAsync(mpImage, frameTime)
+        // Clear canvas quickly (optional)
+        rotatedCanvas!!.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR)
+        rotatedCanvas!!.drawBitmap(src, rotateMatrix, null)
+
+        val mpImage = BitmapImageBuilder(rotatedBitmap!!).build()
+        poseLandmarker?.detectAsync(mpImage, frameTime)
     }
 
     // Run pose landmark using MediaPipe Pose Landmarker API
@@ -312,12 +335,8 @@ class PoseLandmarkerHelper(
         const val DEFAULT_POSE_DETECTION_CONFIDENCE = 0.5F
         const val DEFAULT_POSE_TRACKING_CONFIDENCE = 0.5F
         const val DEFAULT_POSE_PRESENCE_CONFIDENCE = 0.5F
-        const val DEFAULT_NUM_POSES = 1
         const val OTHER_ERROR = 0
         const val GPU_ERROR = 1
-        const val MODEL_POSE_LANDMARKER_FULL = 0
-        const val MODEL_POSE_LANDMARKER_LITE = 1
-        const val MODEL_POSE_LANDMARKER_HEAVY = 2
     }
 
     data class ResultBundle(

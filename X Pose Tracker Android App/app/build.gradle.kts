@@ -84,4 +84,5 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.tasks.vision)
     implementation(libs.core)
+    implementation(libs.androidx.camera.camera2.v133)
 }
