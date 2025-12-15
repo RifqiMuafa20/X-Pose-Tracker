@@ -78,16 +78,18 @@ fun calculateTorsoAngle(
 fun extractAngles(
     landmarks: List<NormalizedLandmark>,
     state: AngleFallbackState
-): List<Float> {
+): FloatArray {
 
     val get = { idx: Int ->
         val lm = landmarks[idx]
         Landmark3D(lm.x(), lm.y(), lm.z())
     }
 
-    val angles = mutableListOf<Float>()
+    val angles = FloatArray(JOINT_DEFS.size + 1)
 
-    for (j in JOINT_DEFS) {
+    for (i in JOINT_DEFS.indices) {
+        val j = JOINT_DEFS[i]
+
         var angle = calculateAngle(get(j.a), get(j.b), get(j.c))
 
         if (angle == null) {
@@ -96,11 +98,10 @@ fun extractAngles(
         }
 
         if (angle == null) angle = state.getPrev(j.name)
-
         if (angle == null) angle = 0f
 
         state.setPrev(j.name, angle)
-        angles.add(angle)
+        angles[i] = angle
     }
 
     var torsoAngle = calculateTorsoAngle(
@@ -114,7 +115,7 @@ fun extractAngles(
     if (torsoAngle == null) torsoAngle = 0f
 
     state.setPrevTorso(torsoAngle)
-    angles.add(torsoAngle)
+    angles[JOINT_DEFS.size] = torsoAngle
 
     return angles
 }

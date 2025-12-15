@@ -43,8 +43,8 @@ import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
-import com.rifqidev.x_posetracker.utils.RepetitionCounter
 import com.rifqidev.x_posetracker.utils.calculateTotalCalories
+import com.rifqidev.x_posetracker.utils.createDefaultRepetitionEngine
 import com.rifqidev.x_posetracker.utils.estimateDuration
 import com.rifqidev.x_posetracker.utils.extractAngles
 import java.io.ByteArrayOutputStream
@@ -90,12 +90,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var windowSize = 0
     private var windowIdx = 0
 
-    private val repetitionCounters = mapOf(
-        "Push-Up" to RepetitionCounter("Push-Up", thresholdDown = 70f, thresholdUp = 160f),
-        "Sit-Up" to RepetitionCounter("Sit-Up", thresholdDown = 60f, thresholdUp = 130f),
-        "Pull-Up" to RepetitionCounter("Pull-Up", thresholdDown = 60f, thresholdUp = 140f),
-        "Lunges" to RepetitionCounter("Lunges", thresholdDown = 70f, thresholdUp = 160f)
-    )
+    private val repEngine = createDefaultRepetitionEngine()
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -153,6 +148,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             start = true
             prediction = ""
             angleState.reset()
+            repEngine.resetSession()
 
             showCountdown {
                 if (durationInSeconds > 0) {
@@ -400,33 +396,33 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                         "Push-Up",
                         durasiMenit = estimateDuration(
                             "Push-Up",
-                            repetitionCounters["Push-Up"]?.count ?: 0
+                            repEngine.getCount("Push-Up")
                         ).toDouble(),
-                        repetisi = repetitionCounters["Push-Up"]?.count ?: 0
+                        repetisi = repEngine.getCount("Push-Up")
                     ),
                     AktivitasLatihan(
                         "Sit-Up",
                         durasiMenit = estimateDuration(
                             "Sit-Up",
-                            repetitionCounters["Sit-Up"]?.count ?: 0
+                            repEngine.getCount("Sit-Up")
                         ),
-                        repetisi = repetitionCounters["Sit-Up"]?.count ?: 0
+                        repetisi = repEngine.getCount("Sit-Up")
                     ),
                     AktivitasLatihan(
                         "Pull-Up",
                         durasiMenit = estimateDuration(
                             "Pull-Up",
-                            repetitionCounters["Pull-Up"]?.count ?: 0
+                            repEngine.getCount("Pull-Up")
                         ),
-                        repetisi = repetitionCounters["Pull-Up"]?.count ?: 0
+                        repetisi = repEngine.getCount("Pull-Up")
                     ),
                     AktivitasLatihan(
                         "Lunges",
                         durasiMenit = estimateDuration(
                             "Lunges",
-                            repetitionCounters["Lunges"]?.count ?: 0
+                            repEngine.getCount("Lunges")
                         ),
-                        repetisi = repetitionCounters["Lunges"]?.count ?: 0
+                        repetisi = repEngine.getCount("Lunges")
                     ),
                 )
 
@@ -439,10 +435,10 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 intent.putExtra("time", DateHelper.getCurrentTime())
                 intent.putExtra("duration", durationInSeconds.toInt())
                 intent.putExtra("calorie", totalKalori.toDouble())
-                intent.putExtra("push_up", repetitionCounters["Push-Up"]?.count ?: 0)
-                intent.putExtra("sit_up", repetitionCounters["Sit-Up"]?.count ?: 0)
-                intent.putExtra("pull_up", repetitionCounters["Pull-Up"]?.count ?: 0)
-                intent.putExtra("lunges", repetitionCounters["Lunges"]?.count ?: 0)
+                intent.putExtra("push_up", repEngine.getCount("Push-Up"))
+                intent.putExtra("sit_up", repEngine.getCount("Sit-Up"))
+                intent.putExtra("pull_up", repEngine.getCount("Pull-Up"))
+                intent.putExtra("lunges", repEngine.getCount("Lunges"))
                 intent.putExtra("record_type", recordType)
                 intent.putExtra("member_id", memberId)
                 intent.putExtra("record_photo_bytes", midRecordPhotoBytes)
@@ -547,23 +543,13 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             binding.type.text = prediction
         }
 
-        val mainAngle = when (prediction) {
-            "Push-Up" -> angles13[7]
-            "Sit-Up" -> angles13[9]
-            "Pull-Up" -> angles13[7]
-            "Lunges" -> angles13[11]
-            else -> null
-        }
+        repEngine.update(prediction, angles13)
 
-        mainAngle?.let {
-            repetitionCounters[prediction]?.update(it)
-        }
+        binding.repetition.text = repEngine.getCount(prediction).toString()
 
-        binding.repetition.text = repetitionCounters[prediction]?.count.toString()
-
-        binding.pushUpRep.text = repetitionCounters["Push-Up"]?.count.toString()
-        binding.sitUpRep.text = repetitionCounters["Sit-Up"]?.count.toString()
-        binding.pullUpRep.text = repetitionCounters["Pull-Up"]?.count.toString()
-        binding.lungesRep.text = repetitionCounters["Lunges"]?.count.toString()
+        binding.pushUpRep.text = repEngine.getCount("Push-Up").toString()
+        binding.sitUpRep.text = repEngine.getCount("Sit-Up").toString()
+        binding.pullUpRep.text = repEngine.getCount("Pull-Up").toString()
+        binding.lungesRep.text = repEngine.getCount("Lunges").toString()
     }
 }
