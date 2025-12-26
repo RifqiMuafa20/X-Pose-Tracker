@@ -3,6 +3,7 @@ package com.rifqidev.x_posetracker.utils
 import android.content.Context
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
+import kotlin.math.abs
 
 class PoseClassificationHelper(context: Context) {
 
@@ -11,7 +12,7 @@ class PoseClassificationHelper(context: Context) {
     private val input = Array(1) { Array(30) { FloatArray(13) } }
     private val output = Array(1) { FloatArray(NUM_CLASSES) }
 
-    private val voteWindow = 7
+    private val voteWindow = 5
     private val voteBuf = IntArray(voteWindow) { -1 }
     private var voteIdx = 0
     private var voteSize = 0
@@ -25,10 +26,13 @@ class PoseClassificationHelper(context: Context) {
     }
 
     fun runModel(ring: Array<FloatArray>, headIdx: Int): String {
-        for (t in 0 until 30) {
-            val src = ring[(headIdx + t) % 30]
+        for (t in 0 until SEQ_LEN) {
+            val src = ring[(headIdx + t) % SEQ_LEN]
             val dst = input[0][t]
-            for (j in 0 until 13) dst[j] = src[j]
+
+            for (j in 0 until NUM_FEATURES) {
+                dst[j] = standardize(src[j], MEAN[j], STD[j])
+            }
         }
 
         interpreter.run(input, output)
@@ -37,6 +41,10 @@ class PoseClassificationHelper(context: Context) {
         val voted = updateMajorityVote(pred)
 
         return categories.getOrElse(voted) { "Unknown" }
+    }
+
+    private fun standardize(x: Float, mean: Float, std: Float): Float {
+        return if (abs(std) < 1e-6f) 0f else (x - mean) / std
     }
 
     private fun updateMajorityVote(pred: Int): Int {
@@ -80,6 +88,9 @@ class PoseClassificationHelper(context: Context) {
 
     companion object {
         const val NUM_CLASSES = 4
+        const val SEQ_LEN = 30
+        const val NUM_FEATURES = 13
+        
         val categories = listOf("Lunges", "Pull-Up", "Push-Up", "Sit-Up")
     }
 }

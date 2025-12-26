@@ -7,7 +7,7 @@
     <string name="x_pose_tracker_logo">X Pose Tracker Logo</string>
     <string name="welcome_background">push up in the beach</string>
     <string name="welcome_message">Tracking KebugaranMu!</string>
-    <string name="welcome_description">X-Pose Tracker menggunakan teknologi pose estimation untuk memantau gerakan push-up, sit-up, pull-up, dan lunges secara real-time, hitung repetisi, dan catat progress latihan!</string>
+    <string name="welcome_description">X-Pose Tracker menggunakan teknologi pose estimation untuk memantau gerakan push-up, sit-up, pull-up, dan lunges secara real-time, koreksi kesalahan, dan capai hasil terbaik!</string>
     <string name="mulai">Mulai</string>
     <string name="step1">Langkah 1 dari 3</string>
     <string name="step2">Langkah 2 dari 3</string>

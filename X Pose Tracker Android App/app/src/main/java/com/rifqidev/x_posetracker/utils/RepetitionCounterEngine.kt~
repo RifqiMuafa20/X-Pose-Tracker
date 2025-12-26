@@ -52,7 +52,7 @@ class PushUpCounter : IRepetitionCounter {
 
     private var isDown = false
 
-    private val ELBOW_UP = 150f
+    private val ELBOW_UP = 160f
     private val ELBOW_DOWN = 70f
     private val HIP_VALID = 160f
     private val KNEE_VALID = 160f

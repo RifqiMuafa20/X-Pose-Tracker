@@ -3,6 +3,7 @@ package com.rifqidev.x_posetracker.utils
 import android.content.Context
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
+import kotlin.math.abs
 
 class PoseClassificationHelper(context: Context) {
 
@@ -25,10 +26,13 @@ class PoseClassificationHelper(context: Context) {
     }
 
     fun runModel(ring: Array<FloatArray>, headIdx: Int): String {
-        for (t in 0 until 30) {
-            val src = ring[(headIdx + t) % 30]
+        for (t in 0 until SEQ_LEN) {
+            val src = ring[(headIdx + t) % SEQ_LEN]
             val dst = input[0][t]
-            for (j in 0 until 13) dst[j] = src[j]
+
+            for (j in 0 until NUM_FEATURES) {
+                dst[j] = standardize(src[j], MEAN[j], STD[j])
+            }
         }
 
         interpreter.run(input, output)
@@ -37,6 +41,10 @@ class PoseClassificationHelper(context: Context) {
         val voted = updateMajorityVote(pred)
 
         return categories.getOrElse(voted) { "Unknown" }
+    }
+
+    private fun standardize(x: Float, mean: Float, std: Float): Float {
+        return if (abs(std) < 1e-6f) 0f else (x - mean) / std
     }
 
     private fun updateMajorityVote(pred: Int): Int {
@@ -80,6 +88,22 @@ class PoseClassificationHelper(context: Context) {
 
     companion object {
         const val NUM_CLASSES = 4
+        const val SEQ_LEN = 30
+        const val NUM_FEATURES = 13
+
         val categories = listOf("Lunges", "Pull-Up", "Push-Up", "Sit-Up")
+
+        // Z-SCORE PARAMETERS (FROM TRAINING)
+        val MEAN = floatArrayOf(
+            72.36067f, 110.54639f, 148.8717f, 137.80536f, 124.20968f,
+            123.16265f, 69.22333f, 114.03867f, 150.23697f, 137.31897f,
+            124.48476f, 122.65251f, 50.37258f
+        )
+
+        val STD = floatArrayOf(
+            55.85047f, 51.28964f, 26.91423f, 49.3622f, 53.51188f,
+            27.37082f, 56.11798f, 50.29099f, 25.06907f, 49.27043f,
+            52.25864f, 26.43981f, 38.88928f
+        )
     }
 }
