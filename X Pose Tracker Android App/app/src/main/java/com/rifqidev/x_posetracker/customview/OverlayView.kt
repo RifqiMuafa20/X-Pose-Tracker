@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -34,10 +35,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context!!, R.color.red_accent)
-        strokeWidth = LANDMARK_STROKE_WIDTH
-        textSize = 32f
+        strokeWidth = 18f
+        textSize = 36f
         textAlign = Paint.Align.CENTER
-        isFakeBoldText = true
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
 
     private var scaleFactor = 1f

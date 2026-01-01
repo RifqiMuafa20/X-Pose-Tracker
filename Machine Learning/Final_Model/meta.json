@@ -1,0 +1,23 @@
+{
+  "val_subject": "Geraldo Forland",
+  "input_shape": [
+    30,
+    13
+  ],
+  "num_classes": 4,
+  "best_hp": {
+    "lstm_units": 64,
+    "dropout_lstm": 0.4,
+    "dense_units": 32,
+    "dropout_dense": 0.4,
+    "learning_rate": 0.001
+  },
+  "batch_size": 16,
+  "epochs": 50,
+  "labels": [
+    "Lunges",
+    "Pull-Up",
+    "Push-Up",
+    "Sit-Up"
+  ]
+}

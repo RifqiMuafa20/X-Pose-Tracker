@@ -1,0 +1,19 @@
+{
+    "scenario": "2D_Angles",
+    "num_folds": 8,
+    "mean_accuracy": 0.9935372864284634,
+    "std_accuracy": 0.007113593795429019,
+    "mean_test_loss": 0.03325637199168341,
+    "std_test_loss": 0.038286833672242705,
+    "mean_macro_precision": 0.9949348917139338,
+    "mean_macro_recall": 0.9902397138349774,
+    "mean_macro_f1": 0.9922501301149418,
+    "learning_rate": 0.001,
+    "batch_size": 32,
+    "best_hyperparameters": {
+        "lstm_units": 128,
+        "dropout_lstm": 0.4,
+        "dense_units": 32,
+        "dropout_dense": 0.4
+    }
+}

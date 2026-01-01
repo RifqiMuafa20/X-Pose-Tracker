@@ -1,0 +1,19 @@
+{
+    "scenario": "Learning_Rate_1e5",
+    "num_folds": 8,
+    "mean_accuracy": 0.9967924877749468,
+    "std_accuracy": 0.003286591224039569,
+    "mean_test_loss": 0.01575429452350363,
+    "std_test_loss": 0.011592548769350935,
+    "mean_macro_precision": 0.9970837791150291,
+    "mean_macro_recall": 0.9951792993182936,
+    "mean_macro_f1": 0.9960617342467136,
+    "learning_rate": 1e-05,
+    "batch_size": 16,
+    "best_hyperparameters": {
+        "lstm_units": 128,
+        "dropout_lstm": 0.4,
+        "dense_units": 128,
+        "dropout_dense": 0.4
+    }
+}
