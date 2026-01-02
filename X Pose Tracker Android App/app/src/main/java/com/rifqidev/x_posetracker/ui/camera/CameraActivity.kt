@@ -7,16 +7,20 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.hardware.camera2.CaptureRequest
+import android.media.SoundPool
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.SystemClock
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.util.Range
 import android.util.Size
+import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -48,11 +52,13 @@ import com.rifqidev.x_posetracker.utils.createDefaultRepetitionEngine
 import com.rifqidev.x_posetracker.utils.estimateDuration
 import com.rifqidev.x_posetracker.utils.extractAngles
 import java.io.ByteArrayOutputStream
+import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListener {
+class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListener,
+    TextToSpeech.OnInitListener {
     private lateinit var binding: ActivityCameraBinding
     private lateinit var viewModel: CameraViewModel
 
@@ -89,6 +95,23 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private val windowPose = Array(30) { FloatArray(13) }
     private var windowSize = 0
     private var windowIdx = 0
+
+    private var status = true
+    private var message = ""
+
+    private val activeMessages = mutableSetOf<String>()
+    private var lastStatusValid = true
+
+    private var lastCountMap = mutableMapOf<String, Int>()
+    private var lastPrediction: String? = null
+    private var invalidSpokenInCycle = false
+
+    private var count = 0
+
+    private var tts: TextToSpeech? = null
+    private lateinit var sp: SoundPool
+    private var soundId: Int = 0
+    private var spLoaded = false
 
     private val repEngine = createDefaultRepetitionEngine()
 
@@ -135,6 +158,19 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         memberId = intent.getStringExtra("member_id") ?: ""
         recordType = intent.getIntExtra("record_type", 0)
         val durationInSeconds = intent.getLongExtra("duration", 0L)
+
+        tts = TextToSpeech(this, this)
+        sp = SoundPool.Builder().build()
+
+        sp.setOnLoadCompleteListener { _, _, status ->
+            if (status == 0) {
+                spLoaded = true
+            } else {
+                Toast.makeText(this@CameraActivity, "Gagal load audio", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        soundId = sp.load(this, R.raw.error_sound, 1)
 
         // Initialize our background executor
         backgroundExecutor = Executors.newSingleThreadExecutor()
@@ -336,6 +372,12 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
     override fun onDestroy() {
         timer?.cancel()
+
+        if (tts != null) {
+            tts!!.stop()
+            tts!!.shutdown()
+        }
+
         super.onDestroy()
 
         backgroundExecutor.shutdown()
@@ -397,7 +439,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                         durasiMenit = estimateDuration(
                             "Push-Up",
                             repEngine.getCount("Push-Up")
-                        ).toDouble(),
+                        ),
                         repetisi = repEngine.getCount("Push-Up")
                     ),
                     AktivitasLatihan(
@@ -543,13 +585,112 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             binding.type.text = prediction
         }
 
+        if (prediction != lastPrediction) {
+            speak(prediction)
+            lastPrediction = prediction
+        }
+
         repEngine.update(prediction, angles13)
 
-        binding.repetition.text = repEngine.getCount(prediction).toString()
+        count = repEngine.getCount(prediction)
+
+        if (count > (lastCountMap[prediction] ?: 0)) {
+            speak("$count")
+            lastCountMap[prediction] = count
+        }
+
+        binding.repetition.text = count.toString()
+
+        status = repEngine.getLastValidation(prediction)?.isValid == true
+        message = repEngine.getLastValidation(prediction)?.message.orEmpty()
+
+        if (status) {
+            binding.invalidStatus.text = "Valid"
+            binding.invalidStatus.setTextColor(
+                ContextCompat.getColor(this, R.color.lime_green)
+            )
+
+            if (!lastStatusValid) {
+                clearInvalidMessages()
+                invalidSpokenInCycle = false
+            }
+
+            lastStatusValid = true
+
+        } else {
+            binding.invalidStatus.text = "Invalid"
+            binding.invalidStatus.setTextColor(
+                ContextCompat.getColor(this, R.color.red_accent)
+            )
+
+            lastStatusValid = false
+            showInvalidPopup(message)
+
+            if (!invalidSpokenInCycle) {
+                playErrorSound()
+                invalidSpokenInCycle = true
+            }
+        }
 
         binding.pushUpRep.text = repEngine.getCount("Push-Up").toString()
         binding.sitUpRep.text = repEngine.getCount("Sit-Up").toString()
         binding.pullUpRep.text = repEngine.getCount("Pull-Up").toString()
         binding.lungesRep.text = repEngine.getCount("Lunges").toString()
+    }
+
+    private fun showInvalidPopup(message: String) {
+        if (message.isBlank()) return
+
+        if (activeMessages.contains(message)) return
+
+        activeMessages.add(message)
+
+        val container = binding.invalidMessageContainer
+
+        if (container.childCount >= 3) {
+            val removedView = container.getChildAt(0) as TextView
+            activeMessages.remove(removedView.text.toString())
+            container.removeViewAt(0)
+        }
+
+        val textView = LayoutInflater.from(this)
+            .inflate(R.layout.item_invalid_message, container, false) as TextView
+
+        textView.text = message
+        container.addView(textView)
+
+        textView.postDelayed({
+            activeMessages.remove(message)
+            container.removeView(textView)
+        }, 1000)
+    }
+
+    private fun clearInvalidMessages() {
+        val container = binding.invalidMessageContainer
+        container.removeAllViews()
+        activeMessages.clear()
+    }
+
+    private fun speak(text: String) {
+        tts?.speak(
+            text,
+            TextToSpeech.QUEUE_FLUSH,
+            null,
+            text
+        )
+    }
+
+    private fun playErrorSound() {
+        if (spLoaded) {
+            sp.play(soundId, 1f, 1f, 0, 0, 1f)
+        }
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            tts?.language = Locale("id", "ID")
+            tts?.setSpeechRate(2.0f)
+            tts?.setPitch(1.0f)
+        }
     }
 }

@@ -127,6 +127,27 @@
                 app:layout_constraintStart_toStartOf="@id/viewFinder"
                 app:layout_constraintEnd_toEndOf="@id/viewFinder"/>
 
+            <TextView
+                android:id="@+id/invalid_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:textSize="16sp"
+                android:fontFamily="@font/poppins_bold"
+                android:textColor="@color/lime_green"
+                app:layout_constraintStart_toStartOf="@id/viewFinder"
+                app:layout_constraintTop_toTopOf="@id/viewFinder" />
+
+            <LinearLayout
+                android:id="@+id/invalidMessageContainer"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:layout_margin="12dp"
+                app:layout_constraintEnd_toEndOf="@id/viewFinder"
+                app:layout_constraintTop_toTopOf="@id/viewFinder" />
+
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline2"
                 android:layout_width="wrap_content"

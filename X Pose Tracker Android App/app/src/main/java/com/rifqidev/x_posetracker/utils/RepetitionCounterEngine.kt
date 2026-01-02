@@ -1,27 +1,42 @@
 package com.rifqidev.x_posetracker.utils
 
-import kotlin.math.abs
-
 object AngleIdx {
     const val LEFT_ELBOW = 1
     const val RIGHT_ELBOW = 7
-
     const val LEFT_HIP = 3
     const val RIGHT_HIP = 9
-
     const val LEFT_KNEE = 4
     const val RIGHT_KNEE = 10
-
     const val TORSO = 12
 }
 
-private enum class Side { LEFT, RIGHT }
+enum class MovementState {
+    DOWN,
+    NEAR_DOWN,
+    CENTRE,
+    NEAR_UP,
+    UP
+}
+
+data class ValidationResult(
+    val isValid: Boolean,
+    val message: String
+)
+
+data class CounterResult(
+    val count: Int,
+    val state: MovementState,
+    val validationResult: ValidationResult
+)
 
 interface IRepetitionCounter {
     val count: Int
+    val currentState: MovementState
+    val lastValidationResult: ValidationResult
+
     fun resetAll()
     fun resetStateOnly()
-    fun update(angles13: FloatArray)
+    fun update(angles13: FloatArray): CounterResult
 }
 
 class RepetitionCounterEngine(
@@ -35,38 +50,69 @@ class RepetitionCounterEngine(
         activeLabel = null
     }
 
-    fun update(label: String, angles13: FloatArray) {
+    fun update(label: String, angles13: FloatArray): CounterResult? {
         if (label != activeLabel) {
             counters[label]?.resetStateOnly()
             activeLabel = label
         }
-        counters[label]?.update(angles13)
+        return counters[label]?.update(angles13)
     }
 
     fun getCount(label: String): Int = counters[label]?.count ?: 0
+    fun getLastValidation(label: String): ValidationResult? = counters[label]?.lastValidationResult
 }
 
 class PushUpCounter : IRepetitionCounter {
     override var count: Int = 0
         private set
 
-    private var isDown = false
+    override var currentState: MovementState = MovementState.DOWN
+        private set
 
-    private val ELBOW_UP = 150f
-    private val ELBOW_DOWN = 70f
-    private val HIP_VALID = 160f
-    private val KNEE_VALID = 160f
+    override var lastValidationResult: ValidationResult =
+        ValidationResult(true, "")
+        private set
+
+    private var isInvalidCycle = false
+    private var reachedUp = false
+    private var startedFromDown = false
+
+    private var isGoingUp = false
+    private var isGoingDown = false
+
+    private val ELBOW_FULL_UP = 160f
+    private val ELBOW_NEAR_UP = 140f
+    private val ELBOW_CENTRE = 115f
+    private val ELBOW_NEAR_DOWN = 90f
+    private val ELBOW_FULL_DOWN = 70f
+
+    private val HIP_MIN_VALID = 160f
+    private val KNEE_MIN_VALID = 160f
+
+    private val stateOrder = listOf(
+        MovementState.DOWN,
+        MovementState.NEAR_DOWN,
+        MovementState.CENTRE,
+        MovementState.NEAR_UP,
+        MovementState.UP
+    )
 
     override fun resetAll() {
         count = 0
-        isDown = false
+        resetStateOnly()
     }
 
     override fun resetStateOnly() {
-        isDown = false
+        currentState = MovementState.DOWN
+        lastValidationResult = ValidationResult(true, "")
+        isInvalidCycle = false
+        reachedUp = false
+        isGoingUp = false
+        isGoingDown = false
+        startedFromDown = false
     }
 
-    override fun update(angles13: FloatArray) {
+    override fun update(angles13: FloatArray): CounterResult {
         val eL = angles13[AngleIdx.LEFT_ELBOW]
         val eR = angles13[AngleIdx.RIGHT_ELBOW]
         val hL = angles13[AngleIdx.LEFT_HIP]
@@ -74,15 +120,126 @@ class PushUpCounter : IRepetitionCounter {
         val kL = angles13[AngleIdx.LEFT_KNEE]
         val kR = angles13[AngleIdx.RIGHT_KNEE]
 
-        val valid = (hL >= HIP_VALID && hR >= HIP_VALID && kL >= KNEE_VALID && kR >= KNEE_VALID)
+        // Posture Validation
+        val postureValidation = validatePosture(hL, hR, kL, kR)
 
-        if (!isDown) {
-            if (valid && eL <= ELBOW_DOWN && eR <= ELBOW_DOWN) isDown = true
-        } else {
-            if (valid && eL >= ELBOW_UP && eR >= ELBOW_UP) {
-                count++
-                isDown = false
+        if (!postureValidation.isValid) {
+            isInvalidCycle = true
+            lastValidationResult = postureValidation
+        }
+
+        // determine state
+        val newState = determineState(eL, eR)
+
+        val oldIdx = stateOrder.indexOf(currentState)
+        val newIdx = stateOrder.indexOf(newState)
+
+        // Initial Start
+        if (currentState == MovementState.DOWN && newState == MovementState.NEAR_DOWN && !startedFromDown) {
+            startedFromDown = true
+            lastValidationResult = ValidationResult(true, "")
+        }
+
+        // Up
+        if (!reachedUp && newIdx > oldIdx) {
+            isGoingUp = true
+            isGoingDown = false
+        }
+
+        // Reach Up
+        if (newState == MovementState.UP) {
+            reachedUp = true
+            isGoingUp = false
+        }
+
+        // Down
+        if (reachedUp && newIdx < oldIdx) {
+            isGoingDown = true
+            isGoingUp = false
+        }
+
+        // Go Up but go Down again before UP
+        if (
+            isGoingUp &&
+            newIdx < oldIdx &&
+            currentState != MovementState.UP
+        ) {
+            isInvalidCycle = true
+            lastValidationResult =
+                ValidationResult(false, "Tidak mencapai posisi UP")
+            isGoingUp = false
+        }
+
+        // Go Down but go Up again before going Down
+        if (
+            isGoingDown &&
+            newIdx > oldIdx &&
+            currentState != MovementState.DOWN
+        ) {
+            isInvalidCycle = true
+            lastValidationResult =
+                ValidationResult(false, "Tidak mencapai posisi DOWN")
+            isGoingDown = false
+        }
+
+        // Repetition Counting
+        if (
+            currentState != MovementState.DOWN &&
+            newState == MovementState.DOWN
+        ) {
+            when {
+                !isInvalidCycle && reachedUp && startedFromDown -> {
+                    count++
+                    lastValidationResult = ValidationResult(true, "")
+                }
+
+                !startedFromDown -> {
+                    lastValidationResult =
+                        ValidationResult(false, "Gerakan tidak dimulai dari kondisi DOWN")
+                }
+
+                !reachedUp -> {
+                    lastValidationResult =
+                        ValidationResult(false, "Gerakan tidak mencapai kondisi UP")
+                }
             }
+
+            // Reset cycle
+            isInvalidCycle = false
+            reachedUp = false
+            isGoingUp = false
+            isGoingDown = false
+            startedFromDown = false
+        }
+
+        currentState = newState
+        return CounterResult(count, currentState, lastValidationResult)
+    }
+
+    private fun determineState(eL: Float, eR: Float): MovementState {
+        return when {
+            eL <= ELBOW_FULL_DOWN && eR <= ELBOW_FULL_DOWN -> MovementState.DOWN
+            eL <= ELBOW_NEAR_DOWN && eR <= ELBOW_NEAR_DOWN -> MovementState.NEAR_DOWN
+            eL <= ELBOW_CENTRE && eR <= ELBOW_CENTRE -> MovementState.CENTRE
+            eL <= ELBOW_NEAR_UP && eR <= ELBOW_NEAR_UP -> MovementState.NEAR_UP
+            eL >= ELBOW_FULL_UP && eR >= ELBOW_FULL_UP -> MovementState.UP
+            else -> currentState
+        }
+    }
+
+    private fun validatePosture( hL: Float, hR: Float, kL: Float, kR: Float): ValidationResult {
+        val messages = mutableListOf<String>()
+
+        if (hL < HIP_MIN_VALID || hR < HIP_MIN_VALID)
+            messages.add("Pinggul terlalu ditekuk")
+
+        if (kL < KNEE_MIN_VALID || kR < KNEE_MIN_VALID)
+            messages.add("Lutut terlalu ditekuk")
+
+        return if (messages.isEmpty()) {
+            ValidationResult(true, "")
+        } else {
+            ValidationResult(false, messages.joinToString(", "))
         }
     }
 }
@@ -91,36 +248,175 @@ class SitUpCounter : IRepetitionCounter {
     override var count: Int = 0
         private set
 
-    private var isUp = false
+    override var currentState: MovementState = MovementState.DOWN
+        private set
 
-    private val HIP_UP = 60f
-    private val HIP_DOWN = 120f
-    private val KNEE_TARGET = 100f
+    override var lastValidationResult: ValidationResult =
+        ValidationResult(true, "")
+        private set
+
+    private var isInvalidCycle = false
+    private var reachedUp = false
+    private var startedFromDown = false
+
+    private var isGoingUp = false
+    private var isGoingDown = false
+
+    private val HIP_FULL_DOWN = 120f
+    private val HIP_NEAR_DOWN = 100f
+    private val HIP_CENTRE = 80f
+    private val HIP_NEAR_UP = 60f
+    private val HIP_FULL_UP = 40f
+
+    private val KNEE_MIN_VALID = 35f
+    private val KNEE_MAX_VALID = 100f
+
+    private val stateOrder = listOf(
+        MovementState.DOWN,
+        MovementState.NEAR_DOWN,
+        MovementState.CENTRE,
+        MovementState.NEAR_UP,
+        MovementState.UP
+    )
 
     override fun resetAll() {
         count = 0
-        isUp = false
+        resetStateOnly()
     }
 
     override fun resetStateOnly() {
-        isUp = false
+        currentState = MovementState.DOWN
+        lastValidationResult = ValidationResult(true, "")
+        isInvalidCycle = false
+        reachedUp = false
+        isGoingUp = false
+        startedFromDown = false
+        isGoingDown = false
     }
 
-    override fun update(angles13: FloatArray) {
+    override fun update(angles13: FloatArray): CounterResult {
         val hL = angles13[AngleIdx.LEFT_HIP]
         val hR = angles13[AngleIdx.RIGHT_HIP]
         val kL = angles13[AngleIdx.LEFT_KNEE]
         val kR = angles13[AngleIdx.RIGHT_KNEE]
 
-        val validKnee = (kL <= KNEE_TARGET && kR <= KNEE_TARGET)
+        // Posture Validation
+        val postureValidation = validatePosture(kL, kR)
+        if (!postureValidation.isValid) {
+            isInvalidCycle = true
+            lastValidationResult = postureValidation
+        }
 
-        if (!isUp) {
-            if (validKnee && hL <= HIP_UP && hR <= HIP_UP) isUp = true
-        } else {
-            if (validKnee && hL >= HIP_DOWN && hR >= HIP_DOWN) {
-                count++
-                isUp = false
+        // State Determination
+        val newState = determineState(hL, hR)
+
+        val oldIdx = stateOrder.indexOf(currentState)
+        val newIdx = stateOrder.indexOf(newState)
+
+        // Initial Start
+        if (currentState == MovementState.DOWN && newState == MovementState.NEAR_DOWN && !startedFromDown) {
+            startedFromDown = true
+            lastValidationResult = ValidationResult(true, "")
+        }
+
+        // Up
+        if (!reachedUp && newIdx > oldIdx) {
+            isGoingUp = true
+            isGoingDown = false
+        }
+
+        // Reach Up
+        if (newState == MovementState.UP) {
+            reachedUp = true
+            isGoingUp = false
+        }
+
+        // Down
+        if (reachedUp && newIdx < oldIdx) {
+            isGoingDown = true
+            isGoingUp = false
+        }
+
+        // Go Up but go Down again before UP
+        if (
+            isGoingUp &&
+            newIdx < oldIdx &&
+            currentState != MovementState.UP
+        ) {
+            isInvalidCycle = true
+            lastValidationResult =
+                ValidationResult(false, "Gerakan tidak mencapai kondisi UP")
+            isGoingUp = false
+        }
+
+        // Go down but go up again before going Down
+        if (
+            isGoingDown &&
+            newIdx > oldIdx &&
+            currentState != MovementState.DOWN
+        ) {
+            isInvalidCycle = true
+            lastValidationResult =
+                ValidationResult(false, "Gerakan tidak mencapai kondisi DOWN")
+            isGoingDown = false
+        }
+
+        // Repetition Counting
+        if (currentState != MovementState.DOWN &&
+            newState == MovementState.DOWN
+        ) {
+            when {
+                !isInvalidCycle && reachedUp && startedFromDown -> {
+                    count++
+                }
+
+                !startedFromDown -> {
+                    lastValidationResult =
+                        ValidationResult(false, "Gerakan tidak dimulai dari kondisi DOWN")
+                }
+
+                !reachedUp -> {
+                    lastValidationResult =
+                        ValidationResult(false, "Gerakan tidak mencapai kondisi UP")
+                }
             }
+
+            // Reset siklus
+            isInvalidCycle = false
+            reachedUp = false
+            isGoingUp = false
+            isGoingDown = false
+            startedFromDown = false
+        }
+
+        currentState = newState
+        return CounterResult(count, currentState, lastValidationResult)
+    }
+
+    private fun determineState(hL: Float, hR: Float): MovementState {
+        return when {
+            hL >= HIP_FULL_DOWN && hR >= HIP_FULL_DOWN -> MovementState.DOWN
+            hL >= HIP_NEAR_DOWN && hR >= HIP_NEAR_DOWN -> MovementState.NEAR_DOWN
+            hL >= HIP_CENTRE && hR >= HIP_CENTRE -> MovementState.CENTRE
+            hL >= HIP_NEAR_UP && hR >= HIP_NEAR_UP -> MovementState.NEAR_UP
+            hL <= HIP_FULL_UP && hR <= HIP_FULL_UP -> MovementState.UP
+            else -> currentState
+        }
+    }
+
+    private fun validatePosture(kL: Float, kR: Float): ValidationResult {
+        val messages = mutableListOf<String>()
+
+        if (kL < KNEE_MIN_VALID || kR < KNEE_MIN_VALID)
+            messages.add("Lutut terlalu ditekuk")
+
+        if (kL > KNEE_MAX_VALID || kR > KNEE_MAX_VALID)
+            messages.add("Lutut terlalu dibuka")
+
+        return if (messages.isEmpty()) {
+            ValidationResult(true, "")
+        } else {
+            ValidationResult(false, messages.joinToString(", "))
         }
     }
 }
@@ -129,87 +425,336 @@ class PullUpCounter : IRepetitionCounter {
     override var count: Int = 0
         private set
 
-    private var isUp = false
-    private val ELBOW_UP = 55f
-    private val ELBOW_DOWN = 160f
-    private val KNEE_VALID = 160f
+    override var currentState: MovementState = MovementState.DOWN
+        private set
+
+    override var lastValidationResult: ValidationResult =
+        ValidationResult(true, "")
+        private set
+
+    private var isInvalidCycle = false
+    private var reachedUp = false
+    private var startedFromDown = false
+
+    private var isGoingUp = false
+    private var isGoingDown = false
+
+    private val ELBOW_FULL_DOWN = 160f
+    private val ELBOW_NEAR_DOWN = 130f
+    private val ELBOW_CENTRE = 105f
+    private val ELBOW_NEAR_UP = 80f
+    private val ELBOW_FULL_UP = 50f
+
+    private val KNEE_MIN_VALID = 120f
+    private val HIP_MIN_VALID = 120f
+
+    private val stateOrder = listOf(
+        MovementState.DOWN,
+        MovementState.NEAR_DOWN,
+        MovementState.CENTRE,
+        MovementState.NEAR_UP,
+        MovementState.UP
+    )
 
     override fun resetAll() {
         count = 0
-        isUp = false
+        resetStateOnly()
     }
 
     override fun resetStateOnly() {
-        isUp = false
+        currentState = MovementState.DOWN
+        lastValidationResult = ValidationResult(true, "")
+        isInvalidCycle = false
+        reachedUp = false
+        isGoingUp = false
+        isGoingDown = false
+        startedFromDown = false
     }
 
-    override fun update(angles13: FloatArray) {
+    override fun update(angles13: FloatArray): CounterResult {
         val eL = angles13[AngleIdx.LEFT_ELBOW]
         val eR = angles13[AngleIdx.RIGHT_ELBOW]
         val kL = angles13[AngleIdx.LEFT_KNEE]
         val kR = angles13[AngleIdx.RIGHT_KNEE]
+        val hL = angles13[AngleIdx.LEFT_HIP]
+        val hR = angles13[AngleIdx.RIGHT_HIP]
 
-        val valid = (kL >= KNEE_VALID && kR >= KNEE_VALID)
+        // Posture Validation
+        val postureValidation = validatePosture(kL, kR, hL, hR)
 
-        if (!isUp) {
-            if (valid && eL <= ELBOW_UP && eR <= ELBOW_UP) isUp = true
-        } else {
-            if (valid && eL >= ELBOW_DOWN && eR >= ELBOW_DOWN) {
-                count++
-                isUp = false
+        if (!postureValidation.isValid) {
+            isInvalidCycle = true
+            lastValidationResult = postureValidation
+        }
+
+        // Determine state
+        val newState = determineState(eL, eR)
+
+        val oldIdx = stateOrder.indexOf(currentState)
+        val newIdx = stateOrder.indexOf(newState)
+
+        // Initial Start
+        if (currentState == MovementState.DOWN && newState == MovementState.NEAR_DOWN && !startedFromDown) {
+            startedFromDown = true
+            lastValidationResult = ValidationResult(true, "")
+        }
+
+        // Up
+        if (!reachedUp && newIdx > oldIdx) {
+            isGoingUp = true
+            isGoingDown = false
+        }
+
+        // Reach Up
+        if (newState == MovementState.UP) {
+            reachedUp = true
+            isGoingUp = false
+        }
+
+        // Down
+        if (reachedUp && newIdx < oldIdx) {
+            isGoingDown = true
+            isGoingUp = false
+        }
+
+        // Go Up but Go Down again before UP
+        if (
+            isGoingUp &&
+            newIdx < oldIdx &&
+            currentState != MovementState.UP
+        ) {
+            isInvalidCycle = true
+            lastValidationResult =
+                ValidationResult(false, "Tidak mencapai posisi UP")
+            isGoingUp = false
+        }
+
+        // Go Down but Go Up again before DOWN
+        if (
+            isGoingDown &&
+            newIdx > oldIdx &&
+            currentState != MovementState.DOWN
+        ) {
+            isInvalidCycle = true
+            lastValidationResult =
+                ValidationResult(false, "Tidak mencapai posisi DOWN")
+            isGoingDown = false
+        }
+
+        // Repetition Count
+        if ( currentState != MovementState.DOWN && newState == MovementState.DOWN) {
+            when {
+                !isInvalidCycle && reachedUp && startedFromDown -> {
+                    count++
+                    lastValidationResult = ValidationResult(true, "")
+                }
+
+                !startedFromDown -> {
+                    lastValidationResult =
+                        ValidationResult(false, "Gerakan tidak dimulai dari kondisi DOWN")
+                }
+
+                !reachedUp -> {
+                    lastValidationResult =
+                        ValidationResult(false, "Gerakan tidak mencapai kondisi UP")
+                }
             }
+
+            // Reset siklus
+            isInvalidCycle = false
+            reachedUp = false
+            isGoingUp = false
+            isGoingDown = false
+            startedFromDown = false
+        }
+
+        currentState = newState
+        return CounterResult(count, currentState, lastValidationResult)
+    }
+
+    private fun determineState(eL: Float, eR: Float): MovementState {
+        return when {
+            eL >= ELBOW_FULL_DOWN && eR >= ELBOW_FULL_DOWN -> MovementState.DOWN
+            eL >= ELBOW_NEAR_DOWN && eR >= ELBOW_NEAR_DOWN -> MovementState.NEAR_DOWN
+            eL >= ELBOW_CENTRE && eR >= ELBOW_CENTRE -> MovementState.CENTRE
+            eL >= ELBOW_NEAR_UP && eR >= ELBOW_NEAR_UP -> MovementState.NEAR_UP
+            eL <= ELBOW_FULL_UP && eR <= ELBOW_FULL_UP -> MovementState.UP
+            else -> currentState
+        }
+    }
+
+    private fun validatePosture( kL: Float, kR: Float, hL: Float, hR: Float ): ValidationResult {
+        val messages = mutableListOf<String>()
+
+        if (kL < KNEE_MIN_VALID || kR < KNEE_MIN_VALID)
+            messages.add("Lutut tidak lurus")
+
+        if (hL < HIP_MIN_VALID || hR < HIP_MIN_VALID)
+            messages.add("Pinggul tidak lurus")
+
+        return if (messages.isEmpty()) {
+            ValidationResult(true, "")
+        } else {
+            ValidationResult(false, messages.joinToString(", "))
         }
     }
 }
 
 class LungesCounter : IRepetitionCounter {
+
     override var count: Int = 0
         private set
 
-    private var inDeep = false
-    private var expected = Side.LEFT
+    override var currentState: MovementState = MovementState.UP
+        private set
 
-    private val KNEE_UP = 145f
-    private val KNEE_DOWN_FRONT = 100f
-    private val KNEE_DOWN_BACK = 120f
-    private val TORSO_MAX = 15f
+    override var lastValidationResult: ValidationResult =
+        ValidationResult(true, "")
+        private set
+
+    private var isInvalidCycle = false
+    private var reachedDown = false
+    private var startedFromUp = false
+
+    private var isGoingDown = false
+    private var isGoingUp = false
+
+    // Knee thresholds
+    private val KNEE_FULL_UP = 160f
+    private val KNEE_NEAR_UP = 145f
+    private val KNEE_CENTRE = 130f
+    private val KNEE_NEAR_DOWN = 115f
+    private val KNEE_FULL_DOWN = 100f
+
+    private val TORSO_MAX_DEVIATION = 30f
+
+    private val stateOrder = listOf(
+        MovementState.DOWN,
+        MovementState.NEAR_DOWN,
+        MovementState.CENTRE,
+        MovementState.NEAR_UP,
+        MovementState.UP
+    )
 
     override fun resetAll() {
         count = 0
-        inDeep = false
-        expected = Side.LEFT
+        resetStateOnly()
     }
 
     override fun resetStateOnly() {
-        inDeep = false
+        currentState = MovementState.UP
+        lastValidationResult = ValidationResult(true, "")
+        isInvalidCycle = false
+        reachedDown = false
+        startedFromUp = false
+        isGoingDown = false
+        isGoingUp = false
     }
 
-    override fun update(angles13: FloatArray) {
+    override fun update(angles13: FloatArray): CounterResult {
+
         val kL = angles13[AngleIdx.LEFT_KNEE]
         val kR = angles13[AngleIdx.RIGHT_KNEE]
         val torso = angles13[AngleIdx.TORSO]
 
-        if (abs(torso) > TORSO_MAX) return
+        // Posture validation
+        val postureValidation = validatePosture(torso)
+        if (!postureValidation.isValid) {
+            isInvalidCycle = true
+            lastValidationResult = postureValidation
+        }
 
-        val stand = (kL >= KNEE_UP && kR >= KNEE_UP)
+        // State determination
+        val newState = determineState(kL, kR)
 
-        val frontSideDetected = if (kL < kR) Side.LEFT else Side.RIGHT
+        val oldIdx = stateOrder.indexOf(currentState)
+        val newIdx = stateOrder.indexOf(newState)
 
-        val frontKnee = if (expected == Side.LEFT) kL else kR
-        val backKnee  = if (expected == Side.LEFT) kR else kL
+        // Initial Start
+        if (
+            currentState == MovementState.UP &&
+            newState == MovementState.NEAR_UP &&
+            !startedFromUp
+        ) {
+            startedFromUp = true
+            lastValidationResult = ValidationResult(true, "")
+        }
 
-        val deep = (frontKnee <= KNEE_DOWN_FRONT) &&
-                (backKnee  <= KNEE_DOWN_BACK) &&
-                (frontSideDetected == expected)
+        // Going down
+        if (!reachedDown && newIdx < oldIdx) {
+            isGoingDown = true
+            isGoingUp = false
+        }
 
-        if (!inDeep) {
-            if (deep) inDeep = true
-        } else {
-            if (stand) {
-                count++
-                inDeep = false
-                expected = if (expected == Side.LEFT) Side.RIGHT else Side.LEFT
+        // Reach DOWN
+        if (newState == MovementState.DOWN) {
+            reachedDown = true
+            isGoingDown = false
+        }
+
+        // Going up after DOWN
+        if (reachedDown && newIdx > oldIdx) {
+            isGoingUp = true
+            isGoingDown = false
+        }
+
+        // Down → Up before DOWN
+        if (isGoingDown && newIdx > oldIdx) {
+            isInvalidCycle = true
+            lastValidationResult =
+                ValidationResult(false, "Gerakan tidak mencapai posisi DOWN")
+            isGoingDown = false
+        }
+
+        // Up → Down before UP
+        if (isGoingUp && newIdx < oldIdx && currentState != MovementState.UP) {
+            isInvalidCycle = true
+            lastValidationResult =
+                ValidationResult(false, "Gerakan tidak mencapai posisi UP")
+            isGoingUp = false
+        }
+
+        // Count repetition when back to UP
+        if (currentState != MovementState.UP && newState == MovementState.UP) {
+            when {
+                isInvalidCycle -> lastValidationResult = ValidationResult(false, lastValidationResult.message)
+                !startedFromUp -> lastValidationResult = ValidationResult(false, "Gerakan tidak dimulai dari posisi UP")
+                !reachedDown -> lastValidationResult = ValidationResult(false, "Gerakan tidak mencapai posisi DOWN")
+
+                else -> {
+                    count++
+                    lastValidationResult = ValidationResult(true, "")
+                }
             }
+
+            // reset cycle
+            isInvalidCycle = false
+            reachedDown = false
+            startedFromUp = false
+            isGoingDown = false
+            isGoingUp = false
+        }
+
+        currentState = newState
+        return CounterResult(count, currentState, lastValidationResult)
+    }
+
+    private fun determineState(kL: Float, kR: Float): MovementState {
+        return when {
+            kL >= KNEE_FULL_UP && kR >= KNEE_FULL_UP -> MovementState.UP
+            kL >= KNEE_NEAR_UP && kR >= KNEE_NEAR_UP -> MovementState.NEAR_UP
+            kL >= KNEE_CENTRE && kR >= KNEE_CENTRE -> MovementState.CENTRE
+            kL >= KNEE_NEAR_DOWN && kR >= KNEE_NEAR_DOWN -> MovementState.NEAR_DOWN
+            kL <= KNEE_FULL_DOWN && kR <= KNEE_FULL_DOWN -> MovementState.DOWN
+            else -> currentState
+        }
+    }
+
+    private fun validatePosture(torso: Float): ValidationResult {
+        return if (kotlin.math.abs(torso) > TORSO_MAX_DEVIATION) {
+            ValidationResult(false, "Tubuh terlalu miring")
+        } else {
+            ValidationResult(true, "")
         }
     }
 }

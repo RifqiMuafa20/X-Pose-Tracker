@@ -8,7 +8,7 @@ import com.rifqidev.x_posetracker.repository.AppRepository
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
 
 class CameraViewModel(mApplication: Application) : ViewModel() {
-    private var _delegate: Int = PoseLandmarkerHelper.DELEGATE_GPU
+    private var _delegate: Int = PoseLandmarkerHelper.DELEGATE_CPU
     private var _minPoseDetectionConfidence: Float =
         PoseLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE
     private var _minPoseTrackingConfidence: Float = PoseLandmarkerHelper
