@@ -107,13 +107,13 @@ class PushUpCounter : IRepetitionCounter {
     }
 
     override fun resetStateOnly() {
+        isInitialized = false
         lastValidationResult = ValidationResult(true, "")
         isInvalidCycle = false
         reachedUp = false
         isGoingUp = false
         isGoingDown = false
         startedFromDown = false
-        isInitialized = false
         minStateIdx = Int.MAX_VALUE
         maxStateIdx = -1
     }
@@ -287,6 +287,7 @@ class SitUpCounter : IRepetitionCounter {
     }
 
     override fun resetStateOnly() {
+        currentState = MovementState.DOWN
         lastValidationResult = ValidationResult(true, "")
         isInvalidCycle = false
         reachedUp = false
@@ -371,7 +372,6 @@ class SitUpCounter : IRepetitionCounter {
             when {
                 !isInvalidCycle && reachedUp && startedFromDown -> {
                     count++
-                    lastValidationResult = ValidationResult(true, "")
                 }
 
                 !startedFromDown -> {
@@ -465,6 +465,7 @@ class PullUpCounter : IRepetitionCounter {
     }
 
     override fun resetStateOnly() {
+        currentState = MovementState.DOWN
         lastValidationResult = ValidationResult(true, "")
         isInvalidCycle = false
         reachedUp = false
@@ -701,23 +702,23 @@ class LungesCounter : IRepetitionCounter {
             reachedDown = true
             isGoingDown = false
             isGoingUp = false
+            maxStateIdx = newIdx
         }
 
         // Going up
         if (reachedDown && newIdx > oldIdx) {
             isGoingUp = true
             isGoingDown = false
-            maxStateIdx = newIdx
         }
 
-        // Go Down but Go Up again before DOWN
+        // Down → Up before DOWN
         if (isGoingDown && newIdx-1 > minStateIdx) {
             isInvalidCycle = true
             lastValidationResult = ValidationResult(false, "Gerakan tidak mencapai posisi DOWN")
             isGoingDown = false
         }
 
-        // Go Up but Go Down again before UP
+        // Up → Down before UP
         if (isGoingUp && newIdx+1 < maxStateIdx) {
             isInvalidCycle = true
             lastValidationResult = ValidationResult(false, "Gerakan tidak mencapai posisi UP")
