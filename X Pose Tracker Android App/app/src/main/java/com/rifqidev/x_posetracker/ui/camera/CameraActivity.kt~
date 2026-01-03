@@ -594,17 +594,12 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
         count = repEngine.getCount(prediction)
 
-        binding.repetition.text = count.toString()
-
-        binding.pushUpRep.text = repEngine.getCount("Push-Up").toString()
-        binding.sitUpRep.text = repEngine.getCount("Sit-Up").toString()
-        binding.pullUpRep.text = repEngine.getCount("Pull-Up").toString()
-        binding.lungesRep.text = repEngine.getCount("Lunges").toString()
-
         if (count > (lastCountMap[prediction] ?: 0)) {
             speak("$count")
             lastCountMap[prediction] = count
         }
+
+        binding.repetition.text = count.toString()
 
         if(prediction == autoLabel || prediction == "Unknown") {
             status = true
@@ -641,6 +636,11 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 invalidSpokenInCycle = true
             }
         }
+
+        binding.pushUpRep.text = repEngine.getCount("Push-Up").toString()
+        binding.sitUpRep.text = repEngine.getCount("Sit-Up").toString()
+        binding.pullUpRep.text = repEngine.getCount("Pull-Up").toString()
+        binding.lungesRep.text = repEngine.getCount("Lunges").toString()
     }
 
     private fun showInvalidPopup(message: String) {

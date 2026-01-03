@@ -5,6 +5,7 @@
     android:paddingHorizontal="10dp"
     android:paddingVertical="6dp"
     android:textSize="12sp"
+    android:fontFamily="@font/poppins_semi_bold"
     android:textColor="@color/white"
     android:background="@drawable/bg_invalid_popup"
-    android:maxLines="2" />
+    android:maxLines="3" />
