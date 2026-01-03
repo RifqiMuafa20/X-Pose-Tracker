@@ -601,8 +601,13 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
         binding.repetition.text = count.toString()
 
-        status = repEngine.getLastValidation(prediction)?.isValid == true
-        message = repEngine.getLastValidation(prediction)?.message.orEmpty()
+        if(prediction == autoLabel || prediction == "Unknown") {
+            status = true
+            message = ""
+        } else {
+            status = repEngine.getLastValidation(prediction)?.isValid == true
+            message = repEngine.getLastValidation(prediction)?.message.orEmpty()
+        }
 
         if (status) {
             binding.invalidStatus.text = "Valid"
@@ -682,7 +687,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
     private fun playErrorSound() {
         if (spLoaded) {
-            sp.play(soundId, 1f, 1f, 0, 0, 1f)
+            sp.play(soundId, 1f, 1f, 0, 0, 2f)
         }
     }
 
