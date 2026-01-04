@@ -100,8 +100,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var message = ""
 
     private val activeMessages = mutableSetOf<String>()
-    private var lastStatusValid = true
-
     private var lastCountMap = mutableMapOf<String, Int>()
     private var lastPrediction: String? = null
     private var invalidSpokenInCycle = false
@@ -620,20 +618,13 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 ContextCompat.getColor(this, R.color.lime_green)
             )
 
-            if (!lastStatusValid) {
-                clearInvalidMessages()
-                invalidSpokenInCycle = false
-            }
-
-            lastStatusValid = true
-
+            invalidSpokenInCycle = false
         } else {
             binding.invalidStatus.text = "Invalid"
             binding.invalidStatus.setTextColor(
                 ContextCompat.getColor(this, R.color.red_accent)
             )
 
-            lastStatusValid = false
             showInvalidPopup(message)
 
             if (!invalidSpokenInCycle) {
@@ -668,12 +659,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             activeMessages.remove(message)
             container.removeView(textView)
         }, 1000)
-    }
-
-    private fun clearInvalidMessages() {
-        val container = binding.invalidMessageContainer
-        container.removeAllViews()
-        activeMessages.clear()
     }
 
     private fun speak(text: String) {
