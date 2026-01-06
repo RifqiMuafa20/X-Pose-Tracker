@@ -73,6 +73,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var recordType: Int = 0
     private var memberId: String = ""
     private var timer: CountDownTimer? = null
+    private var duration = 0L
     private var start: Boolean = false
     private var userProfile: UserProfileEntity? = null
 
@@ -177,7 +178,8 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
         binding.startCamera.setOnClickListener {
             binding.startCamera.visibility = View.GONE
-            binding.startText.visibility = View.GONE
+            binding.stopCamera.visibility = View.VISIBLE
+            binding.startText.text = "Stop"
 
             start = true
             prediction = ""
@@ -190,6 +192,10 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 }
                 setUpCamera()
             }
+        }
+
+        binding.stopCamera.setOnClickListener {
+            showConfirmationDialog(R.string.stop_record, 1)
         }
 
         binding.switchCamera.setOnClickListener {
@@ -338,6 +344,8 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
             if (start) onPoseFrame(poseLandmarks)
             else binding.type.text = activityType ?: "Unknown"
+
+            binding.inferenceTime.text = "${resultBundle.inferenceTime} ms"
         }
     }
 
@@ -409,6 +417,9 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         timer = object : CountDownTimer(durationInSeconds * 1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val secondsRemaining = millisUntilFinished / 1000
+
+                duration = durationInSeconds - secondsRemaining
+
                 binding.duration.text = formatTime(secondsRemaining)
 
                 elapsedSeconds++
@@ -422,69 +433,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             override fun onFinish() {
                 binding.duration.text = "00:00"
 
-                if (!midPhotoCaptured && recordType == 0) {
-                    capturePreviewFrame()
-                }
-
-                val intent = Intent(
-                    this@CameraActivity,
-                    ResultActivity::class.java
-                )
-
-                val aktivitasSesi = listOf(
-                    AktivitasLatihan(
-                        "Push-Up",
-                        durasiMenit = estimateDuration(
-                            "Push-Up",
-                            repEngine.getCount("Push-Up")
-                        ),
-                        repetisi = repEngine.getCount("Push-Up")
-                    ),
-                    AktivitasLatihan(
-                        "Sit-Up",
-                        durasiMenit = estimateDuration(
-                            "Sit-Up",
-                            repEngine.getCount("Sit-Up")
-                        ),
-                        repetisi = repEngine.getCount("Sit-Up")
-                    ),
-                    AktivitasLatihan(
-                        "Pull-Up",
-                        durasiMenit = estimateDuration(
-                            "Pull-Up",
-                            repEngine.getCount("Pull-Up")
-                        ),
-                        repetisi = repEngine.getCount("Pull-Up")
-                    ),
-                    AktivitasLatihan(
-                        "Lunges",
-                        durasiMenit = estimateDuration(
-                            "Lunges",
-                            repEngine.getCount("Lunges")
-                        ),
-                        repetisi = repEngine.getCount("Lunges")
-                    ),
-                )
-
-                val userId = userProfile?.idUser
-                val beratBadan = userProfile?.userWeight?.toFloat()
-                val totalKalori = calculateTotalCalories(beratBadan, aktivitasSesi)
-
-                intent.putExtra("user_id", userId)
-                intent.putExtra("date", DateHelper.getCurrentDate())
-                intent.putExtra("time", DateHelper.getCurrentTime())
-                intent.putExtra("duration", durationInSeconds.toInt())
-                intent.putExtra("calorie", totalKalori.toDouble())
-                intent.putExtra("push_up", repEngine.getCount("Push-Up"))
-                intent.putExtra("sit_up", repEngine.getCount("Sit-Up"))
-                intent.putExtra("pull_up", repEngine.getCount("Pull-Up"))
-                intent.putExtra("lunges", repEngine.getCount("Lunges"))
-                intent.putExtra("record_type", recordType)
-                intent.putExtra("member_id", memberId)
-                intent.putExtra("record_photo_bytes", midRecordPhotoBytes)
-
-                startActivity(intent)
-                finish()
+                finishActivity()
             }
         }
         timer?.start()
@@ -532,12 +481,82 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         midRecordPhotoBytes = stream.toByteArray()
     }
 
+    private fun finishActivity() {
+        if (!midPhotoCaptured && recordType == 0) {
+            capturePreviewFrame()
+        }
+
+        val intent = Intent(
+            this@CameraActivity,
+            ResultActivity::class.java
+        )
+
+        val aktivitasSesi = listOf(
+            AktivitasLatihan(
+                "Push-Up",
+                durasiMenit = estimateDuration(
+                    "Push-Up",
+                    repEngine.getCount("Push-Up")
+                ),
+                repetisi = repEngine.getCount("Push-Up")
+            ),
+            AktivitasLatihan(
+                "Sit-Up",
+                durasiMenit = estimateDuration(
+                    "Sit-Up",
+                    repEngine.getCount("Sit-Up")
+                ),
+                repetisi = repEngine.getCount("Sit-Up")
+            ),
+            AktivitasLatihan(
+                "Pull-Up",
+                durasiMenit = estimateDuration(
+                    "Pull-Up",
+                    repEngine.getCount("Pull-Up")
+                ),
+                repetisi = repEngine.getCount("Pull-Up")
+            ),
+            AktivitasLatihan(
+                "Lunges",
+                durasiMenit = estimateDuration(
+                    "Lunges",
+                    repEngine.getCount("Lunges")
+                ),
+                repetisi = repEngine.getCount("Lunges")
+            ),
+        )
+
+        val userId = userProfile?.idUser
+        val beratBadan = userProfile?.userWeight?.toFloat()
+        val totalKalori = calculateTotalCalories(beratBadan, aktivitasSesi)
+
+        intent.putExtra("user_id", userId)
+        intent.putExtra("date", DateHelper.getCurrentDate())
+        intent.putExtra("time", DateHelper.getCurrentTime())
+        intent.putExtra("duration", duration.toInt())
+        intent.putExtra("calorie", totalKalori.toDouble())
+        intent.putExtra("push_up", repEngine.getCount("Push-Up"))
+        intent.putExtra("sit_up", repEngine.getCount("Sit-Up"))
+        intent.putExtra("pull_up", repEngine.getCount("Pull-Up"))
+        intent.putExtra("lunges", repEngine.getCount("Lunges"))
+        intent.putExtra("record_type", recordType)
+        intent.putExtra("member_id", memberId)
+        intent.putExtra("record_photo_bytes", midRecordPhotoBytes)
+
+        startActivity(intent)
+        finish()
+    }
+
     private fun showConfirmationDialog(message: Int, type: Int) {
         val builder = AlertDialog.Builder(this)
         builder.setMessage(message)
         builder.setPositiveButton(R.string.yes) { _, _ ->
             if (type == 0) {
                 finish()
+            }
+
+            else if (type == 1) {
+                finishActivity()
             }
         }
         builder.setNegativeButton(R.string.no) { dialog, _ ->
