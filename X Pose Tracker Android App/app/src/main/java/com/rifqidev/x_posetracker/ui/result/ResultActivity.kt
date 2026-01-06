@@ -49,6 +49,16 @@ class ResultActivity : AppCompatActivity() {
         val pullUp = intent.getIntExtra("pull_up", 0)
         val lunges = intent.getIntExtra("lunges", 0)
         val memberId = intent.getStringExtra("member_id") ?: ""
+        val pushUpSeq = intent.getIntExtra("push_up_seq", 0)
+        val pullUpSeq = intent.getIntExtra("pull_up_seq", 0)
+        val sitUpSeq = intent.getIntExtra("sit_up_seq", 0)
+        val lungesSeq = intent.getIntExtra("lunges_seq", 0)
+
+        binding.pushUpSeq.text = getString(R.string.push_up_seq, pushUpSeq)
+        binding.pullUpSeq.text = getString(R.string.pull_up_seq, pullUpSeq)
+        binding.sitUpSeq.text = getString(R.string.sit_up_seq, sitUpSeq)
+        binding.lungesSeq.text = getString(R.string.lunges_seq, lungesSeq)
+
         recordId = intent.getStringExtra("record_id") ?: ""
         recordType = intent.getIntExtra("record_type", 0)
         val recordPhotoBytes: ByteArray? = intent.getByteArrayExtra("record_photo_bytes")
@@ -59,6 +69,10 @@ class ResultActivity : AppCompatActivity() {
         binding.calorie.text = String.format("%.2f kkal", calorie)
         binding.date.text = date?.let { DateHelper.formatDateToIndo(it) } ?: "-"
         binding.time.text = "$duration detik"
+
+        if (recordPhotoBytes != null) {
+            binding.frameImage.setImageBitmap(recordPhotoBytes.toBitmap())
+        }
 
         if(recordType == 2){
             binding.continueButton.visibility = View.INVISIBLE
@@ -102,12 +116,6 @@ class ResultActivity : AppCompatActivity() {
                 viewModel.insertMemberRecord(memberRecord)
                 showToast(getString(R.string.user_record_added))
                 finish()
-            }
-        }
-
-        if(recordType == 0 || recordType == 2){
-            if (recordPhotoBytes != null) {
-                binding.frameImage.setImageBitmap(recordPhotoBytes.toBitmap())
             }
         }
 

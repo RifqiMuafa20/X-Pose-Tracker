@@ -47,6 +47,7 @@ import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
+import com.rifqidev.x_posetracker.utils.PredictionCountPerClass
 import com.rifqidev.x_posetracker.utils.calculateTotalCalories
 import com.rifqidev.x_posetracker.utils.createDefaultRepetitionEngine
 import com.rifqidev.x_posetracker.utils.estimateDuration
@@ -113,6 +114,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var spLoaded = false
 
     private val repEngine = createDefaultRepetitionEngine()
+    private val predictionCounter = PredictionCountPerClass()
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -530,6 +532,11 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         val beratBadan = userProfile?.userWeight?.toFloat()
         val totalKalori = calculateTotalCalories(beratBadan, aktivitasSesi)
 
+        intent.putExtra("push_up_seq", predictionCounter.getCount("Push-Up"))
+        intent.putExtra("pull_up_seq", predictionCounter.getCount("Pull-Up"))
+        intent.putExtra("sit_up_seq", predictionCounter.getCount("Sit-Up"))
+        intent.putExtra("lunges_seq", predictionCounter.getCount("Lunges"))
+
         intent.putExtra("user_id", userId)
         intent.putExtra("date", DateHelper.getCurrentDate())
         intent.putExtra("time", DateHelper.getCurrentTime())
@@ -595,6 +602,9 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             clsTick++
             if (clsTick % CLS_EVERY_N_FRAMES == 0) {
                 prediction = poseClassifier.runModel(windowPose, windowIdx)
+
+                predictionCounter.addPrediction(prediction)
+
                 binding.type.text = prediction
             }
         } else {
