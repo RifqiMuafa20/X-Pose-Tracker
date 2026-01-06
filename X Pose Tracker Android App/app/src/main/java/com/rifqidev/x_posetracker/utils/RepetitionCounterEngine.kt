@@ -149,8 +149,9 @@ class PushUpCounter : IRepetitionCounter {
         minStateIdx = minOf(minStateIdx, newIdx)
 
         // Initial Start
-        if (currentState == MovementState.DOWN && !startedFromDown) {
+        if (currentState == MovementState.DOWN && newState == MovementState.NEAR_DOWN && !startedFromDown) {
             startedFromDown = true
+            isInvalidCycle = false
             lastValidationResult = ValidationResult(true, "")
         }
 
@@ -327,8 +328,9 @@ class SitUpCounter : IRepetitionCounter {
         minStateIdx = minOf(minStateIdx, newIdx)
 
         // Initial Start
-        if (currentState == MovementState.DOWN && !startedFromDown) {
+        if (currentState == MovementState.DOWN && newState == MovementState.NEAR_DOWN && !startedFromDown) {
             startedFromDown = true
+            isInvalidCycle = false
             lastValidationResult = ValidationResult(true, "")
         }
 
@@ -507,8 +509,9 @@ class PullUpCounter : IRepetitionCounter {
         minStateIdx = minOf(minStateIdx, newIdx)
 
         // Initial Start
-        if (currentState == MovementState.DOWN && !startedFromDown) {
+        if (currentState == MovementState.DOWN && newState == MovementState.NEAR_DOWN && !startedFromDown) {
             startedFromDown = true
+            isInvalidCycle = false
             lastValidationResult = ValidationResult(true, "")
         }
 
@@ -685,8 +688,9 @@ class LungesCounter : IRepetitionCounter {
         minStateIdx = minOf(minStateIdx, newIdx)
 
         // Initial Start
-        if (currentState == MovementState.UP && !startedFromUp) {
+        if (currentState == MovementState.UP && newState == MovementState.NEAR_UP && !startedFromUp) {
             startedFromUp = true
+            isInvalidCycle = false
             lastValidationResult = ValidationResult(true, "")
         }
 
