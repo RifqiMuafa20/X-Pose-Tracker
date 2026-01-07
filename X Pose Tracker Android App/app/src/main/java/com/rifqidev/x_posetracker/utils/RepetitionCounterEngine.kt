@@ -90,8 +90,8 @@ class PushUpCounter : IRepetitionCounter {
     private val ELBOW_NEAR_DOWN = 100f
     private val ELBOW_FULL_DOWN = 70f
 
-    private val HIP_MIN_VALID = 160f
-    private val KNEE_MIN_VALID = 160f
+    private val HIP_MIN_VALID = 150f
+    private val KNEE_MIN_VALID = 150f
 
     private val stateOrder = listOf(
         MovementState.DOWN,
@@ -221,7 +221,7 @@ class PushUpCounter : IRepetitionCounter {
             eL <= ELBOW_FULL_DOWN && eR <= ELBOW_FULL_DOWN -> MovementState.DOWN
             eL <= ELBOW_NEAR_DOWN && eR <= ELBOW_NEAR_DOWN -> MovementState.NEAR_DOWN
             eL <= ELBOW_CENTRE && eR <= ELBOW_CENTRE -> MovementState.CENTRE
-            eL <= ELBOW_FULL_UP && eR <= ELBOW_FULL_UP -> MovementState.NEAR_UP
+            eL < ELBOW_FULL_UP && eR < ELBOW_FULL_UP -> MovementState.NEAR_UP
             else -> MovementState.UP
         }
     }
@@ -266,13 +266,13 @@ class SitUpCounter : IRepetitionCounter {
     private var isGoingUp = false
     private var isGoingDown = false
 
-    private val HIP_FULL_DOWN = 120f
-    private val HIP_NEAR_DOWN = 95f
-    private val HIP_CENTRE = 65f
-    private val HIP_FULL_UP = 40f
+    private val HIP_FULL_DOWN = 110f
+    private val HIP_NEAR_DOWN = 90f
+    private val HIP_CENTRE = 70f
+    private val HIP_FULL_UP = 50f
 
-    private val KNEE_MIN_VALID = 35f
-    private val KNEE_MAX_VALID = 100f
+    private val KNEE_MIN_VALID = 25f
+    private val KNEE_MAX_VALID = 90f
 
     private val stateOrder = listOf(
         MovementState.DOWN,
@@ -400,7 +400,7 @@ class SitUpCounter : IRepetitionCounter {
             hL >= HIP_FULL_DOWN && hR >= HIP_FULL_DOWN -> MovementState.DOWN
             hL >= HIP_NEAR_DOWN && hR >= HIP_NEAR_DOWN -> MovementState.NEAR_DOWN
             hL >= HIP_CENTRE && hR >= HIP_CENTRE -> MovementState.CENTRE
-            hL >= HIP_FULL_UP && hR >= HIP_FULL_UP -> MovementState.NEAR_UP
+            hL > HIP_FULL_UP && hR > HIP_FULL_UP -> MovementState.NEAR_UP
             else -> MovementState.UP
         }
     }
@@ -445,9 +445,9 @@ class PullUpCounter : IRepetitionCounter {
     private var isGoingUp = false
     private var isGoingDown = false
 
-    private val ELBOW_FULL_DOWN = 160f
-    private val ELBOW_NEAR_DOWN = 120f
-    private val ELBOW_CENTRE = 90f
+    private val ELBOW_FULL_DOWN = 130f
+    private val ELBOW_NEAR_DOWN = 100f
+    private val ELBOW_CENTRE = 80f
     private val ELBOW_FULL_UP = 50f
 
     private val KNEE_MIN_VALID = 120f
@@ -581,7 +581,7 @@ class PullUpCounter : IRepetitionCounter {
             eL >= ELBOW_FULL_DOWN && eR >= ELBOW_FULL_DOWN -> MovementState.DOWN
             eL >= ELBOW_NEAR_DOWN && eR >= ELBOW_NEAR_DOWN -> MovementState.NEAR_DOWN
             eL >= ELBOW_CENTRE && eR >= ELBOW_CENTRE -> MovementState.CENTRE
-            eL >= ELBOW_FULL_UP && eR >= ELBOW_FULL_UP -> MovementState.NEAR_UP
+            eL > ELBOW_FULL_UP && eR > ELBOW_FULL_UP -> MovementState.NEAR_UP
             else -> MovementState.UP
         }
     }
@@ -629,11 +629,11 @@ class LungesCounter : IRepetitionCounter {
 
     // Knee thresholds
     private val KNEE_FULL_UP = 160f
-    private val KNEE_NEAR_UP = 140f
+    private val KNEE_NEAR_UP = 130f
     private val KNEE_CENTRE = 120f
     private val KNEE_FULL_DOWN = 100f
 
-    private val TORSO_MAX_DEVIATION = 30f
+    private val TORSO_MAX_DEVIATION = 20f
 
     private val stateOrder = listOf(
         MovementState.DOWN,
@@ -760,7 +760,7 @@ class LungesCounter : IRepetitionCounter {
             kL >= KNEE_FULL_UP && kR >= KNEE_FULL_UP -> MovementState.UP
             kL >= KNEE_NEAR_UP && kR >= KNEE_NEAR_UP -> MovementState.NEAR_UP
             kL >= KNEE_CENTRE && kR >= KNEE_CENTRE -> MovementState.CENTRE
-            kL >= KNEE_FULL_DOWN && kR >= KNEE_FULL_DOWN -> MovementState.NEAR_DOWN
+            kL > KNEE_FULL_DOWN && kR > KNEE_FULL_DOWN -> MovementState.NEAR_DOWN
             else -> MovementState.DOWN
         }
     }
