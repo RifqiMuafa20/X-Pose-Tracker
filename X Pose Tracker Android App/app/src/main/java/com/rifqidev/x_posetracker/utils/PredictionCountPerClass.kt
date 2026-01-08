@@ -10,12 +10,4 @@ class PredictionCountPerClass {
     fun getCount(prediction: String): Int {
         return countMap[prediction] ?: 0
     }
-
-    fun getAllCounts(): Map<String, Int> {
-        return countMap.toMap()
-    }
-
-    fun reset() {
-        countMap.clear()
-    }
 }

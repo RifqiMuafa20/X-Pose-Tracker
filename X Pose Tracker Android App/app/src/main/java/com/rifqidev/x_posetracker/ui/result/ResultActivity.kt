@@ -53,11 +53,17 @@ class ResultActivity : AppCompatActivity() {
         val pullUpSeq = intent.getIntExtra("pull_up_seq", 0)
         val sitUpSeq = intent.getIntExtra("sit_up_seq", 0)
         val lungesSeq = intent.getIntExtra("lunges_seq", 0)
+        val avgInference = intent.getLongExtra("avg_inference", 0L)
+        val responseTime = intent.getLongExtra("response_time", 0L)
 
         binding.pushUpSeq.text = getString(R.string.push_up_seq, pushUpSeq)
         binding.pullUpSeq.text = getString(R.string.pull_up_seq, pullUpSeq)
         binding.sitUpSeq.text = getString(R.string.sit_up_seq, sitUpSeq)
         binding.lungesSeq.text = getString(R.string.lunges_seq, lungesSeq)
+
+        binding.averageInference.text = getString(R.string.avg_inference, avgInference)
+        binding.countInference.text = getString(R.string.count_inference, 1000/avgInference)
+        binding.responseTime.text = getString(R.string.response_time, responseTime)
 
         recordId = intent.getStringExtra("record_id") ?: ""
         recordType = intent.getIntExtra("record_type", 0)

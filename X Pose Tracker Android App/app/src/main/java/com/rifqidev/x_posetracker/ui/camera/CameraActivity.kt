@@ -88,6 +88,14 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var midPhotoCaptured: Boolean = false
     private var elapsedSeconds: Long = 0L
 
+    private var inferenceTotal = 0L
+    private var inferenceCount = 0L
+
+    private var startRecordTime: Long = 0L
+    private var firstPredictionTime: Long = 0L
+    private var responseTime: Long = 0L
+    private var isFirstPredictionCaptured = false
+
     private var lastOverlayTs = 0L
     private val OVERLAY_INTERVAL_MS = 100L
 
@@ -188,6 +196,9 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             prediction = ""
             angleState.reset()
             repEngine.resetSession()
+
+            startRecordTime = SystemClock.elapsedRealtime()
+            isFirstPredictionCaptured = false
 
             showCountdown {
                 if (durationInSeconds > 0) {
@@ -349,6 +360,8 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             else binding.type.text = activityType ?: "Unknown"
 
             binding.inferenceTime.text = "${resultBundle.inferenceTime} ms"
+            inferenceTotal += resultBundle.inferenceTime
+            inferenceCount++
         }
     }
 
@@ -427,7 +440,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
                 elapsedSeconds++
 
-                if (!midPhotoCaptured && elapsedSeconds >= halfPoint && recordType == 0) {
+                if (!midPhotoCaptured && elapsedSeconds >= halfPoint) {
                     capturePreviewFrame()
                     midPhotoCaptured = true
                 }
@@ -550,6 +563,8 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         intent.putExtra("record_type", recordType)
         intent.putExtra("member_id", memberId)
         intent.putExtra("record_photo_bytes", midRecordPhotoBytes)
+        intent.putExtra("avg_inference", (inferenceTotal/inferenceCount))
+        intent.putExtra("response_time", responseTime)
 
         startActivity(intent)
         finish()
@@ -605,6 +620,13 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 prediction = poseClassifier.runModel(windowPose, windowIdx)
 
                 predictionCounter.addPrediction(prediction)
+
+                if (!isFirstPredictionCaptured && prediction.isNotEmpty()) {
+                    firstPredictionTime = SystemClock.elapsedRealtime()
+                    isFirstPredictionCaptured = true
+
+                    responseTime = firstPredictionTime - startRecordTime
+                }
 
                 binding.type.text = prediction
             }
