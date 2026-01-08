@@ -59,6 +59,7 @@ class RepetitionCounterEngine(
     }
 
     fun getCount(label: String): Int = counters[label]?.count ?: 0
+    fun getState(label: String): MovementState? = counters[label]?.currentState
     fun getLastValidation(label: String): ValidationResult? = counters[label]?.lastValidationResult
 }
 
@@ -66,7 +67,7 @@ class PushUpCounter : IRepetitionCounter {
     override var count: Int = 0
         private set
 
-    override lateinit var currentState: MovementState
+    override var currentState: MovementState = MovementState.CENTRE
         private set
 
     override var lastValidationResult: ValidationResult =
@@ -107,6 +108,7 @@ class PushUpCounter : IRepetitionCounter {
     }
 
     override fun resetStateOnly() {
+        currentState = MovementState.CENTRE
         lastValidationResult = ValidationResult(true, "")
         isInvalidCycle = false
         reachedUp = false
@@ -145,52 +147,57 @@ class PushUpCounter : IRepetitionCounter {
         val oldIdx = stateOrder.indexOf(currentState)
         val newIdx = stateOrder.indexOf(newState)
 
-        maxStateIdx = maxOf(maxStateIdx, newIdx)
-        minStateIdx = minOf(minStateIdx, newIdx)
-
         // Initial Start
-        if (currentState == MovementState.DOWN && newState == MovementState.NEAR_DOWN && !startedFromDown) {
+        if (currentState == MovementState.DOWN && newIdx > oldIdx && !startedFromDown) {
             startedFromDown = true
             isInvalidCycle = false
             lastValidationResult = ValidationResult(true, "")
         }
 
         // Up
-        if (!reachedUp && newIdx > oldIdx) {
+        if (!reachedUp && newIdx > oldIdx && !isGoingUp) {
             isGoingUp = true
             isGoingDown = false
         }
 
         // Reach Up
-        if (newState == MovementState.UP) {
+        if (newState == MovementState.UP && !reachedUp) {
             reachedUp = true
             isGoingUp = false
             isGoingDown = false
+            minStateIdx = Int.MAX_VALUE
         }
 
         // Down
-        if (reachedUp && newIdx < oldIdx) {
+        if (reachedUp && newIdx < oldIdx && !isGoingDown) {
             isGoingDown = true
             isGoingUp = false
-            minStateIdx = newIdx
+        }
+
+        if (isGoingUp) {
+            maxStateIdx = maxOf(maxStateIdx, newIdx)
+        }
+
+        if (isGoingDown) {
+            minStateIdx = minOf(minStateIdx, newIdx)
         }
 
         // Go Up but go Down again before UP
-        if (isGoingUp && newIdx+1 < maxStateIdx) {
+        if (isGoingUp && newIdx < maxStateIdx-1) {
             isInvalidCycle = true
             lastValidationResult = ValidationResult(false, "Tidak mencapai posisi UP")
             isGoingUp = false
         }
 
         // Go Down but go Up again before going Down
-        if (isGoingDown && newIdx-1 > minStateIdx) {
+        if (isGoingDown && newIdx > minStateIdx+1) {
             isInvalidCycle = true
             lastValidationResult = ValidationResult(false, "Tidak mencapai posisi DOWN")
             isGoingDown = false
         }
 
         // Repetition Counting
-        if (currentState != MovementState.DOWN && newState == MovementState.DOWN) {
+        if (newState == MovementState.DOWN && newIdx < oldIdx) {
             when {
                 !isInvalidCycle && reachedUp && startedFromDown -> {
                     count++
@@ -198,7 +205,7 @@ class PushUpCounter : IRepetitionCounter {
                 }
 
                 !startedFromDown -> {
-                    lastValidationResult = ValidationResult(false, "Gerakan tidak dimulai dari kondisi DOWN")
+                    lastValidationResult = ValidationResult(false, "Tidak dimulai dari posisi DOWN")
                 }
             }
 
@@ -222,7 +229,8 @@ class PushUpCounter : IRepetitionCounter {
             eL <= ELBOW_NEAR_DOWN && eR <= ELBOW_NEAR_DOWN -> MovementState.NEAR_DOWN
             eL <= ELBOW_CENTRE && eR <= ELBOW_CENTRE -> MovementState.CENTRE
             eL < ELBOW_FULL_UP && eR < ELBOW_FULL_UP -> MovementState.NEAR_UP
-            else -> MovementState.UP
+            eL >= ELBOW_FULL_UP && eR >= ELBOW_FULL_UP -> MovementState.UP
+            else -> currentState
         }
     }
 
@@ -247,7 +255,7 @@ class SitUpCounter : IRepetitionCounter {
     override var count: Int = 0
         private set
 
-    override lateinit var currentState: MovementState
+    override var currentState: MovementState = MovementState.CENTRE
         private set
 
     override var lastValidationResult: ValidationResult =
@@ -271,8 +279,7 @@ class SitUpCounter : IRepetitionCounter {
     private val HIP_CENTRE = 70f
     private val HIP_FULL_UP = 50f
 
-    private val KNEE_MIN_VALID = 25f
-    private val KNEE_MAX_VALID = 90f
+    private val KNEE_MAX_VALID = 100f
 
     private val stateOrder = listOf(
         MovementState.DOWN,
@@ -288,6 +295,7 @@ class SitUpCounter : IRepetitionCounter {
     }
 
     override fun resetStateOnly() {
+        currentState = MovementState.CENTRE
         lastValidationResult = ValidationResult(true, "")
         isInvalidCycle = false
         reachedUp = false
@@ -324,52 +332,57 @@ class SitUpCounter : IRepetitionCounter {
         val oldIdx = stateOrder.indexOf(currentState)
         val newIdx = stateOrder.indexOf(newState)
 
-        maxStateIdx = maxOf(maxStateIdx, newIdx)
-        minStateIdx = minOf(minStateIdx, newIdx)
-
         // Initial Start
-        if (currentState == MovementState.DOWN && newState == MovementState.NEAR_DOWN && !startedFromDown) {
+        if (currentState == MovementState.DOWN && newIdx > oldIdx && !startedFromDown) {
             startedFromDown = true
             isInvalidCycle = false
             lastValidationResult = ValidationResult(true, "")
         }
 
         // Up
-        if (!reachedUp && newIdx > oldIdx) {
+        if (!reachedUp && newIdx > oldIdx && !isGoingUp) {
             isGoingUp = true
             isGoingDown = false
         }
 
         // Reach Up
-        if (newState == MovementState.UP) {
+        if (newState == MovementState.UP && !reachedUp) {
             reachedUp = true
             isGoingUp = false
             isGoingDown = false
+            minStateIdx = Int.MAX_VALUE
         }
 
         // Down
-        if (reachedUp && newIdx < oldIdx) {
+        if (reachedUp && newIdx < oldIdx && !isGoingDown) {
             isGoingDown = true
             isGoingUp = false
-            minStateIdx = newIdx
+        }
+
+        if (isGoingUp) {
+            maxStateIdx = maxOf(maxStateIdx, newIdx)
+        }
+
+        if (isGoingDown) {
+            minStateIdx = minOf(minStateIdx, newIdx)
         }
 
         // Go Up but go Down again before UP
-        if (isGoingUp && newIdx+1 < maxStateIdx) {
+        if (isGoingUp && newIdx < maxStateIdx-1) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Gerakan tidak mencapai kondisi UP")
+            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi UP")
             isGoingUp = false
         }
 
         // Go down but go up again before going Down
-        if (isGoingDown && newIdx-1 > minStateIdx) {
+        if (isGoingDown && newIdx > minStateIdx+1) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Gerakan tidak mencapai kondisi DOWN")
+            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi DOWN")
             isGoingDown = false
         }
 
         // Repetition Counting
-        if (currentState != MovementState.DOWN && newState == MovementState.DOWN) {
+        if (newState == MovementState.DOWN && newIdx < oldIdx) {
             when {
                 !isInvalidCycle && reachedUp && startedFromDown -> {
                     count++
@@ -377,7 +390,7 @@ class SitUpCounter : IRepetitionCounter {
                 }
 
                 !startedFromDown -> {
-                    lastValidationResult = ValidationResult(false, "Gerakan tidak dimulai dari kondisi DOWN")
+                    lastValidationResult = ValidationResult(false, "Tidak dimulai dari posisi DOWN")
                 }
             }
 
@@ -401,23 +414,16 @@ class SitUpCounter : IRepetitionCounter {
             hL >= HIP_NEAR_DOWN && hR >= HIP_NEAR_DOWN -> MovementState.NEAR_DOWN
             hL >= HIP_CENTRE && hR >= HIP_CENTRE -> MovementState.CENTRE
             hL > HIP_FULL_UP && hR > HIP_FULL_UP -> MovementState.NEAR_UP
-            else -> MovementState.UP
+            hL <= HIP_FULL_UP && hR <= HIP_FULL_UP -> MovementState.UP
+            else -> currentState
         }
     }
 
     private fun validatePosture(kL: Float, kR: Float): ValidationResult {
-        val messages = mutableListOf<String>()
-
-        if (kL < KNEE_MIN_VALID || kR < KNEE_MIN_VALID)
-            messages.add("Lutut terlalu ditekuk")
-
-        if (kL > KNEE_MAX_VALID || kR > KNEE_MAX_VALID)
-            messages.add("Lutut terlalu dibuka")
-
-        return if (messages.isEmpty()) {
-            ValidationResult(true, "")
+        return if (kL > KNEE_MAX_VALID || kR > KNEE_MAX_VALID) {
+            ValidationResult(false, "Lutut terlalu dibuka")
         } else {
-            ValidationResult(false, messages.joinToString(", "))
+            ValidationResult(true, "")
         }
     }
 }
@@ -426,7 +432,7 @@ class PullUpCounter : IRepetitionCounter {
     override var count: Int = 0
         private set
 
-    override lateinit var currentState: MovementState
+    override var currentState: MovementState = MovementState.CENTRE
         private set
 
     override var lastValidationResult: ValidationResult =
@@ -467,6 +473,7 @@ class PullUpCounter : IRepetitionCounter {
     }
 
     override fun resetStateOnly() {
+        currentState = MovementState.CENTRE
         lastValidationResult = ValidationResult(true, "")
         isInvalidCycle = false
         reachedUp = false
@@ -505,52 +512,57 @@ class PullUpCounter : IRepetitionCounter {
         val oldIdx = stateOrder.indexOf(currentState)
         val newIdx = stateOrder.indexOf(newState)
 
-        maxStateIdx = maxOf(maxStateIdx, newIdx)
-        minStateIdx = minOf(minStateIdx, newIdx)
-
         // Initial Start
-        if (currentState == MovementState.DOWN && newState == MovementState.NEAR_DOWN && !startedFromDown) {
+        if (currentState == MovementState.DOWN && newIdx > oldIdx && !startedFromDown) {
             startedFromDown = true
             isInvalidCycle = false
             lastValidationResult = ValidationResult(true, "")
         }
 
         // Up
-        if (!reachedUp && newIdx > oldIdx) {
+        if (!reachedUp && newIdx > oldIdx && !isGoingUp) {
             isGoingUp = true
             isGoingDown = false
         }
 
         // Reach Up
-        if (newState == MovementState.UP) {
+        if (newState == MovementState.UP && !reachedUp) {
             reachedUp = true
             isGoingUp = false
             isGoingDown = false
+            minStateIdx = Int.MAX_VALUE
         }
 
         // Down
-        if (reachedUp && newIdx < oldIdx) {
+        if (reachedUp && newIdx < oldIdx && !isGoingDown) {
             isGoingDown = true
             isGoingUp = false
-            minStateIdx = newIdx
+        }
+
+        if (isGoingUp) {
+            maxStateIdx = maxOf(maxStateIdx, newIdx)
+        }
+
+        if (isGoingDown) {
+            minStateIdx = minOf(minStateIdx, newIdx)
         }
 
         // Go Up but Go Down again before UP
-        if (isGoingUp && newIdx+1 < maxStateIdx) {
+        if (isGoingUp && newIdx < maxStateIdx-1) {
             isInvalidCycle = true
             lastValidationResult = ValidationResult(false, "Tidak mencapai posisi UP")
             isGoingUp = false
         }
 
         // Go Down but Go Up again before DOWN
-        if (isGoingDown && newIdx-1 > minStateIdx) {
+        if (isGoingDown && newIdx > minStateIdx+1) {
             isInvalidCycle = true
             lastValidationResult = ValidationResult(false, "Tidak mencapai posisi DOWN")
             isGoingDown = false
         }
 
         // Repetition Count
-        if (currentState != MovementState.DOWN && newState == MovementState.DOWN) {
+        if (newState == MovementState.DOWN && newIdx < oldIdx) {
             when {
                 !isInvalidCycle && reachedUp && startedFromDown -> {
                     count++
@@ -558,7 +570,7 @@ class PullUpCounter : IRepetitionCounter {
                 }
 
                 !startedFromDown -> {
-                    lastValidationResult = ValidationResult(false, "Gerakan tidak dimulai dari kondisi DOWN")
+                    lastValidationResult = ValidationResult(false, "Tidak dimulai dari posisi DOWN")
                 }
             }
 
@@ -582,7 +594,8 @@ class PullUpCounter : IRepetitionCounter {
             eL >= ELBOW_NEAR_DOWN && eR >= ELBOW_NEAR_DOWN -> MovementState.NEAR_DOWN
             eL >= ELBOW_CENTRE && eR >= ELBOW_CENTRE -> MovementState.CENTRE
             eL > ELBOW_FULL_UP && eR > ELBOW_FULL_UP -> MovementState.NEAR_UP
-            else -> MovementState.UP
+            eL <= ELBOW_FULL_UP && eR <= ELBOW_FULL_UP -> MovementState.UP
+            else -> currentState
         }
     }
 
@@ -604,11 +617,10 @@ class PullUpCounter : IRepetitionCounter {
 }
 
 class LungesCounter : IRepetitionCounter {
-
     override var count: Int = 0
         private set
 
-    override lateinit var currentState: MovementState
+    override var currentState: MovementState = MovementState.CENTRE
         private set
 
     override var lastValidationResult: ValidationResult =
@@ -649,6 +661,7 @@ class LungesCounter : IRepetitionCounter {
     }
 
     override fun resetStateOnly() {
+        currentState = MovementState.CENTRE
         lastValidationResult = ValidationResult(true, "")
         isInvalidCycle = false
         reachedDown = false
@@ -684,52 +697,57 @@ class LungesCounter : IRepetitionCounter {
         val oldIdx = stateOrder.indexOf(currentState)
         val newIdx = stateOrder.indexOf(newState)
 
-        maxStateIdx = maxOf(maxStateIdx, newIdx)
-        minStateIdx = minOf(minStateIdx, newIdx)
-
         // Initial Start
-        if (currentState == MovementState.UP && newState == MovementState.NEAR_UP && !startedFromUp) {
+        if (currentState == MovementState.UP && newIdx < oldIdx && !startedFromUp) {
             startedFromUp = true
             isInvalidCycle = false
             lastValidationResult = ValidationResult(true, "")
         }
 
         // Going down
-        if (!reachedDown && newIdx < oldIdx) {
+        if (!reachedDown && newIdx < oldIdx && !isGoingDown) {
             isGoingDown = true
             isGoingUp = false
         }
 
         // Reach DOWN
-        if (newState == MovementState.DOWN) {
+        if (newState == MovementState.DOWN && !reachedDown) {
             reachedDown = true
             isGoingDown = false
             isGoingUp = false
+            maxStateIdx = -1
         }
 
         // Going up
-        if (reachedDown && newIdx > oldIdx) {
+        if (reachedDown && newIdx > oldIdx && !isGoingUp) {
             isGoingUp = true
             isGoingDown = false
-            maxStateIdx = newIdx
+        }
+
+        if (isGoingDown) {
+            minStateIdx = minOf(minStateIdx, newIdx)
+        }
+
+        if (isGoingUp) {
+            maxStateIdx = maxOf(maxStateIdx, newIdx)
         }
 
         // Go Down but Go Up again before DOWN
-        if (isGoingDown && newIdx-1 > minStateIdx) {
+        if (isGoingDown && newIdx > minStateIdx+2) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Gerakan tidak mencapai posisi DOWN")
+            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi DOWN")
             isGoingDown = false
         }
 
         // Go Up but Go Down again before UP
-        if (isGoingUp && newIdx+1 < maxStateIdx) {
+        if (isGoingUp && newIdx < maxStateIdx-2) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Gerakan tidak mencapai posisi UP")
+            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi UP")
             isGoingUp = false
         }
 
         // Count repetition when back to UP
-        if (currentState != MovementState.UP && newState == MovementState.UP) {
+        if (newState == MovementState.UP && newIdx > oldIdx) {
             when {
                 !isInvalidCycle && startedFromUp && reachedDown -> {
                     count++
@@ -737,7 +755,7 @@ class LungesCounter : IRepetitionCounter {
                 }
 
                 !startedFromUp -> {
-                    lastValidationResult = ValidationResult(false, "Gerakan tidak dimulai dari posisi UP")
+                    lastValidationResult = ValidationResult(false, "Tidak dimulai dari posisi UP")
                 }
             }
 
@@ -761,7 +779,8 @@ class LungesCounter : IRepetitionCounter {
             kL >= KNEE_NEAR_UP && kR >= KNEE_NEAR_UP -> MovementState.NEAR_UP
             kL >= KNEE_CENTRE && kR >= KNEE_CENTRE -> MovementState.CENTRE
             kL > KNEE_FULL_DOWN && kR > KNEE_FULL_DOWN -> MovementState.NEAR_DOWN
-            else -> MovementState.DOWN
+            kL <= KNEE_FULL_DOWN && kR <= KNEE_FULL_DOWN -> MovementState.DOWN
+            else -> currentState
         }
     }
 

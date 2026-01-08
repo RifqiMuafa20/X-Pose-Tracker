@@ -159,6 +159,17 @@
                 android:fontFamily="@font/poppins_semi_bold"
                 android:textColor="@color/red_accent" />
 
+            <TextView
+                android:id="@+id/state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:textSize="14sp"
+                android:fontFamily="@font/poppins_semi_bold"
+                android:textColor="@color/lime_green"
+                app:layout_constraintEnd_toEndOf="@id/viewFinder"
+                app:layout_constraintBottom_toBottomOf="@id/viewFinder"/>
+
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline2"
                 android:layout_width="wrap_content"

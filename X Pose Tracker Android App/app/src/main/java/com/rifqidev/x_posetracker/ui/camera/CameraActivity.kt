@@ -99,12 +99,13 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var windowIdx = 0
 
     private var status = true
+    private var state = ""
     private var message = ""
 
     private val activeMessages = mutableSetOf<String>()
     private var lastCountMap = mutableMapOf<String, Int>()
     private var lastPrediction: String? = null
-    private var invalidSpokenInCycle = false
+    private var lastMessage: String? = ""
 
     private var count = 0
 
@@ -484,7 +485,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     }
 
     private fun finishActivity() {
-        if (!midPhotoCaptured && recordType == 0) {
+        if (!midPhotoCaptured) {
             capturePreviewFrame()
         }
 
@@ -636,10 +637,14 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         if(prediction == autoLabel || prediction == "Unknown") {
             status = true
             message = ""
+            state = ""
         } else {
             status = repEngine.getLastValidation(prediction)?.isValid == true
             message = repEngine.getLastValidation(prediction)?.message.orEmpty()
+            state = repEngine.getState(prediction).toString()
         }
+
+        binding.state.text = state
 
         if (status) {
             binding.invalidStatus.text = "Valid"
@@ -647,7 +652,8 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 ContextCompat.getColor(this, R.color.lime_green)
             )
 
-            invalidSpokenInCycle = false
+            lastMessage = ""
+
         } else {
             binding.invalidStatus.text = "Invalid"
             binding.invalidStatus.setTextColor(
@@ -656,10 +662,12 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
             showInvalidPopup(message)
 
-            if (!invalidSpokenInCycle) {
+            if(message != lastMessage){
                 playErrorSound()
-                invalidSpokenInCycle = true
+                speak(message)
             }
+
+            lastMessage = message
         }
     }
 
