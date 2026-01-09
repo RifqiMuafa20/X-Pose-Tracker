@@ -55,15 +55,19 @@ class ResultActivity : AppCompatActivity() {
         val lungesSeq = intent.getIntExtra("lunges_seq", 0)
         val avgInference = intent.getLongExtra("avg_inference", 0L)
         val responseTime = intent.getLongExtra("response_time", 0L)
+        val avgInferenceBilstm = intent.getDoubleExtra("avg_inference_bilstm", 0.0)
 
         binding.pushUpSeq.text = getString(R.string.push_up_seq, pushUpSeq)
         binding.pullUpSeq.text = getString(R.string.pull_up_seq, pullUpSeq)
         binding.sitUpSeq.text = getString(R.string.sit_up_seq, sitUpSeq)
         binding.lungesSeq.text = getString(R.string.lunges_seq, lungesSeq)
 
-        binding.averageInference.text = getString(R.string.avg_inference, avgInference)
-        binding.countInference.text = getString(R.string.count_inference, 1000/avgInference)
-        binding.responseTime.text = getString(R.string.response_time, responseTime)
+        val fps = if (avgInference > 0) 1000.0 / avgInference else 0.0
+
+        binding.averageInference.text = getString(R.string.avg_inference, avgInference.toDouble())
+        binding.countInference.text = getString(R.string.count_inference, fps)
+        binding.responseTime.text = getString(R.string.response_time, responseTime.toDouble())
+        binding.inferenceBilstm.text = getString(R.string.avg_inference_bilstm, avgInferenceBilstm)
 
         recordId = intent.getStringExtra("record_id") ?: ""
         recordType = intent.getIntExtra("record_type", 0)
@@ -91,7 +95,7 @@ class ResultActivity : AppCompatActivity() {
                     idRecord = UUID.randomUUID().toString(),
                     idUser = userId!!,
                     recordName = "Latihan${UUID.randomUUID()}",
-                    recordDuration = duration.toInt(),
+                    recordDuration = duration,
                     recordDate = date!!,
                     recordTime = time!!,
                     recordCalories = calorie,

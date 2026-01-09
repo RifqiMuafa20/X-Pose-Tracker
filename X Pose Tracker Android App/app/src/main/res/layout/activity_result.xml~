@@ -277,18 +277,6 @@
                     app:layout_constraintTop_toBottomOf="@id/count_inference"
                     app:layout_constraintStart_toStartOf="@id/average_inference" />
 
-                <TextView
-                    android:id="@+id/inference_bilstm"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/avg_inference_bilstm"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/poppins_regular"
-                    app:layout_constraintTop_toBottomOf="@id/response_time"
-                    app:layout_constraintStart_toStartOf="@id/average_inference" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 

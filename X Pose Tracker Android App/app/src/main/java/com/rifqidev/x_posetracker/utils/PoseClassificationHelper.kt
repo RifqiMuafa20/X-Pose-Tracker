@@ -17,6 +17,9 @@ class PoseClassificationHelper(context: Context) {
     private var voteIdx = 0
     private var voteSize = 0
 
+    private var totalInferenceTimeNs = 0L
+    private var inferenceCount = 0
+
     init {
         val modelBuffer = FileUtil.loadMappedFile(context, "BiLSTM_Model_Classification.tflite")
         val options = Interpreter.Options().apply {
@@ -35,7 +38,14 @@ class PoseClassificationHelper(context: Context) {
             }
         }
 
+        val startTime = System.nanoTime()
+
         interpreter.run(input, output)
+
+        val endTime = System.nanoTime()
+
+        totalInferenceTimeNs += (endTime - startTime)
+        inferenceCount++
 
         val pred = argMax(output[0])
         val voted = updateMajorityVote(pred)
@@ -82,6 +92,11 @@ class PoseClassificationHelper(context: Context) {
             }
         }
         return bestIdx
+    }
+
+    fun getAverageInferenceTimeMs(): Double {
+        if (inferenceCount == 0) return 0.0
+        return (totalInferenceTimeNs / inferenceCount) / 1_000_000.0
     }
 
     fun close() = interpreter.close()

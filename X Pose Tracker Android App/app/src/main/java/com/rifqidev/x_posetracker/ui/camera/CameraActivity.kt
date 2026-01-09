@@ -563,6 +563,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         intent.putExtra("record_photo_bytes", midRecordPhotoBytes)
         intent.putExtra("avg_inference", (inferenceTotal/inferenceCount))
         intent.putExtra("response_time", responseTime)
+        intent.putExtra("avg_inference_bilstm", poseClassifier.getAverageInferenceTimeMs())
 
         startActivity(intent)
         finish()
