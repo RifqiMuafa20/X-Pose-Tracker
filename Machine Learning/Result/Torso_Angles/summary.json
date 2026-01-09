@@ -1,19 +1,19 @@
 {
     "scenario": "Torso_Angles",
     "num_folds": 8,
-    "mean_accuracy": 0.9967924877749468,
-    "std_accuracy": 0.003286591224039569,
-    "mean_test_loss": 0.013649850312503986,
-    "std_test_loss": 0.01417157252728382,
-    "mean_macro_precision": 0.9974057488119988,
-    "mean_macro_recall": 0.9951792993182936,
-    "mean_macro_f1": 0.9962268469118263,
+    "mean_accuracy": 0.9947333646482709,
+    "std_accuracy": 0.00933420735533172,
+    "mean_test_loss": 0.014616341113310227,
+    "std_test_loss": 0.0204620065688317,
+    "mean_macro_precision": 0.9958179789791326,
+    "mean_macro_recall": 0.9929734169653525,
+    "mean_macro_f1": 0.9942127472284021,
     "learning_rate": 0.001,
     "batch_size": 32,
     "best_hyperparameters": {
         "lstm_units": 32,
-        "dropout_lstm": 0.30000000000000004,
+        "dropout_lstm": 0.1,
         "dense_units": 64,
-        "dropout_dense": 0.30000000000000004
+        "dropout_dense": 0.4
     }
 }

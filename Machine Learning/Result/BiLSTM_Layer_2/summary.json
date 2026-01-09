@@ -1,21 +1,21 @@
 {
     "scenario": "BiLSTM_Layer_2",
     "num_folds": 8,
-    "mean_accuracy": 0.9951664630133608,
-    "std_accuracy": 0.004621788282389792,
-    "mean_test_loss": 0.018983521549671423,
-    "std_test_loss": 0.022269023259842948,
-    "mean_macro_precision": 0.9953556065644882,
-    "mean_macro_recall": 0.9934727390346056,
-    "mean_macro_f1": 0.9943068968846462,
-    "learning_rate": 0.001,
-    "batch_size": 16,
+    "mean_accuracy": 0.9956326452238105,
+    "std_accuracy": 0.0071065868137179695,
+    "mean_test_loss": 0.010189831737676514,
+    "std_test_loss": 0.014654925780100664,
+    "mean_macro_precision": 0.9964828725961539,
+    "mean_macro_recall": 0.9940150836320192,
+    "mean_macro_f1": 0.9951159193689871,
+    "learning_rate": 0.0001,
+    "batch_size": 8,
     "best_hyperparameters": {
-        "lstm_units_l1": 32,
-        "dropout_lstm_l1": 0.1,
+        "lstm_units_l1": 64,
+        "dropout_lstm_l1": 0.5,
         "lstm_units_l2": 64,
         "dropout_lstm_l2": 0.4,
         "dense_units": 32,
-        "dropout_dense": 0.5
+        "dropout_dense": 0.30000000000000004
     }
 }

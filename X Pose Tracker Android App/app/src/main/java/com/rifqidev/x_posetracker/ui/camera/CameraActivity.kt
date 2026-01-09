@@ -107,7 +107,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var windowIdx = 0
 
     private var status = true
-    private var state = ""
     private var message = ""
 
     private val activeMessages = mutableSetOf<String>()
@@ -359,7 +358,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             if (start) onPoseFrame(poseLandmarks)
             else binding.type.text = activityType ?: "Unknown"
 
-            binding.inferenceTime.text = "${resultBundle.inferenceTime} ms"
             inferenceTotal += resultBundle.inferenceTime
             inferenceCount++
         }
@@ -659,14 +657,10 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         if(prediction == autoLabel || prediction == "Unknown") {
             status = true
             message = ""
-            state = ""
         } else {
             status = repEngine.getLastValidation(prediction)?.isValid == true
             message = repEngine.getLastValidation(prediction)?.message.orEmpty()
-            state = repEngine.getState(prediction).toString()
         }
-
-        binding.state.text = state
 
         if (status) {
             binding.invalidStatus.text = "Valid"

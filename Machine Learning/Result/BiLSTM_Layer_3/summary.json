@@ -1,0 +1,23 @@
+{
+    "scenario": "BiLSTM_Layer_3",
+    "num_folds": 8,
+    "mean_accuracy": 0.9963551885764116,
+    "std_accuracy": 0.0072191524708507425,
+    "mean_test_loss": 0.017089361043872486,
+    "std_test_loss": 0.02915561738750316,
+    "mean_macro_precision": 0.9969711538461539,
+    "mean_macro_recall": 0.9950231481481482,
+    "mean_macro_f1": 0.9958742774430803,
+    "learning_rate": 0.0001,
+    "batch_size": 8,
+    "best_hyperparameters": {
+        "lstm_units_1": 32,
+        "lstm_units_2": 64,
+        "lstm_units_3": 64,
+        "dropout_lstm_1": 0.30000000000000004,
+        "dropout_lstm_2": 0.2,
+        "dropout_lstm_3": 0.5,
+        "dense_units": 64,
+        "dropout_dense": 0.1
+    }
+}

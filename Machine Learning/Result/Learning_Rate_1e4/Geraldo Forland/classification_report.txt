@@ -1,7 +1,7 @@
               precision    recall  f1-score   support
 
-      Lunges       1.00      1.00      1.00        49
-     Pull-Up       0.97      1.00      0.98        32
+      Lunges       0.98      1.00      0.99        49
+     Pull-Up       1.00      1.00      1.00        32
      Push-Up       1.00      0.94      0.97        18
       Sit-Up       1.00      1.00      1.00        33
 
