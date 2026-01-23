@@ -40,7 +40,7 @@ class ResultActivity : AppCompatActivity() {
             ViewModelProvider(this, factory)[ResultViewModel::class.java]
 
         val userId = intent.getStringExtra("user_id")
-        var date = intent.getStringExtra("date")
+        val date = intent.getStringExtra("date")
         val time = intent.getStringExtra("time")
         val duration = intent.getIntExtra("duration", 0)
         val calorie = intent.getDoubleExtra("calorie", 0.0)
@@ -49,6 +49,7 @@ class ResultActivity : AppCompatActivity() {
         val pullUp = intent.getIntExtra("pull_up", 0)
         val lunges = intent.getIntExtra("lunges", 0)
         val memberId = intent.getStringExtra("member_id") ?: ""
+
         recordId = intent.getStringExtra("record_id") ?: ""
         recordType = intent.getIntExtra("record_type", 0)
         val recordPhotoBytes: ByteArray? = intent.getByteArrayExtra("record_photo_bytes")
@@ -59,6 +60,10 @@ class ResultActivity : AppCompatActivity() {
         binding.calorie.text = String.format("%.2f kkal", calorie)
         binding.date.text = date?.let { DateHelper.formatDateToIndo(it) } ?: "-"
         binding.time.text = "$duration detik"
+
+        if (recordPhotoBytes != null) {
+            binding.frameImage.setImageBitmap(recordPhotoBytes.toBitmap())
+        }
 
         if(recordType == 2){
             binding.continueButton.visibility = View.INVISIBLE
@@ -71,7 +76,7 @@ class ResultActivity : AppCompatActivity() {
                     idRecord = UUID.randomUUID().toString(),
                     idUser = userId!!,
                     recordName = "Latihan${UUID.randomUUID()}",
-                    recordDuration = duration.toInt(),
+                    recordDuration = duration,
                     recordDate = date!!,
                     recordTime = time!!,
                     recordCalories = calorie,
@@ -102,12 +107,6 @@ class ResultActivity : AppCompatActivity() {
                 viewModel.insertMemberRecord(memberRecord)
                 showToast(getString(R.string.user_record_added))
                 finish()
-            }
-        }
-
-        if(recordType == 0 || recordType == 2){
-            if (recordPhotoBytes != null) {
-                binding.frameImage.setImageBitmap(recordPhotoBytes.toBitmap())
             }
         }
 

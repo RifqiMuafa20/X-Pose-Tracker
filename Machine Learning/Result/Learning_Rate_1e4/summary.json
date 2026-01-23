@@ -1,19 +1,19 @@
 {
     "scenario": "Learning_Rate_1e4",
     "num_folds": 8,
-    "mean_accuracy": 0.9967924877749468,
-    "std_accuracy": 0.003286591224039569,
-    "mean_test_loss": 0.01224252836254891,
-    "std_test_loss": 0.01228379045244444,
-    "mean_macro_precision": 0.9973767478650291,
-    "mean_macro_recall": 0.9951792993182936,
-    "mean_macro_f1": 0.9962112408748408,
+    "mean_accuracy": 0.9981537497274907,
+    "std_accuracy": 0.003199221345176456,
+    "mean_test_loss": 0.011711322090832255,
+    "std_test_loss": 0.01768994411305497,
+    "mean_macro_precision": 0.9985304054054054,
+    "mean_macro_recall": 0.9971064814814815,
+    "mean_macro_f1": 0.9977737814581961,
     "learning_rate": 0.0001,
-    "batch_size": 16,
+    "batch_size": 8,
     "best_hyperparameters": {
-        "lstm_units": 64,
-        "dropout_lstm": 0.5,
-        "dense_units": 32,
+        "lstm_units": 32,
+        "dropout_lstm": 0.30000000000000004,
+        "dense_units": 128,
         "dropout_dense": 0.4
     }
 }

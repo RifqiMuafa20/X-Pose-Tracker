@@ -80,7 +80,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private val angleState = AngleFallbackState()
     private var prediction = ""
     private lateinit var poseClassifier: PoseClassificationHelper
-
     private lateinit var backgroundExecutor: ExecutorService
 
     private var midRecordPhotoBytes: ByteArray? = null
@@ -103,7 +102,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private val activeMessages = mutableSetOf<String>()
     private var lastCountMap = mutableMapOf<String, Int>()
     private var lastPrediction: String? = null
-    private var invalidSpokenInCycle = false
+    private var lastMessage: String? = ""
 
     private var count = 0
 
@@ -344,8 +343,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
             if (start) onPoseFrame(poseLandmarks)
             else binding.type.text = activityType ?: "Unknown"
-
-            binding.inferenceTime.text = "${resultBundle.inferenceTime} ms"
         }
     }
 
@@ -424,7 +421,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
                 elapsedSeconds++
 
-                if (!midPhotoCaptured && elapsedSeconds >= halfPoint && recordType == 0) {
+                if (!midPhotoCaptured && elapsedSeconds >= halfPoint) {
                     capturePreviewFrame()
                     midPhotoCaptured = true
                 }
@@ -482,7 +479,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     }
 
     private fun finishActivity() {
-        if (!midPhotoCaptured && recordType == 0) {
+        if (!midPhotoCaptured) {
             capturePreviewFrame()
         }
 
@@ -595,6 +592,7 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             clsTick++
             if (clsTick % CLS_EVERY_N_FRAMES == 0) {
                 prediction = poseClassifier.runModel(windowPose, windowIdx)
+
                 binding.type.text = prediction
             }
         } else {
@@ -637,7 +635,8 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 ContextCompat.getColor(this, R.color.lime_green)
             )
 
-            invalidSpokenInCycle = false
+            lastMessage = ""
+
         } else {
             binding.invalidStatus.text = "Invalid"
             binding.invalidStatus.setTextColor(
@@ -646,10 +645,12 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
             showInvalidPopup(message)
 
-            if (!invalidSpokenInCycle) {
+            if(message != lastMessage){
                 playErrorSound()
-                invalidSpokenInCycle = true
+                speak(message)
             }
+
+            lastMessage = message
         }
     }
 
