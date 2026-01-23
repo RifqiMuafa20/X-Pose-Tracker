@@ -271,14 +271,14 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
-        <Button
-            android:id="@+id/continue_button"
-            style="@style/RoundedGreenButton"
-            android:layout_marginVertical="56dp"
-            android:text="@string/export"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/list_member" />
+<!--        <Button-->
+<!--            android:id="@+id/export_button"-->
+<!--            style="@style/RoundedGreenButton"-->
+<!--            android:layout_marginVertical="56dp"-->
+<!--            android:text="@string/export"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/list_member" />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
