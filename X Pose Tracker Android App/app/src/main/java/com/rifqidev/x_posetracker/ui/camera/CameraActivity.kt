@@ -47,7 +47,6 @@ import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
-import com.rifqidev.x_posetracker.utils.PredictionCountPerClass
 import com.rifqidev.x_posetracker.utils.calculateTotalCalories
 import com.rifqidev.x_posetracker.utils.createDefaultRepetitionEngine
 import com.rifqidev.x_posetracker.utils.estimateDuration
@@ -81,20 +80,11 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private val angleState = AngleFallbackState()
     private var prediction = ""
     private lateinit var poseClassifier: PoseClassificationHelper
-
     private lateinit var backgroundExecutor: ExecutorService
 
     private var midRecordPhotoBytes: ByteArray? = null
     private var midPhotoCaptured: Boolean = false
     private var elapsedSeconds: Long = 0L
-
-    private var inferenceTotal = 0L
-    private var inferenceCount = 0L
-
-    private var startRecordTime: Long = 0L
-    private var firstPredictionTime: Long = 0L
-    private var responseTime: Long = 0L
-    private var isFirstPredictionCaptured = false
 
     private var lastOverlayTs = 0L
     private val OVERLAY_INTERVAL_MS = 100L
@@ -122,7 +112,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var spLoaded = false
 
     private val repEngine = createDefaultRepetitionEngine()
-    private val predictionCounter = PredictionCountPerClass()
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -195,9 +184,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             prediction = ""
             angleState.reset()
             repEngine.resetSession()
-
-            startRecordTime = SystemClock.elapsedRealtime()
-            isFirstPredictionCaptured = false
 
             showCountdown {
                 if (durationInSeconds > 0) {
@@ -357,9 +343,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
 
             if (start) onPoseFrame(poseLandmarks)
             else binding.type.text = activityType ?: "Unknown"
-
-            inferenceTotal += resultBundle.inferenceTime
-            inferenceCount++
         }
     }
 
@@ -544,11 +527,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         val beratBadan = userProfile?.userWeight?.toFloat()
         val totalKalori = calculateTotalCalories(beratBadan, aktivitasSesi)
 
-        intent.putExtra("push_up_seq", predictionCounter.getCount("Push-Up"))
-        intent.putExtra("pull_up_seq", predictionCounter.getCount("Pull-Up"))
-        intent.putExtra("sit_up_seq", predictionCounter.getCount("Sit-Up"))
-        intent.putExtra("lunges_seq", predictionCounter.getCount("Lunges"))
-
         intent.putExtra("user_id", userId)
         intent.putExtra("date", DateHelper.getCurrentDate())
         intent.putExtra("time", DateHelper.getCurrentTime())
@@ -561,9 +539,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         intent.putExtra("record_type", recordType)
         intent.putExtra("member_id", memberId)
         intent.putExtra("record_photo_bytes", midRecordPhotoBytes)
-        intent.putExtra("avg_inference", (inferenceTotal/inferenceCount))
-        intent.putExtra("response_time", responseTime)
-        intent.putExtra("avg_inference_bilstm", poseClassifier.getAverageInferenceTimeMs())
 
         startActivity(intent)
         finish()
@@ -617,15 +592,6 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
             clsTick++
             if (clsTick % CLS_EVERY_N_FRAMES == 0) {
                 prediction = poseClassifier.runModel(windowPose, windowIdx)
-
-                predictionCounter.addPrediction(prediction)
-
-                if (!isFirstPredictionCaptured && prediction.isNotEmpty()) {
-                    firstPredictionTime = SystemClock.elapsedRealtime()
-                    isFirstPredictionCaptured = true
-
-                    responseTime = firstPredictionTime - startRecordTime
-                }
 
                 binding.type.text = prediction
             }

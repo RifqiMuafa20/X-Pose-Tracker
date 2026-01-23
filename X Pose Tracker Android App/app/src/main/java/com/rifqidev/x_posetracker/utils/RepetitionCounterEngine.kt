@@ -93,6 +93,7 @@ class PushUpCounter : IRepetitionCounter {
 
     private val HIP_MIN_VALID = 150f
     private val KNEE_MIN_VALID = 150f
+    private val TORSO_MIN_DEVIATION = 45f
 
     private val stateOrder = listOf(
         MovementState.DOWN,
@@ -127,9 +128,10 @@ class PushUpCounter : IRepetitionCounter {
         val hR = angles13[AngleIdx.RIGHT_HIP]
         val kL = angles13[AngleIdx.LEFT_KNEE]
         val kR = angles13[AngleIdx.RIGHT_KNEE]
+        val torso = angles13[AngleIdx.TORSO]
 
         // Posture Validation
-        val postureValidation = validatePosture(hL, hR, kL, kR)
+        val postureValidation = validatePosture(hL, hR, kL, kR, torso)
 
         if (!postureValidation.isValid) {
             isInvalidCycle = true
@@ -234,7 +236,7 @@ class PushUpCounter : IRepetitionCounter {
         }
     }
 
-    private fun validatePosture( hL: Float, hR: Float, kL: Float, kR: Float): ValidationResult {
+    private fun validatePosture(hL: Float, hR: Float, kL: Float, kR: Float, torso: Float): ValidationResult {
         val messages = mutableListOf<String>()
 
         if (hL < HIP_MIN_VALID || hR < HIP_MIN_VALID)
@@ -242,6 +244,9 @@ class PushUpCounter : IRepetitionCounter {
 
         if (kL < KNEE_MIN_VALID || kR < KNEE_MIN_VALID)
             messages.add("Lutut terlalu ditekuk")
+
+        if (torso < TORSO_MIN_DEVIATION)
+            messages.add("Posisi badan harus horizontal")
 
         return if (messages.isEmpty()) {
             ValidationResult(true, "")
@@ -459,6 +464,8 @@ class PullUpCounter : IRepetitionCounter {
     private val KNEE_MIN_VALID = 120f
     private val HIP_MIN_VALID = 120f
 
+    private val TORSO_MAX_DEVIATION = 45f
+
     private val stateOrder = listOf(
         MovementState.DOWN,
         MovementState.NEAR_DOWN,
@@ -492,9 +499,10 @@ class PullUpCounter : IRepetitionCounter {
         val kR = angles13[AngleIdx.RIGHT_KNEE]
         val hL = angles13[AngleIdx.LEFT_HIP]
         val hR = angles13[AngleIdx.RIGHT_HIP]
+        val torso = angles13[AngleIdx.TORSO]
 
         // Posture Validation
-        val postureValidation = validatePosture(kL, kR, hL, hR)
+        val postureValidation = validatePosture(kL, kR, hL, hR, torso)
 
         if (!postureValidation.isValid) {
             isInvalidCycle = true
@@ -599,7 +607,7 @@ class PullUpCounter : IRepetitionCounter {
         }
     }
 
-    private fun validatePosture( kL: Float, kR: Float, hL: Float, hR: Float ): ValidationResult {
+    private fun validatePosture( kL: Float, kR: Float, hL: Float, hR: Float, torso: Float ): ValidationResult {
         val messages = mutableListOf<String>()
 
         if (kL < KNEE_MIN_VALID || kR < KNEE_MIN_VALID)
@@ -607,6 +615,9 @@ class PullUpCounter : IRepetitionCounter {
 
         if (hL < HIP_MIN_VALID || hR < HIP_MIN_VALID)
             messages.add("Pinggul tidak lurus")
+
+        if (torso > TORSO_MAX_DEVIATION)
+            messages.add("Posisi badan harus vertikal")
 
         return if (messages.isEmpty()) {
             ValidationResult(true, "")
@@ -645,7 +656,7 @@ class LungesCounter : IRepetitionCounter {
     private val KNEE_CENTRE = 120f
     private val KNEE_FULL_DOWN = 100f
 
-    private val TORSO_MAX_DEVIATION = 20f
+    private val TORSO_MAX_DEVIATION = 45f
 
     private val stateOrder = listOf(
         MovementState.DOWN,

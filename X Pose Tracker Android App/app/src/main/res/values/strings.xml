@@ -189,15 +189,6 @@
     <string name="user_record_added">Record berhasil tersimpan</string>
     <string name="stop_camera">Stop Camera</string>
     <string name="stop_record">Apakah Anda yakin ingin menyelesaikan aktivitas?</string>
-    <string name="jumlah_prediction">Jumlah Prediction</string>
-    <string name="push_up_seq">Push Up: %d</string>
-    <string name="pull_up_seq">Pull Up: %d</string>
-    <string name="sit_up_seq">Sit Up: %d</string>
-    <string name="lunges_seq">Lunges: %d</string>
-    <string name="avg_inference">Inference Pose: %.2f ms</string>
-    <string name="count_inference">FPS Pose: %.2f fps</string>
-    <string name="response_time">Response Bilstm: %.2f ms</string>
-    <string name="avg_inference_bilstm">Inference Bilstm: %.2f ms</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
