@@ -182,7 +182,7 @@
     <string name="tutorial_activity">Tutorial</string>
     <string name="tutor">Tutorial on Using the X Pose Tracker Application</string>
     <string name="cancel_activity_confirmation">Are you sure you want to cancel the activity?</string>
-    <string name="delete_event_confirmation">Are you sure you want to delete the activity?</string>
+    <string name="delete_event_confirmation">Apakah Anda yakin ingin menghapus aktivitas ini?</string>
     <string name="delete_record">Delete Record</string>
     <string name="delete_activity_confirmation">Are you sure you want to delete the record?</string>
     <string name="user_record_added">Record successfully saved</string>

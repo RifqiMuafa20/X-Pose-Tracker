@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">X-Pose Tracker</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="x_pose_tracker_logo">X Pose Tracker Logo</string>
+    <string name="welcome_background">push up di pantai</string>
+    <string name="welcome_message">Tracking KebugaranMu!</string>
+    <string name="welcome_description">X-Pose Tracker menggunakan teknologi pose estimation untuk memantau gerakan push-up, sit-up, pull-up, dan lunges secara real-time, hitung repetisi, dan catat progress latihan!</string>
+    <string name="mulai">Mulai</string>
+    <string name="step1">Langkah 1 dari 3</string>
+    <string name="step2">Langkah 2 dari 3</string>
+    <string name="step_title">Masukkan Data DiriMu!</string>
+    <string name="step2_title">Masukkan Data FisikMu!</string>
+    <string name="nama_lengkap">Nama Lengkap</string>
+    <string name="name_hint">Nama Lengkap</string>
+    <string name="tanggal_lahir">Tanggal Lahir</string>
+    <string name="date_icon">date icon</string>
+    <string name="pria">Pria</string>
+    <string name="wanita">Wanita</string>
+    <string name="jenis_kelamin">Jenis Kelamin</string>
+    <string name="splash_screen_text">Pantau, Koreksi, dan Tingkatkan Performa Tes Kebugaranmu dengan Akurasi Tinggi!</string>
+    <string name="back_button">tombol kembali</string>
+    <string name="weight_title">Berat Badan (Kg)</string>
+    <string name="weight_hint">Berat</string>
+    <string name="height_hint">Tinggi</string>
+    <string name="continue_">lanjut</string>
+    <string name="step3">Langkah 3 dari 3</string>
+    <string name="step3_title">Apa TujuanMu Menggunakan Aplikasi?</string>
+    <string name="option1">Tracking Progress Pribadi</string>
+    <string name="option2">Persiapan Tes Kebugaran Jasmani</string>
+    <string name="option3">Mengawasi Hasil Tes Kebugaran</string>
+    <string name="finish">Selesai</string>
+    <string name="title_record">Rekam</string>
+    <string name="title_history">Riwayat</string>
+    <string name="title_profile">Profil</string>
+    <string name="height_title">Tinggi Badan (cm)</string>
+    <string name="profile_image">gambar profil</string>
+    <string name="welcome">Selamat Datang</string>
+    <string name="name_format">Nama Lengkap</string>
+    <string name="calori">Kalori</string>
+    <string name="duration">Durasi</string>
+    <string name="calori_icon">kalori icon</string>
+    <string name="example_calorie">0</string>
+    <string name="kcal">kkal</string>
+    <string name="duration_icon">durasi icon</string>
+    <string name="seconds">menit</string>
+    <string name="example_duration">0</string>
+    <string name="progress">Progress</string>
+    <string name="push_up">push up</string>
+    <string name="choose">Pilih</string>
+    <string name="workout_icon">workout icon</string>
+    <string name="workout_name">Workout Name</string>
+    <string name="date_example">DD MMMM YYYY</string>
+    <string name="repetition">%d X</string>
+    <string name="best_achievement">Pencapaian</string>
+    <string name="gym_backgound">gym backgound</string>
+    <string name="edit_profile">Edit Profil</string>
+    <string name="tutorial">Tutorial</string>
+    <string name="faq">FAQ</string>
+
+    <string-array name="category_menu">
+        <item>Deteksi Otomatis</item>
+        <item>Push-Up</item>
+        <item>Sit-Up</item>
+        <item>Pull-Up</item>
+        <item>Lunges</item>
+    </string-array>
+
+    <string-array name="categories_menu">
+        <item>Push-Up</item>
+        <item>Sit-Up</item>
+        <item>Pull-Up</item>
+        <item>Lunges</item>
+    </string-array>
+
+    <string-array name="days_menu">
+        <item>Hari ini</item>
+        <item>Minggu ini</item>
+        <item>Bulan ini</item>
+        <item>Tahun ini</item>
+        <item>Semua</item>
+    </string-array>
+
+    <string name="next">Selanjutnya</string>
+    <string name="previous">Sebelumnya</string>
+    <string name="camera_icon">camera icon</string>
+    <string name="perbarui">Perbarui</string>
+    <string name="name_empty">Nama Tidak Boleh Kosong</string>
+    <string name="date_empty">Tanggal Lahir Tidak Boleh Kosong</string>
+    <string name="gender_empty">Gender Tidak Boleh Kosong</string>
+    <string name="weight_empty">Berat Badan Tidak Boleh Kosong</string>
+    <string name="height_empty">Tinggi Badan Tidak Boleh Kosong</string>
+    <string name="goal_empty">Tujuan Tidak Boleh Kosong</string>
+    <string name="profile_updated">Profil Berhasil diperbarui</string>
+    <string name="no">Tidak</string>
+    <string name="yes">Ya</string>
+    <string name="update_confirmation">Apakah Anda Yakin Ingin Menyimpan Data?</string>
+    <string name="cancel_confirmation">Apakah Anda Yakin Ingin Membatalkan Perubahan?</string>
+    <string name="record_activity">Rekam Aktivitas</string>
+    <string name="private_tracker">Pribadi</string>
+    <string name="supervisor_tracker">Pengawas</string>
+    <string name="type_activity">Jenis Aktivitas</string>
+    <string name="choose_activity">Pilih Jenis Aktivitas</string>
+    <string name="activity_duration">Durasi Aktivitas (Detik)</string>
+    <string name="activity">Aktivitas Kegiatan</string>
+    <string name="add_activity">Tambah Kegiatan</string>
+    <string name="activity_title">Judul Kegiatan</string>
+    <string name="activity_date">activity date</string>
+    <string name="person_count">Jumlah Peserta</string>
+    <string name="activity_location">Lokasi Kegiatan</string>
+    <string name="activity_supervisor">Pengawas</string>
+    <string name="activity_name">Nama Kegiatan</string>
+    <string name="start">Mulai</string>
+    <string name="supervisor_name">Nama Pengawas</string>
+    <string name="location_name">Lokasi Pelaksanaan</string>
+    <string name="save">Simpan</string>
+    <string name="activity_detail">Detail Kegiatan</string>
+    <string name="delete_activity">Hapus Kegiatan</string>
+    <string name="edit">Edit</string>
+    <string name="member">Peserta</string>
+    <string name="add">Tambah</string>
+    <string name="test_initial">AG</string>
+    <string name="member_name">Nama Peserta</string>
+    <string name="delete_member">Hapus Peserta</string>
+    <string name="registration_number">Nomor Induk Peserta</string>
+    <string name="export">Export</string>
+    <string name="add_member">Tambah Peserta</string>
+    <string name="member_detail">Detail Peserta</string>
+    <string name="record">Rekam</string>
+    <string name="no_data">No Data</string>
+    <string name="event_empty">Nama Kegiatan Tidak Boleh Kosong</string>
+    <string name="supervisor_empty">Nama Pengawas Tidak Boleh Kosong</string>
+    <string name="location_empty">Lokasi Tidak Boleh Kosong</string>
+    <string name="event_added">Kegiatan Berhasil Ditambahkan</string>
+    <string name="regis_empty">Nomor Induk Tidak Boleh Kosong</string>
+    <string name="member_added">Peserta Berhasil Ditambahkan</string>
+    <string name="edit_event">Edit Kegiatan</string>
+    <string name="member_updated">Peserta Berhasil Diupdate</string>
+    <string name="switch_camera">Switch Camera</string>
+    <string name="capture_image">Capture Camera</string>
+    <string name="type">Jenis</string>
+    <string name="repetition_title">Repetisi</string>
+    <string name="duration_example">00:00</string>
+    <string name="repetition_example">0</string>
+    <string name="unknown"></string>
+    <string name="sit_up">sit up</string>
+    <string name="pull_up">pull up</string>
+    <string name="lunges">lunges</string>
+    <string name="media_pipe">MediaPipe</string>
+    <string name="alt_bottom_sheet_chevron">Bottom sheet expandable indicator</string>
+    <string name="alt_bottom_sheet_max_results_button_minus">Decreasing maximum pose results button</string>
+    <string name="alt_bottom_sheet_max_results_button_plus">Increasing maximum pose results button</string>
+    <string name="alt_bottom_sheet_threshold_button_minus">Decreasing threshold of pose detect results button</string>
+    <string name="alt_bottom_sheet_threshold_button_plus">Increasing threshold of pose detect results button</string>
+    <string name="menu_camera">Camera</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="tv_gallery_placeholder">Click + to add an image or a video to begin running the pose landmarker.</string>
+    <string name="label_inference_time">Inference Time</string>
+    <string name="label_fps">Frames per Second</string>
+    <string name="label_pose_detection_confidence_threshold">Detection Threshold</string>
+    <string name="label_pose_tracking_confidence_threshold">Tracking Threshold</string>
+    <string name="label_pose_presence_confidence_threshold">Presence Threshold</string>
+    <string name="label_num_poses">Number of Poses</string>
+    <string name="label_delegate">Delegate</string>
+    <string name="label_models">Model</string>
+    <string name="event_edited">Kegiatan Berhasil Diupdate</string>
+    <string name="deleted">Data berhasil dihapus</string>
+    <string name="start_recording">Record Data Dimulai</string>
+    <string name="duration_empty">Durasi Tidak Boleh Kosong</string>
+    <string name="category_empty">Kategori Tidak Boleh Kosong</string>
+    <string name="history">Riwayat Rekaman</string>
+    <string name="frame_image">Frame Image</string>
+    <string name="private_training">Latihan Pribadi</string>
+    <string name="time_icon">time icon</string>
+    <string name="time_example">00:00</string>
+    <string name="result">Hasil Aktivitas</string>
+    <string name="qna">Frequently Asked Questions</string>
+    <string name="question1">Apa itu X Pose Tracker?</string>
+    <string name="answer1">X-Pose Tracker menggunakan teknologi pose estimation untuk memantau gerakan push-up, sit-up, pull-up, dan lunges secara real-time, koreksi kesalahan, dan capai hasil terbaik!</string>
+    <string name="arrow_icon">arrow icon</string>
+    <string name="tutorial_activity">Tutorial Penggunaan</string>
+    <string name="tutor">Tutorial Menggunakan Aplikasi X Pose Tracker</string>
+    <string name="cancel_activity_confirmation">Apakah Anda yakin ingin membatalkan aktivitas?</string>
+    <string name="delete_event_confirmation">Apakah Anda yakin ingin menghapus kegiatan ini?</string>
+    <string name="delete_record">Hapus Rekaman</string>
+    <string name="delete_activity_confirmation">Apakah Anda yakin ingin menghapus rekaman ini?</string>
+    <string name="user_record_added">Record berhasil tersimpan</string>
+    <string name="stop_camera">Stop Camera</string>
+    <string name="stop_record">Apakah Anda yakin ingin menyelesaikan aktivitas?</string>
+
+    <string-array name="delegate_spinner_titles">
+        <item>CPU</item>
+        <item>GPU</item>
+    </string-array>
+
+    <string-array name="models_spinner_titles">
+        <item>Pose Landmarker Full</item>
+        <item>Pose Landmarker Lite</item>
+        <item>Pose Landmarker Heavy</item>
+    </string-array>
+
+    <string-array name="faq_questions">
+        <item>Apa itu X-Pose Tracker?</item>
+        <item>Bagaimana cara kerja X Pose Tracker?</item>
+        <item>Bagaimana cara menggunakan aplikasi X Pose Tracker?</item>
+        <item>Apakah saya bisa menggunakan aplikasi tanpa koneksi internet?</item>
+        <item>Apakah data video saya akan disimpan atau dibagikan?</item>
+        <item>Apa saja tes yang bisa dilakukan dengan aplikasi ini?</item>
+        <item>Apakah aplikasi ini bisa digunakan untuk mencatat peserta saat tes?</item>
+        <item>Apakah aplikasi ini mendukung semua jenis ponsel Android?</item>
+        <item>Bagaimana jika sistem salah mengenali gerakan saya?</item>
+        <item>Kontak Developer</item>
+    </string-array>
+
+    <string-array name="faq_answers">
+        <item>X Pose Tracker adalah aplikasi berbasis Android yang dirancang untuk mendeteksi dan menghitung gerakan dalam tes kebugaran jasmani seperti push-up, sit-up, pull-up, dan lunges menggunakan teknologi Human Pose Estimation dan model kecerdasan buatan BiLSTM.</item>
+        <item>Aplikasi ini memanfaatkan kamera smartphone untuk mendeteksi pergerakan tubuh pengguna secara real-time. Sistem akan mengenali jenis gerakan dan menghitung jumlah repetisi berdasarkan sudut sendi tubuh yang dianalisis oleh model kecerdasan buatan.</item>
+        <item>Silahkan melihat video tutorial penggunaan aplikasi pada menu tutorial.</item>
+        <item>Iya. X Pose Tracker dapat berjalan secara offline karena seluruh proses analisis dilakukan langsung di perangkat Anda menggunakan model yang sudah dioptimasi. Namun perlu mengaktifkan jaringan internet untuk melihat video tutorial X Pose Tracker</item>
+        <item>Tidak. Privasi Anda sangat kami jaga. Aplikasi ini tidak menyimpan video atau membagikannya ke server mana pun. Semua pemrosesan terjadi secara lokal di perangkat Anda.</item>
+        <item>Saat ini X Pose Tracker mendukung deteksi dan perhitungan repetisi untuk: \n - Push-up \n - Sit-up \n - Pull-up \n - Lunges</item>
+        <item>Ya. Mode pengawas tersedia untuk mencatat hasil tes dari beberapa peserta. Anda dapat merekam, menyimpan, dan meninjau hasil setiap peserta secara otomatis.</item>
+        <item>Aplikasi ini dirancang untuk berjalan di sebagian besar ponsel Android yang memiliki kamera dan performa menengah ke atas. Disarankan menggunakan perangkat dengan minimal Android 8.0 dan RAM 3GB untuk performa optimal.</item>
+        <item>Pastikan Anda berada dalam pencahayaan yang cukup, posisi kamera ideal (sejajar dengan tubuh), dan menggunakan pakaian yang tidak menghalangi bentuk tubuh. Jika kesalahan tetap terjadi, Anda bisa mengirimkan umpan balik melalui kontak yang tersedia.</item>
+        <item>Jika Anda memiliki pertanyaan, saran, atau ingin melaporkan bug, silakan hubungi kami melalui email berikut: muhammadrifqi20001@gmail.com</item>
+    </string-array>
+</resources>
