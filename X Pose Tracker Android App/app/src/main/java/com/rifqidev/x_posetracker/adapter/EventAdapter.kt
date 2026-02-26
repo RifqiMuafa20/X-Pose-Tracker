@@ -33,7 +33,7 @@ class EventAdapter : RecyclerView.Adapter<EventAdapter.ActivityViewHolder>() {
         val item = items[position]
         holder.title.text = item.activityName
         holder.date.text = item.activityDate?.let { DateHelper.formatDateToIndo(it) }
-        holder.count.text = "${item.memberAmount} orang"
+        holder.count.text = holder.itemView.context.getString(R.string.person_format, item.memberAmount)
         holder.location.text = item.activityLocation
         holder.supervisor.text = item.activitySupervisor
 

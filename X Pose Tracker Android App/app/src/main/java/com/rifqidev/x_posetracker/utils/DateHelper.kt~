@@ -8,7 +8,7 @@ import java.util.Locale
 object DateHelper {
     private val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
     private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-    private val indoFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+    private val indoFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
     private val monthDayFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
 
     fun getCurrentDate(): String {

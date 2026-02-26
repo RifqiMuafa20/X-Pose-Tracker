@@ -57,9 +57,9 @@ class ResultActivity : AppCompatActivity() {
         val names = resources.getStringArray(R.array.categories_menu)
 
         binding.hour.text = time
-        binding.calorie.text = String.format("%.2f kkal", calorie)
+        binding.calorie.text = String.format(getString(R.string.calorie_format), calorie)
         binding.date.text = date?.let { DateHelper.formatDateToIndo(it) } ?: "-"
-        binding.time.text = "$duration detik"
+        binding.time.text = getString(R.string.time_format, duration)
 
         if (recordPhotoBytes != null) {
             binding.frameImage.setImageBitmap(recordPhotoBytes.toBitmap())

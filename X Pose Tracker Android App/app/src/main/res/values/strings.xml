@@ -188,6 +188,10 @@
     <string name="user_record_added">Record successfully saved</string>
     <string name="stop_camera">Stop Camera</string>
     <string name="stop_record">Are you sure you want to finish the activity?</string>
+    <string name="delete_user">Are you sure you want to delete %1$s?</string>
+    <string name="time_format">%d seconds</string>
+    <string name="calorie_format">%.2f kcal</string>
+    <string name="person_format">%1$d people</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

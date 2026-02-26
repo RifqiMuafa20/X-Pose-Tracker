@@ -50,7 +50,7 @@ class MemberAdapter(
         holder.deleteButton.setOnClickListener { view ->
             AlertDialog.Builder(view.context)
                 .setTitle(R.string.delete_member)
-                .setMessage("Apakah Anda yakin ingin menghapus ${item.memberName}?")
+                .setMessage(view.context.getString(R.string.delete_user, item.memberName))
                 .setPositiveButton(R.string.yes) { _, _ ->
                     onDeleteClick(item)
                 }

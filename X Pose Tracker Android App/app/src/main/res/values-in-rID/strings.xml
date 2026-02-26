@@ -189,6 +189,10 @@
     <string name="user_record_added">Record berhasil tersimpan</string>
     <string name="stop_camera">Stop Camera</string>
     <string name="stop_record">Apakah Anda yakin ingin menyelesaikan aktivitas?</string>
+    <string name="delete_user">Apakah Anda yakin ingin menghapus %1$s?</string>
+    <string name="time_format">%d detik</string>
+    <string name="calorie_format">%.2f kkal</string>
+    <string name="person_format">%1$d orang</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

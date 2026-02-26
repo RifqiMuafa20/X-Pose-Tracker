@@ -58,7 +58,7 @@ class DetailEventActivity : AppCompatActivity() {
                     }
                     binding.activityLocation.text = activity.activityLocation
                     binding.activitySupervisor.text = activity.activitySupervisor
-                    binding.activityCount.text = getString(R.string.person_format, activity.memberAmount)
+                    binding.activityCount.text = "${activity.memberAmount} orang"
                 }
             }
 
