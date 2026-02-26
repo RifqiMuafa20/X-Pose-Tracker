@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +26,10 @@ import com.rifqidev.x_posetracker.utils.reduceFileImage
 import com.rifqidev.x_posetracker.utils.toBitmap
 import com.rifqidev.x_posetracker.utils.uriToFile
 import java.util.Calendar
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class EditProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditProfileBinding
@@ -172,35 +177,45 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun updateProfile() {
-        val userName = binding.nameInput.text.toString()
-        val userBirth = binding.dateText.text.toString()
-        val userGender = when (binding.genderToggleGroup.checkedButtonId) {
-            R.id.btn_male -> getString(R.string.pria)
-            R.id.btn_female -> getString(R.string.wanita)
-            else -> getString(R.string.pria)
+        showLoading(true)
+
+        lifecycleScope.launch {
+
+            val userName = binding.nameInput.text.toString()
+            val userBirth = binding.dateText.text.toString()
+            val userGender = when (binding.genderToggleGroup.checkedButtonId) {
+                R.id.btn_male -> getString(R.string.pria)
+                R.id.btn_female -> getString(R.string.wanita)
+                else -> getString(R.string.pria)
+            }
+            val userHeight = binding.heightInput.text.toString().toInt()
+            val userWeight = binding.weightInput.text.toString().toInt()
+
+            if (currentImageUri != null) {
+                reducedImageByteArray = withContext(Dispatchers.IO) {
+                    val imageFile = uriToFile(currentImageUri!!, this@EditProfileActivity)
+                        .reduceFileImage()
+                    imageFile.readBytes()
+                }
+            }
+
+            val userProfile = UserProfileEntity(
+                idUser = id!!,
+                userName = userName,
+                userBirth = userBirth,
+                userGender = userGender,
+                userHeight = userHeight,
+                userWeight = userWeight,
+                userGoal = goal,
+                userProfile = reducedImageByteArray
+            )
+
+            viewModel.updateUserProfile(userProfile)
+
+            showLoading(false)
+            showToast(getString(R.string.profile_updated))
+            finish()
         }
-        val userHeight = binding.heightInput.text.toString().toInt()
-        val userWeight = binding.weightInput.text.toString().toInt()
-
-        if (currentImageUri != null) {
-            val imageFile = uriToFile(currentImageUri!!, this).reduceFileImage()
-            reducedImageByteArray = imageFile.readBytes()
-        }
-
-        val userProfile = UserProfileEntity(
-            idUser = id!!,
-            userName = userName,
-            userBirth = userBirth,
-            userGender = userGender,
-            userHeight = userHeight,
-            userWeight = userWeight,
-            userGoal = goal,
-            userProfile = reducedImageByteArray
-        )
-
-        viewModel.updateUserProfile(userProfile)
-        showToast(getString(R.string.profile_updated))
-        finish()
     }
 
     private fun openCameraOrGalleryChooser(context: Context) {
@@ -234,6 +249,10 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

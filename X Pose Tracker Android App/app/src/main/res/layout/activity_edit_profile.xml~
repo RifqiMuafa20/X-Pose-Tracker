@@ -28,7 +28,7 @@
             android:id="@+id/profile_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_marginTop="38dp"
+            android:layout_marginTop="24dp"
             android:contentDescription="@string/profile_image"
             android:scaleType="centerCrop"
             android:src="@drawable/account_icon"
@@ -267,6 +267,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/HeightTextField" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressBar"
+            android:layout_width="520dp"
+            android:layout_height="520dp"
+            android:indeterminate="true"
+            android:visibility="visible"
+            android:indeterminateTint="@color/lime_green"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
