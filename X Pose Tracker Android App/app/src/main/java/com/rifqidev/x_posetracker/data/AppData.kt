@@ -33,6 +33,15 @@ data class BestCategoryAchievement(
     val bestDate: String?
 )
 
+data class ActivityMemberExport(
+    val memberName: String?,
+    val memberRegistrationNumber: String?,
+    val maxPushup: Int?,
+    val maxPullup: Int?,
+    val maxSitup: Int?,
+    val maxLunges: Int?
+)
+
 data class WeeklyProgress(
     @ColumnInfo(name = "date")
     val date: String,

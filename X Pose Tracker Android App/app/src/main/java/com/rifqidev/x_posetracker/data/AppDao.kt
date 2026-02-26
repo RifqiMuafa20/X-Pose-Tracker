@@ -2,6 +2,7 @@ package com.rifqidev.x_posetracker.data
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AppDao {
@@ -34,7 +35,7 @@ interface AppDao {
     fun getAllActivities(): LiveData<List<ActivityEntity>>
 
     @Query("SELECT * FROM activity WHERE id_activity = :activityId LIMIT 1")
-    fun getActivityById(activityId: String): LiveData<ActivityEntity?>
+    fun getActivityById(activityId: String): Flow<ActivityEntity>
 
     @Update
     fun updateActivity(activity: ActivityEntity)
@@ -161,4 +162,23 @@ interface AppDao {
         startDate: String,
         endDate: String
     ): LiveData<List<WeeklyProgress>>
+
+    // export record data to csv
+
+    @Query("""
+        SELECT 
+            am.member_name AS memberName,
+            am.member_registration_number AS memberRegistrationNumber,
+            MAX(mr.pushup_count) AS maxPushup,
+            MAX(mr.pullup_count) AS maxPullup,
+            MAX(mr.situp_count) AS maxSitup,
+            MAX(mr.lunges_count) AS maxLunges
+        FROM activity_member am
+        LEFT JOIN member_record mr 
+            ON am.id_member = mr.id_member
+        WHERE am.id_activity = :activityId
+        GROUP BY am.id_member
+        ORDER BY am.member_name ASC
+    """)
+    suspend fun getMembersWithBestRecord(activityId: String): List<ActivityMemberExport>
 }

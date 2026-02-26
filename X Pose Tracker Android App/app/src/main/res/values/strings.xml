@@ -192,6 +192,8 @@
     <string name="time_format">%d seconds</string>
     <string name="calorie_format">%.2f kcal</string>
     <string name="person_format">%1$d people</string>
+    <string name="csv_success">CSV successfully created!</string>
+    <string name="open_csv">Open CSV with</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

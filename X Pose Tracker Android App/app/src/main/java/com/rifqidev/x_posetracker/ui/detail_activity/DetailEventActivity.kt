@@ -16,6 +16,15 @@ import com.rifqidev.x_posetracker.databinding.ActivityDetailEventBinding
 import com.rifqidev.x_posetracker.ui.add_member.AddMemberActivity
 import com.rifqidev.x_posetracker.ui.edit_activity.EditEventActivity
 import com.rifqidev.x_posetracker.utils.DateHelper
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import android.content.ContentValues
+import android.provider.MediaStore
+import android.os.Environment
+import kotlinx.coroutines.flow.first
+import java.io.OutputStreamWriter
 
 class DetailEventActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailEventBinding
@@ -48,18 +57,22 @@ class DetailEventActivity : AppCompatActivity() {
         activityId = intent.getStringExtra("activity_id")
 
         if (activityId != null) {
-            viewModel.getActivityById(activityId!!).observe(this) { activity ->
-                if (activity != null) {
-                    binding.activityName.text = activity.activityName
-                    binding.activityDate.text = activity.activityDate?.let {
-                        DateHelper.formatDateToIndo(
-                            it
-                        )
+            lifecycleScope.launch {
+                viewModel.getActivityById(activityId!!)
+                    .collect { activity ->
+
+                        activity.let {
+
+                            binding.activityName.text = it.activityName
+                            binding.activityDate.text = it.activityDate?.let { date ->
+                                DateHelper.formatDateToIndo(date)
+                            }
+                            binding.activityLocation.text = it.activityLocation
+                            binding.activitySupervisor.text = it.activitySupervisor
+                            binding.activityCount.text =
+                                getString(R.string.person_format, it.memberAmount)
+                        }
                     }
-                    binding.activityLocation.text = activity.activityLocation
-                    binding.activitySupervisor.text = activity.activitySupervisor
-                    binding.activityCount.text = getString(R.string.person_format, activity.memberAmount)
-                }
             }
 
             viewModel.getActivityMembers(activityId!!).observe(this) { memberList ->
@@ -89,6 +102,81 @@ class DetailEventActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.exportButton.setOnClickListener {
+            lifecycleScope.launch {
+                showLoading(true)
+
+                try {
+                    val activityDetail =
+                        viewModel.getActivityById(activityId!!).first()
+                    val memberList = viewModel.getDetailActivityMemberRecord(activityId.toString())
+
+                    withContext(Dispatchers.IO) {
+
+                        val fileName = "Activity_${activityId}.csv"
+
+                        val resolver = contentResolver
+
+                        val contentValues = ContentValues().apply {
+                            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                            put(MediaStore.MediaColumns.MIME_TYPE, "text/csv")
+                            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                        }
+
+                        val uri = resolver.insert(
+                            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                            contentValues
+                        ) ?: throw Exception("Gagal membuat file")
+
+                        resolver.openOutputStream(uri)?.use { outputStream ->
+                            OutputStreamWriter(outputStream).use { writer ->
+
+                                // ACTIVITY
+                                writer.append("Activity Name,Date,Supervisor,Location,Total Members\n")
+                                writer.append(
+                                    "${activityDetail.activityName ?: ""}," +
+                                            "${activityDetail.activityDate ?: ""}," +
+                                            "${activityDetail.activitySupervisor ?: ""}," +
+                                            "${activityDetail.activityLocation ?: ""}," +
+                                            "${activityDetail.memberAmount ?: 0}\n\n"
+                                )
+
+                                // MEMBER
+                                writer.append("Name,Registration Number,Push-up,Pull-up,Sit-up,Lunges\n")
+
+                                memberList.forEach { member ->
+                                    writer.append(
+                                        "${member.memberName ?: ""}," +
+                                                "${member.memberRegistrationNumber ?: ""}," +
+                                                "${member.maxPushup ?: 0}," +
+                                                "${member.maxPullup ?: 0}," +
+                                                "${member.maxSitup ?: 0}," +
+                                                "${member.maxLunges ?: 0}\n"
+                                    )
+                                }
+
+                                writer.flush()
+                            }
+                        }
+
+                        val openIntent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(uri, "text/csv")
+                            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        }
+
+                        startActivity(Intent.createChooser(openIntent, getString(R.string.open_csv)))
+                    }
+
+                    showToast(getString(R.string.csv_success))
+
+                } catch (e: Exception) {
+                    showToast("Failed to export: ${e.message}")
+                }
+
+                showLoading(false)
+            }
+        }
+
         binding.backButton.setOnClickListener {
             finish()
         }
@@ -114,5 +202,9 @@ class DetailEventActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 }

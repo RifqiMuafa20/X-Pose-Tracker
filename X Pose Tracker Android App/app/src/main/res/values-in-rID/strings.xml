@@ -193,6 +193,8 @@
     <string name="time_format">%d detik</string>
     <string name="calorie_format">%.2f kkal</string>
     <string name="person_format">%1$d orang</string>
+    <string name="csv_success">CSV berhasil dibuat!</string>
+    <string name="open_csv">Buka CSV dengan</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

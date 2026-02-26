@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import com.rifqidev.x_posetracker.data.ActivityEntity
 import com.rifqidev.x_posetracker.data.ActivityMemberEntity
+import com.rifqidev.x_posetracker.data.ActivityMemberExport
 import com.rifqidev.x_posetracker.data.AppDao
 import com.rifqidev.x_posetracker.data.AppDatabase
 import com.rifqidev.x_posetracker.data.BestCategoryAchievement
@@ -11,7 +12,7 @@ import com.rifqidev.x_posetracker.data.MemberRecordEntity
 import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.data.UserRecordEntity
 import com.rifqidev.x_posetracker.data.WeeklyProgress
-import java.util.Date
+import kotlinx.coroutines.flow.Flow
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -59,7 +60,7 @@ class AppRepository(application: Application) {
         executorService.execute { mAppDao.insertActivity(activity) }
     }
 
-    fun getActivityById(activityId: String): LiveData<ActivityEntity?> {
+    fun getActivityById(activityId: String): Flow<ActivityEntity> {
         return mAppDao.getActivityById(activityId)
     }
 
@@ -136,4 +137,8 @@ class AppRepository(application: Application) {
     fun getWeeklyProgressByCategory(category: String, startDate: String, endDate: String): LiveData<List<WeeklyProgress>> {
         return mAppDao.getWeeklyProgressByCategory(category, startDate, endDate)
     }
+
+    // export record activity to csv
+    suspend fun getAllActivitiesRecord(activityId: String): List<ActivityMemberExport> =
+        mAppDao.getMembersWithBestRecord(activityId)
 }

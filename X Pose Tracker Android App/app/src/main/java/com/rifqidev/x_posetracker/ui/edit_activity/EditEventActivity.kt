@@ -5,12 +5,16 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
 import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.data.ActivityEntity
 import com.rifqidev.x_posetracker.databinding.ActivityAddEventBinding
 import com.rifqidev.x_posetracker.utils.DateHelper
+import kotlinx.coroutines.launch
 
 class EditEventActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddEventBinding
@@ -31,14 +35,22 @@ class EditEventActivity : AppCompatActivity() {
         var member: Int? = null
 
         if (activityId != null) {
-            viewModel.getActivityById(activityId).observe(this) { activity ->
-                if (activity != null) {
-                    binding.nameInput.setText(activity.activityName)
-                    binding.locationInput.setText(activity.activityLocation)
-                    binding.supervisorInput.setText(activity.activitySupervisor)
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                    activityDate = activity.activityDate.toString()
-                    member = activity.memberAmount
+                    viewModel.getActivityById(activityId)
+                        .collect { activity ->
+
+                            activity.let {
+
+                                binding.nameInput.setText(it.activityName.orEmpty())
+                                binding.locationInput.setText(it.activityLocation.orEmpty())
+                                binding.supervisorInput.setText(it.activitySupervisor.orEmpty())
+
+                                activityDate = it.activityDate.orEmpty()
+                                member = it.memberAmount
+                            }
+                        }
                 }
             }
         }
