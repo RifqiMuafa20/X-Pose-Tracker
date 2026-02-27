@@ -13,7 +13,7 @@ import androidx.room.RoomDatabase
         ActivityMemberEntity::class,
         MemberRecordEntity::class
     ],
-    version = 2,
+    version = 1,
     exportSchema = false
 )
 

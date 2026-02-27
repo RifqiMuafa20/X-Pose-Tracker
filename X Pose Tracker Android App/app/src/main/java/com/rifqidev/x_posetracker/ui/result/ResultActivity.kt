@@ -15,7 +15,6 @@ import com.rifqidev.x_posetracker.data.MemberRecordEntity
 import com.rifqidev.x_posetracker.data.UserRecordEntity
 import com.rifqidev.x_posetracker.data.WorkoutItem
 import com.rifqidev.x_posetracker.databinding.ActivityResultBinding
-import com.rifqidev.x_posetracker.ui.camera.CameraViewModel
 import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.toBitmap
 import java.util.UUID

@@ -42,6 +42,24 @@ data class ActivityMemberExport(
     val maxLunges: Int?
 )
 
+data class RepUiState(
+    val current: Int,
+    val pushUp: Int,
+    val sitUp: Int,
+    val pullUp: Int,
+    val lunges: Int
+)
+
+data class ValidationUiState(
+    val isValid: Boolean,
+    val message: String
+)
+
+sealed class UiEvent {
+    data class Speak(val text: String) : UiEvent()
+    object PlayErrorSound : UiEvent()
+}
+
 data class WeeklyProgress(
     @ColumnInfo(name = "date")
     val date: String,

@@ -195,6 +195,7 @@
     <string name="person_format">%1$d orang</string>
     <string name="csv_success">CSV berhasil dibuat!</string>
     <string name="open_csv">Buka CSV dengan</string>
+    <string name="failed_load_audio">Gagal untuk mengambil TTS</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

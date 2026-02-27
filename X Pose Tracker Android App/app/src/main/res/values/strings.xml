@@ -194,6 +194,7 @@
     <string name="person_format">%1$d people</string>
     <string name="csv_success">CSV successfully created!</string>
     <string name="open_csv">Open CSV with</string>
+    <string name="failed_load_audio">Failed to load TTS</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

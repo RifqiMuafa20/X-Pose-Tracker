@@ -35,33 +35,33 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
-import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.rifqidev.x_posetracker.R
-import com.rifqidev.x_posetracker.data.AktivitasLatihan
+import com.rifqidev.x_posetracker.data.UiEvent
 import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.databinding.ActivityCameraBinding
+import com.rifqidev.x_posetracker.ui.editprofile.EditProfileActivity
+import com.rifqidev.x_posetracker.ui.editprofile.EditProfileActivity.Companion
 import com.rifqidev.x_posetracker.ui.result.ResultActivity
-import com.rifqidev.x_posetracker.utils.AngleFallbackState
 import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
-import com.rifqidev.x_posetracker.utils.calculateTotalCalories
-import com.rifqidev.x_posetracker.utils.createDefaultRepetitionEngine
-import com.rifqidev.x_posetracker.utils.estimateDuration
-import com.rifqidev.x_posetracker.utils.extractAngles
 import java.io.ByteArrayOutputStream
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListener,
+class CameraActivity : AppCompatActivity(),
+    PoseLandmarkerHelper.LandmarkerListener,
     TextToSpeech.OnInitListener {
+
+    // View binding & ViewModel
     private lateinit var binding: ActivityCameraBinding
     private lateinit var viewModel: CameraViewModel
 
+    // Camera
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -69,18 +69,17 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_BACK
 
+    // Single background thread
+    private lateinit var backgroundExecutor: ExecutorService
+
+    // Session state
     private var activityType: String? = null
     private var recordType: Int = 0
     private var memberId: String = ""
     private var timer: CountDownTimer? = null
     private var duration = 0L
-    private var start: Boolean = false
+    private var isSessionActive: Boolean = false
     private var userProfile: UserProfileEntity? = null
-
-    private val angleState = AngleFallbackState()
-    private var prediction = ""
-    private lateinit var poseClassifier: PoseClassificationHelper
-    private lateinit var backgroundExecutor: ExecutorService
 
     private var midRecordPhotoBytes: ByteArray? = null
     private var midPhotoCaptured: Boolean = false
@@ -89,130 +88,42 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
     private var lastOverlayTs = 0L
     private val OVERLAY_INTERVAL_MS = 100L
 
-    private var clsTick = 0
-    private val CLS_EVERY_N_FRAMES = 10
-
-    private val windowPose = Array(30) { FloatArray(13) }
-    private var windowSize = 0
-    private var windowIdx = 0
-
-    private var status = true
-    private var message = ""
-
-    private val activeMessages = mutableSetOf<String>()
-    private var lastCountMap = mutableMapOf<String, Int>()
-    private var lastPrediction: String? = null
-    private var lastMessage: String? = ""
-
-    private var count = 0
-
+    // Audio TTS
     private var tts: TextToSpeech? = null
     private lateinit var sp: SoundPool
     private var soundId: Int = 0
     private var spLoaded = false
 
-    private val repEngine = createDefaultRepetitionEngine()
+    private val activeMessages = mutableSetOf<String>()
 
+    // Permission launcher
     private val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                Toast.makeText(this, "Permission request granted", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, "Permission request denied", Toast.LENGTH_LONG).show()
-            }
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            val msg = if (isGranted) "Permission request granted" else "Permission request denied"
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
         }
 
     private fun allPermissionsGranted() =
-        ContextCompat.checkSelfPermission(
-            this,
-            REQUIRED_PERMISSION
-        ) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(this, REQUIRED_PERMISSION) == PackageManager.PERMISSION_GRANTED
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        val factory = ViewModelFactory.getInstance(this.application)
-        viewModel =
-            ViewModelProvider(this, factory)[CameraViewModel::class.java]
-
-        viewModel.getUserProfile().observe(this) { user ->
-            if (user != null) {
-                userProfile = user
-            }
-        }
-
-        poseClassifier = PoseClassificationHelper(this)
 
         if (!allPermissionsGranted()) {
             requestPermissionLauncher.launch(REQUIRED_PERMISSION)
         }
 
-        activityType = intent.getStringExtra("type") ?: "Unknown"
-        memberId = intent.getStringExtra("member_id") ?: ""
-        recordType = intent.getIntExtra("record_type", 0)
-        val durationInSeconds = intent.getLongExtra("duration", 0L)
+        setupViewModel()
+        setupIntentData()
+        setupAudio()
+        setupClickListeners()
 
-        tts = TextToSpeech(this, this)
-        sp = SoundPool.Builder().build()
-
-        sp.setOnLoadCompleteListener { _, _, status ->
-            if (status == 0) {
-                spLoaded = true
-            } else {
-                Toast.makeText(this@CameraActivity, "Gagal load audio", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        soundId = sp.load(this, R.raw.error_sound, 1)
-
-        // Initialize our background executor
+        // Background thread for camera analysis only
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
-        binding.duration.text = formatTime(durationInSeconds)
-
-        binding.startCamera.setOnClickListener {
-            binding.startCamera.visibility = View.GONE
-            binding.stopCamera.visibility = View.VISIBLE
-            binding.startText.text = "Stop"
-
-            start = true
-            prediction = ""
-            angleState.reset()
-            repEngine.resetSession()
-
-            showCountdown {
-                if (durationInSeconds > 0) {
-                    startCountdown(durationInSeconds)
-                }
-                setUpCamera()
-            }
-        }
-
-        binding.stopCamera.setOnClickListener {
-            showConfirmationDialog(R.string.stop_record, 1)
-        }
-
-        binding.switchCamera.setOnClickListener {
-            cameraFacing = if (cameraFacing == CameraSelector.LENS_FACING_BACK)
-                CameraSelector.LENS_FACING_FRONT
-            else
-                CameraSelector.LENS_FACING_BACK
-
-            setUpCamera()
-        }
-
-        binding.type.text = activityType
-
-        binding.viewFinder.post {
-            setUpCamera()
-        }
-
-        // Create the PoseLandmarkerHelper that will handle the inference
+        // Initialize PoseLandmarker on background thread (heavy native init)
         backgroundExecutor.execute {
             poseLandmarkerHelper = PoseLandmarkerHelper(
                 context = this,
@@ -221,129 +132,11 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
                 minPoseTrackingConfidence = viewModel.currentMinPoseTrackingConfidence,
                 minPosePresenceConfidence = viewModel.currentMinPosePresenceConfidence,
                 currentDelegate = viewModel.currentDelegate,
-                poseLandmarkerHelperListener = this@CameraActivity
+                poseLandmarkerHelperListener = this
             )
         }
-    }
 
-    // Initialize CameraX, and prepare to bind the camera use cases
-    private fun setUpCamera() {
-        val cameraProviderFuture =
-            ProcessCameraProvider.getInstance(this)
-        cameraProviderFuture.addListener(
-            {
-                // CameraProvider
-                cameraProvider = cameraProviderFuture.get()
-
-                // Build and bind the camera use cases
-                bindCameraUseCases()
-            }, ContextCompat.getMainExecutor(this)
-        )
-    }
-
-    // Declare and bind preview, capture and analysis use cases
-    @SuppressLint("UnsafeOptInUsageError")
-    private fun bindCameraUseCases() {
-
-        // CameraProvider
-        val cameraProvider = cameraProvider
-            ?: throw IllegalStateException("Camera initialization failed.")
-
-        val cameraSelector =
-            CameraSelector.Builder().requireLensFacing(cameraFacing).build()
-
-        // Preview. Only using the 4:3 ratio because this is the closest to our models
-        val previewBuilder = Preview.Builder()
-            .setTargetResolution(Size(480, 360))
-            .setTargetRotation(binding.viewFinder.display.rotation)
-
-        Camera2Interop.Extender(previewBuilder).setCaptureRequestOption(
-            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-            Range(30, 30)
-        )
-
-        preview = previewBuilder.build()
-
-        // ImageAnalysis. Using RGBA 8888 to match how our models work
-        val analysisBuilder = ImageAnalysis.Builder()
-            .setTargetResolution(Size(480, 360))
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-
-        val interop = Camera2Interop.Extender(analysisBuilder)
-
-        // Request 30 FPS
-        interop.setCaptureRequestOption(
-            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-            Range(30, 30)
-        )
-
-        imageAnalyzer = analysisBuilder.build().also {
-            it.setAnalyzer(backgroundExecutor) { image ->
-                detectPose(image)
-            }
-        }
-
-        // Must unbind the use-cases before rebinding them
-        cameraProvider.unbindAll()
-
-        try {
-            // A variable number of use-cases can be passed here -
-            // camera provides access to CameraControl & CameraInfo
-            camera = cameraProvider.bindToLifecycle(
-                this, cameraSelector, preview, imageAnalyzer
-            )
-
-            // Attach the viewfinder's surface provider to preview use case
-            preview?.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-        } catch (exc: Exception) {
-            Log.e(TAG, "Use case binding failed", exc)
-        }
-    }
-
-    private fun detectPose(imageProxy: ImageProxy) {
-        if (this::poseLandmarkerHelper.isInitialized) {
-            poseLandmarkerHelper.detectLiveStream(
-                imageProxy = imageProxy,
-                isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT
-            )
-        }
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        imageAnalyzer?.targetRotation =
-            binding.viewFinder.display.rotation
-    }
-
-    override fun onError(error: String, errorCode: Int) {
-        runOnUiThread {
-            Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
-        val now = SystemClock.uptimeMillis()
-        val shouldDrawOverlay = (now - lastOverlayTs) >= OVERLAY_INTERVAL_MS
-        if (shouldDrawOverlay) lastOverlayTs = now
-
-        runOnUiThread {
-            if (shouldDrawOverlay) {
-                binding.overlay.setResults(
-                    resultBundle.results.first(),
-                    resultBundle.inputImageHeight,
-                    resultBundle.inputImageWidth,
-                    RunningMode.LIVE_STREAM
-                )
-                binding.overlay.invalidate()
-            }
-
-            val result = resultBundle.results.firstOrNull() ?: return@runOnUiThread
-            val poseLandmarks = result.landmarks().firstOrNull() ?: return@runOnUiThread
-
-            if (start) onPoseFrame(poseLandmarks)
-            else binding.type.text = activityType ?: "Unknown"
-        }
+        binding.viewFinder.post { setUpCamera() }
     }
 
     public override fun onResume() {
@@ -352,44 +145,407 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         setUpCamera()
 
         backgroundExecutor.execute {
-            if (this::poseLandmarkerHelper.isInitialized) {
-                if (poseLandmarkerHelper.isClose()) {
-                    poseLandmarkerHelper.setupPoseLandmarker()
-                }
+            if (::poseLandmarkerHelper.isInitialized && poseLandmarkerHelper.isClose()) {
+                poseLandmarkerHelper.setupPoseLandmarker()
             }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        if (this::poseLandmarkerHelper.isInitialized) {
+        if (::poseLandmarkerHelper.isInitialized) {
+            // Persist config back to ViewModel (main thread — no I/O, just field reads)
             viewModel.setMinPoseDetectionConfidence(poseLandmarkerHelper.minPoseDetectionConfidence)
             viewModel.setMinPoseTrackingConfidence(poseLandmarkerHelper.minPoseTrackingConfidence)
             viewModel.setMinPosePresenceConfidence(poseLandmarkerHelper.minPosePresenceConfidence)
             viewModel.setDelegate(poseLandmarkerHelper.currentDelegate)
 
-            // Close the PoseLandmarkerHelper and release resources
+            // Release native resources on background thread
             backgroundExecutor.execute { poseLandmarkerHelper.clearPoseLandmarker() }
         }
     }
 
     override fun onDestroy() {
         timer?.cancel()
-
-        if (tts != null) {
-            tts!!.stop()
-            tts!!.shutdown()
-        }
+        tts?.stop()
+        tts?.shutdown()
 
         super.onDestroy()
 
+        // Block until background thread finishes — prevents use-after-free of native handle
         backgroundExecutor.shutdown()
-        backgroundExecutor.awaitTermination(
-            Long.MAX_VALUE, TimeUnit.NANOSECONDS
+        backgroundExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
+
+        // poseClassifier is now owned by ViewModel; ViewModel.onCleared() cleans it up
+        binding.overlay.clear()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        imageAnalyzer?.targetRotation = binding.viewFinder.display.rotation
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        showConfirmationDialog(R.string.cancel_activity_confirmation, type = 0)
+    }
+
+    private fun setupViewModel() {
+        val factory = ViewModelFactory.getInstance(application)
+        viewModel = ViewModelProvider(this, factory)[CameraViewModel::class.java]
+
+        viewModel.initClassifier(PoseClassificationHelper(this))
+
+        viewModel.getUserProfile().observe(this) { user ->
+            userProfile = user
+        }
+
+        viewModel.prediction.observe(this) { label ->
+            binding.type.text = label
+        }
+
+        // Observe rep counts
+        viewModel.repState.observe(this) { state ->
+            binding.repetition.text = state.current.toString()
+            binding.pushUpRep.text = state.pushUp.toString()
+            binding.sitUpRep.text = state.sitUp.toString()
+            binding.pullUpRep.text = state.pullUp.toString()
+            binding.lungesRep.text = state.lunges.toString()
+        }
+
+        // Observe validation state
+        viewModel.validationState.observe(this) { state ->
+            if (state.isValid) {
+                binding.invalidStatus.text = "Valid"
+                binding.invalidStatus.setTextColor(ContextCompat.getColor(this, R.color.lime_green))
+            } else {
+                binding.invalidStatus.text = "Invalid"
+                binding.invalidStatus.setTextColor(ContextCompat.getColor(this, R.color.red_accent))
+                showInvalidPopup(state.message)
+            }
+        }
+
+        // Observe one-shot UI events (speak, sound effects)
+        viewModel.uiEvent.observe(this) { event ->
+            event ?: return@observe
+            when (event) {
+                is UiEvent.Speak -> speak(event.text)
+                is UiEvent.PlayErrorSound -> playErrorSound()
+            }
+            viewModel.onEventConsumed()
+        }
+    }
+
+    private fun setupIntentData() {
+        activityType = intent.getStringExtra("type") ?: "Unknown"
+        memberId = intent.getStringExtra("member_id") ?: ""
+        recordType = intent.getIntExtra("record_type", 0)
+
+        val durationInSeconds = intent.getLongExtra("duration", 0L)
+        binding.duration.text = formatTime(durationInSeconds)
+        binding.type.text = activityType
+
+        binding.startCamera.setOnClickListener {
+            startSession(durationInSeconds)
+        }
+    }
+
+    private fun setupAudio() {
+        tts = TextToSpeech(this, this)
+        sp = SoundPool.Builder().build()
+        sp.setOnLoadCompleteListener { _, _, status ->
+            spLoaded = (status == 0)
+            if (!spLoaded) Toast.makeText(this,
+                getString(R.string.failed_load_audio), Toast.LENGTH_SHORT).show()
+        }
+        soundId = sp.load(this, R.raw.error_sound, 1)
+    }
+
+    private fun setupClickListeners() {
+        binding.stopCamera.setOnClickListener {
+            showConfirmationDialog(R.string.stop_record, type = 1)
+        }
+
+        binding.switchCamera.setOnClickListener {
+            cameraFacing = if (cameraFacing == CameraSelector.LENS_FACING_BACK)
+                CameraSelector.LENS_FACING_FRONT
+            else
+                CameraSelector.LENS_FACING_BACK
+            setUpCamera()
+        }
+    }
+
+    // Session control
+
+    private fun startSession(durationInSeconds: Long) {
+        binding.startCamera.visibility = View.GONE
+        binding.stopCamera.visibility = View.VISIBLE
+        binding.startText.text = "Stop"
+
+        isSessionActive = true
+        viewModel.resetSession()
+
+        showCountdown {
+            if (durationInSeconds > 0) startCountdown(durationInSeconds)
+            setUpCamera()
+        }
+    }
+
+    // Camera setup
+
+    private fun setUpCamera() {
+        val future = ProcessCameraProvider.getInstance(this)
+        future.addListener(
+            {
+                cameraProvider = future.get()
+                bindCameraUseCases()
+            },
+            ContextCompat.getMainExecutor(this)   // callback on main thread — safe for cameraProvider
+        )
+    }
+
+    @SuppressLint("UnsafeOptInUsageError")
+    private fun bindCameraUseCases() {
+        val cameraProvider = cameraProvider
+            ?: throw IllegalStateException("Camera initialization failed.")
+
+        val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(cameraFacing)
+            .build()
+
+        val previewBuilder = Preview.Builder()
+            .setTargetResolution(Size(480, 360))
+            .setTargetRotation(binding.viewFinder.display.rotation)
+
+        val fpsRange = if (cameraFacing == CameraSelector.LENS_FACING_FRONT) {
+            Range(15, 30)
+        } else {
+            Range(30, 30)
+        }
+
+        Camera2Interop.Extender(previewBuilder).setCaptureRequestOption(
+            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+            fpsRange
         )
 
-        poseClassifier.close()
-        binding.overlay.clear()
+        preview = previewBuilder.build()
+
+        val analysisBuilder = ImageAnalysis.Builder()
+            .setTargetResolution(Size(480, 360))
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+
+        Camera2Interop.Extender(analysisBuilder).setCaptureRequestOption(
+            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+            fpsRange
+        )
+
+        imageAnalyzer = analysisBuilder.build().also {
+            // Analysis runs on backgroundExecutor — never the main thread
+            it.setAnalyzer(backgroundExecutor) { image -> detectPose(image) }
+        }
+
+        cameraProvider.unbindAll()
+
+        try {
+            camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalyzer)
+            preview?.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+        } catch (exc: Exception) {
+            Log.e(TAG, "Use case binding failed", exc)
+        }
+    }
+
+    // PoseLandmarkerHelper.LandmarkerListener
+
+    override fun onResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
+        val now = SystemClock.uptimeMillis()
+        val shouldDrawOverlay = (now - lastOverlayTs) >= OVERLAY_INTERVAL_MS
+        if (shouldDrawOverlay) lastOverlayTs = now
+
+        // Schedule overlay update on main thread
+        if (shouldDrawOverlay) {
+            runOnUiThread {
+                binding.overlay.setResults(
+                    resultBundle.results.first(),
+                    resultBundle.inputImageHeight,
+                    resultBundle.inputImageWidth,
+                    RunningMode.LIVE_STREAM
+                )
+                binding.overlay.invalidate()
+            }
+        }
+
+        if (!isSessionActive) {
+            runOnUiThread { binding.type.text = activityType ?: "Unknown" }
+            return
+        }
+
+        // Extract landmarks and hand off to ViewModel for background processing
+        val poseLandmarks = resultBundle.results.firstOrNull()?.landmarks()?.firstOrNull()
+            ?: return
+
+        val autoLabel = resources.getStringArray(R.array.category_menu)[0]
+
+        viewModel.processPoseFrame(poseLandmarks, activityType, autoLabel)
+    }
+
+    override fun onError(error: String, errorCode: Int) {
+        runOnUiThread {
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Camera frame detection
+
+    private fun detectPose(imageProxy: ImageProxy) {
+        if (::poseLandmarkerHelper.isInitialized) {
+            poseLandmarkerHelper.detectLiveStream(
+                imageProxy = imageProxy,
+                isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT
+            )
+        }
+    }
+
+    // Countdown timer
+
+    private fun startCountdown(durationInSeconds: Long) {
+        elapsedSeconds = 0L
+        midPhotoCaptured = false
+        val halfPoint = durationInSeconds / 2
+
+        timer = object : CountDownTimer(durationInSeconds * 1000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsRemaining = millisUntilFinished / 1000
+                duration = durationInSeconds - secondsRemaining
+                binding.duration.text = formatTime(secondsRemaining)
+
+                elapsedSeconds++
+                if (!midPhotoCaptured && elapsedSeconds >= halfPoint) {
+                    capturePreviewFrame()   // compression offloaded — see below
+                    midPhotoCaptured = true
+                }
+            }
+
+            override fun onFinish() {
+                binding.duration.text = "00:00"
+                finishActivity()
+            }
+        }
+        timer?.start()
+    }
+
+    // Photo capture
+
+    private fun capturePreviewFrame() {
+        val bitmap: Bitmap = binding.viewFinder.bitmap ?: return
+        backgroundExecutor.execute {
+            val stream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+            midRecordPhotoBytes = stream.toByteArray()
+        }
+    }
+
+    // Finish & navigation
+
+    private fun finishActivity() {
+        if (!midPhotoCaptured) capturePreviewFrame()
+
+        val beratBadan = userProfile?.userWeight?.toFloat()
+        val totalKalori = viewModel.calculateCalories(beratBadan)
+
+        val intent = Intent(this, ResultActivity::class.java).apply {
+            putExtra("user_id", userProfile?.idUser)
+            putExtra("date", DateHelper.getCurrentDate())
+            putExtra("time", DateHelper.getCurrentTime())
+            putExtra("duration", duration.toInt())
+            putExtra("calorie", totalKalori.toDouble())
+            putExtra("push_up", viewModel.getRepCount("Push-Up"))
+            putExtra("sit_up", viewModel.getRepCount("Sit-Up"))
+            putExtra("pull_up", viewModel.getRepCount("Pull-Up"))
+            putExtra("lunges", viewModel.getRepCount("Lunges"))
+            putExtra("record_type", recordType)
+            putExtra("member_id", memberId)
+            putExtra("record_photo_bytes", midRecordPhotoBytes)
+        }
+
+        startActivity(intent)
+        finish()
+    }
+
+    private fun showConfirmationDialog(message: Int, type: Int) {
+        AlertDialog.Builder(this)
+            .setMessage(message)
+            .setPositiveButton(R.string.yes) { _, _ ->
+                if (type == 0) finish() else finishActivity()
+            }
+            .setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
+            .create()
+            .show()
+    }
+
+    private fun showInvalidPopup(message: String) {
+        if (message.isBlank() || activeMessages.contains(message)) return
+        activeMessages.add(message)
+
+        val container = binding.invalidMessageContainer
+        if (container.childCount >= 3) {
+            val removed = container.getChildAt(0) as TextView
+            activeMessages.remove(removed.text.toString())
+            container.removeViewAt(0)
+        }
+
+        val textView = LayoutInflater.from(this)
+            .inflate(R.layout.item_invalid_message, container, false) as TextView
+        textView.text = message
+        container.addView(textView)
+
+        textView.postDelayed({
+            activeMessages.remove(message)
+            container.removeView(textView)
+        }, 1000)
+    }
+
+    private fun showCountdown(onFinish: () -> Unit) {
+        val values = listOf("3", "2", "1")
+        var index = 0
+        val countdownText = binding.countdownText
+        countdownText.visibility = View.VISIBLE
+
+        fun showNext() {
+            if (index >= values.size) {
+                countdownText.visibility = View.GONE
+                onFinish()
+                return
+            }
+            countdownText.text = values[index]
+            countdownText.alpha = 1f
+            countdownText.scaleX = 1f
+            countdownText.scaleY = 1f
+            countdownText.animate()
+                .alpha(0f).scaleX(2f).scaleY(2f)
+                .setDuration(800)
+                .withEndAction { index++; showNext() }
+                .start()
+        }
+        showNext()
+    }
+
+    // Audio
+
+    private fun speak(text: String) {
+        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, text)
+    }
+
+    private fun playErrorSound() {
+        if (spLoaded) sp.play(soundId, 1f, 1f, 0, 0, 2f)
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            tts?.language = Locale("id", "ID")
+            tts?.setSpeechRate(2.0f)
+            tts?.setPitch(1.0f)
+        }
     }
 
     private fun hideSystemUI() {
@@ -405,302 +561,8 @@ class CameraActivity : AppCompatActivity(), PoseLandmarkerHelper.LandmarkerListe
         supportActionBar?.hide()
     }
 
-    private fun startCountdown(durationInSeconds: Long) {
-        elapsedSeconds = 0L
-        midPhotoCaptured = false
-
-        val halfPoint = durationInSeconds / 2
-
-        timer = object : CountDownTimer(durationInSeconds * 1000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                val secondsRemaining = millisUntilFinished / 1000
-
-                duration = durationInSeconds - secondsRemaining
-
-                binding.duration.text = formatTime(secondsRemaining)
-
-                elapsedSeconds++
-
-                if (!midPhotoCaptured && elapsedSeconds >= halfPoint) {
-                    capturePreviewFrame()
-                    midPhotoCaptured = true
-                }
-            }
-
-            override fun onFinish() {
-                binding.duration.text = "00:00"
-
-                finishActivity()
-            }
-        }
-        timer?.start()
-    }
-
-    private fun showCountdown(onFinish: () -> Unit) {
-        val countdownValues = listOf("3", "2", "1")
-        var index = 0
-
-        val countdownText = binding.countdownText
-        countdownText.visibility = View.VISIBLE
-
-        fun showNext() {
-            if (index >= countdownValues.size) {
-                countdownText.visibility = View.GONE
-                onFinish()
-                return
-            }
-
-            countdownText.text = countdownValues[index]
-            countdownText.alpha = 1f
-            countdownText.scaleX = 1f
-            countdownText.scaleY = 1f
-
-            countdownText.animate()
-                .alpha(0f)
-                .scaleX(2f)
-                .scaleY(2f)
-                .setDuration(800)
-                .withEndAction {
-                    index++
-                    showNext()
-                }
-                .start()
-        }
-
-        showNext()
-    }
-
-    private fun capturePreviewFrame() {
-        val previewBitmap: Bitmap = binding.viewFinder.bitmap ?: return
-
-        val stream = ByteArrayOutputStream()
-        previewBitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
-        midRecordPhotoBytes = stream.toByteArray()
-    }
-
-    private fun finishActivity() {
-        if (!midPhotoCaptured) {
-            capturePreviewFrame()
-        }
-
-        val intent = Intent(
-            this@CameraActivity,
-            ResultActivity::class.java
-        )
-
-        val aktivitasSesi = listOf(
-            AktivitasLatihan(
-                "Push-Up",
-                durasiMenit = estimateDuration(
-                    "Push-Up",
-                    repEngine.getCount("Push-Up")
-                ),
-                repetisi = repEngine.getCount("Push-Up")
-            ),
-            AktivitasLatihan(
-                "Sit-Up",
-                durasiMenit = estimateDuration(
-                    "Sit-Up",
-                    repEngine.getCount("Sit-Up")
-                ),
-                repetisi = repEngine.getCount("Sit-Up")
-            ),
-            AktivitasLatihan(
-                "Pull-Up",
-                durasiMenit = estimateDuration(
-                    "Pull-Up",
-                    repEngine.getCount("Pull-Up")
-                ),
-                repetisi = repEngine.getCount("Pull-Up")
-            ),
-            AktivitasLatihan(
-                "Lunges",
-                durasiMenit = estimateDuration(
-                    "Lunges",
-                    repEngine.getCount("Lunges")
-                ),
-                repetisi = repEngine.getCount("Lunges")
-            ),
-        )
-
-        val userId = userProfile?.idUser
-        val beratBadan = userProfile?.userWeight?.toFloat()
-        val totalKalori = calculateTotalCalories(beratBadan, aktivitasSesi)
-
-        intent.putExtra("user_id", userId)
-        intent.putExtra("date", DateHelper.getCurrentDate())
-        intent.putExtra("time", DateHelper.getCurrentTime())
-        intent.putExtra("duration", duration.toInt())
-        intent.putExtra("calorie", totalKalori.toDouble())
-        intent.putExtra("push_up", repEngine.getCount("Push-Up"))
-        intent.putExtra("sit_up", repEngine.getCount("Sit-Up"))
-        intent.putExtra("pull_up", repEngine.getCount("Pull-Up"))
-        intent.putExtra("lunges", repEngine.getCount("Lunges"))
-        intent.putExtra("record_type", recordType)
-        intent.putExtra("member_id", memberId)
-        intent.putExtra("record_photo_bytes", midRecordPhotoBytes)
-
-        startActivity(intent)
-        finish()
-    }
-
-    private fun showConfirmationDialog(message: Int, type: Int) {
-        val builder = AlertDialog.Builder(this)
-        builder.setMessage(message)
-        builder.setPositiveButton(R.string.yes) { _, _ ->
-            if (type == 0) {
-                finish()
-            }
-
-            else if (type == 1) {
-                finishActivity()
-            }
-        }
-        builder.setNegativeButton(R.string.no) { dialog, _ ->
-            dialog.dismiss()
-        }
-        val dialog = builder.create()
-        dialog.show()
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        showConfirmationDialog(R.string.cancel_activity_confirmation, 0)
-    }
-
     companion object {
         private const val REQUIRED_PERMISSION = Manifest.permission.CAMERA
         private const val TAG = "Pose Landmarker"
-    }
-
-    private fun onPoseFrame(poseLandmarks: List<NormalizedLandmark>) {
-        val angles13 = extractAngles(
-            landmarks = poseLandmarks,
-            state = angleState
-        )
-
-        val autoLabel = resources.getStringArray(R.array.category_menu)[0]
-        val isAuto = activityType == autoLabel
-
-        val dst = windowPose[windowIdx]
-        for (j in 0 until 13) dst[j] = angles13[j]
-
-        windowIdx = (windowIdx + 1) % 30
-        if (windowSize < 30) windowSize++
-
-        if (isAuto && windowSize == 30) {
-            clsTick++
-            if (clsTick % CLS_EVERY_N_FRAMES == 0) {
-                prediction = poseClassifier.runModel(windowPose, windowIdx)
-
-                binding.type.text = prediction
-            }
-        } else {
-            prediction = activityType ?: "Unknown"
-            binding.type.text = prediction
-        }
-
-        if (prediction != lastPrediction) {
-            speak(prediction)
-            lastPrediction = prediction
-        }
-
-        repEngine.update(prediction, angles13)
-
-        count = repEngine.getCount(prediction)
-
-        binding.repetition.text = count.toString()
-
-        binding.pushUpRep.text = repEngine.getCount("Push-Up").toString()
-        binding.sitUpRep.text = repEngine.getCount("Sit-Up").toString()
-        binding.pullUpRep.text = repEngine.getCount("Pull-Up").toString()
-        binding.lungesRep.text = repEngine.getCount("Lunges").toString()
-
-        if (count > (lastCountMap[prediction] ?: 0)) {
-            speak("$count")
-            lastCountMap[prediction] = count
-        }
-
-        if(prediction == autoLabel || prediction == "Unknown") {
-            status = true
-            message = ""
-        } else {
-            status = repEngine.getLastValidation(prediction)?.isValid == true
-            message = repEngine.getLastValidation(prediction)?.message.orEmpty()
-        }
-
-        if (status) {
-            binding.invalidStatus.text = "Valid"
-            binding.invalidStatus.setTextColor(
-                ContextCompat.getColor(this, R.color.lime_green)
-            )
-
-            lastMessage = ""
-
-        } else {
-            binding.invalidStatus.text = "Invalid"
-            binding.invalidStatus.setTextColor(
-                ContextCompat.getColor(this, R.color.red_accent)
-            )
-
-            showInvalidPopup(message)
-
-            if(message != lastMessage){
-                playErrorSound()
-                speak(message)
-            }
-
-            lastMessage = message
-        }
-    }
-
-    private fun showInvalidPopup(message: String) {
-        if (message.isBlank()) return
-
-        if (activeMessages.contains(message)) return
-
-        activeMessages.add(message)
-
-        val container = binding.invalidMessageContainer
-
-        if (container.childCount >= 3) {
-            val removedView = container.getChildAt(0) as TextView
-            activeMessages.remove(removedView.text.toString())
-            container.removeViewAt(0)
-        }
-
-        val textView = LayoutInflater.from(this)
-            .inflate(R.layout.item_invalid_message, container, false) as TextView
-
-        textView.text = message
-        container.addView(textView)
-
-        textView.postDelayed({
-            activeMessages.remove(message)
-            container.removeView(textView)
-        }, 1000)
-    }
-
-    private fun speak(text: String) {
-        tts?.speak(
-            text,
-            TextToSpeech.QUEUE_FLUSH,
-            null,
-            text
-        )
-    }
-
-    private fun playErrorSound() {
-        if (spLoaded) {
-            sp.play(soundId, 1f, 1f, 0, 0, 2f)
-        }
-    }
-
-    override fun onInit(status: Int) {
-        if (status == TextToSpeech.SUCCESS) {
-            tts?.language = Locale("id", "ID")
-            tts?.setSpeechRate(2.0f)
-            tts?.setPitch(1.0f)
-        }
     }
 }

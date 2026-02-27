@@ -10,7 +10,6 @@ import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.adapter.ListWorkoutAdapter
 import com.rifqidev.x_posetracker.data.WorkoutItem
 import com.rifqidev.x_posetracker.databinding.ActivityDetailMemberBinding
-import com.rifqidev.x_posetracker.ui.camera.CameraActivity
 import com.rifqidev.x_posetracker.ui.edit_member.EditMemberActivity
 import com.rifqidev.x_posetracker.ui.record_private.PrivateRecordActivity
 import java.util.Date

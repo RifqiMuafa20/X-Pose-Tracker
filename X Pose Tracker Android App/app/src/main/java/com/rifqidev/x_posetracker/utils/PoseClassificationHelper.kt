@@ -84,8 +84,6 @@ class PoseClassificationHelper(context: Context) {
         return bestIdx
     }
 
-    fun close() = interpreter.close()
-
     companion object {
         const val NUM_CLASSES = 4
         const val SEQ_LEN = 30
