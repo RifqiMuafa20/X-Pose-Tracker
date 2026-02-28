@@ -1,13 +1,11 @@
 package com.rifqidev.x_posetracker.ui.history
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
 import com.rifqidev.x_posetracker.adapter.EventAdapter
@@ -41,14 +39,7 @@ class HistoryFragment : Fragment() {
 
         adapter = HistoryAdapter()
         binding.rvActivity.adapter = adapter
-
-        val orientation = resources.configuration.orientation
-
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            binding.rvActivity.layoutManager = GridLayoutManager(requireContext(), 2)
-        } else {
-            binding.rvActivity.layoutManager = LinearLayoutManager(requireContext())
-        }
+        binding.rvActivity.layoutManager = LinearLayoutManager(this.requireActivity())
 
         viewModel.getUserProfile().observe(viewLifecycleOwner) { user ->
             if (user != null) {

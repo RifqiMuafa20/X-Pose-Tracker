@@ -21,8 +21,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.content.ContentValues
+import android.content.res.Configuration
 import android.provider.MediaStore
 import android.os.Environment
+import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.flow.first
 import java.io.OutputStreamWriter
 
@@ -52,7 +54,14 @@ class DetailEventActivity : AppCompatActivity() {
         }
 
         binding.rvMember.adapter = adapter
-        binding.rvMember.layoutManager = LinearLayoutManager(this)
+
+        val orientation = resources.configuration.orientation
+
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.rvMember.layoutManager = GridLayoutManager(this, 2)
+        } else {
+            binding.rvMember.layoutManager = LinearLayoutManager(this)
+        }
 
         activityId = intent.getStringExtra("activity_id")
 

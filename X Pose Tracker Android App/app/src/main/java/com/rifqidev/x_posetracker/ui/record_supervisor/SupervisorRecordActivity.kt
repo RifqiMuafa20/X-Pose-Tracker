@@ -1,11 +1,13 @@
 package com.rifqidev.x_posetracker.ui.record_supervisor
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
 import com.rifqidev.x_posetracker.adapter.EventAdapter
@@ -30,7 +32,14 @@ class SupervisorRecordActivity : AppCompatActivity() {
 
         adapter = EventAdapter()
         binding.rvActivity.adapter = adapter
-        binding.rvActivity.layoutManager = LinearLayoutManager(this)
+
+        val orientation = resources.configuration.orientation
+
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.rvActivity.layoutManager = GridLayoutManager(this, 2)
+        } else {
+            binding.rvActivity.layoutManager = LinearLayoutManager(this)
+        }
 
         activityViewModel.allActivities.observe(this) { activityList ->
             if (activityList.isNullOrEmpty()) {
