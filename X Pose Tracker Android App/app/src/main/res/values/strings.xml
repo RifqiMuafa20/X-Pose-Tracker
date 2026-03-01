@@ -180,7 +180,7 @@
     <string name="answer1">X-Pose Tracker is an application that uses pose estimation technology to monitor push-ups, sit-ups, pull-ups, and lunges in real time, count repetitions, and record your workout progress!</string>
     <string name="arrow_icon">arrow icon</string>
     <string name="tutorial_activity">Tutorial</string>
-    <string name="tutor">Tutorial on Using the X Pose Tracker Application</string>
+    <string name="tutor">Click the icon to Watch the Tutorial on Using the X Pose Tracker Application</string>
     <string name="cancel_activity_confirmation">Are you sure you want to cancel the activity?</string>
     <string name="delete_event_confirmation">Are you sure you want to delete the activity?</string>
     <string name="delete_record">Delete Record</string>
@@ -195,6 +195,7 @@
     <string name="csv_success">CSV successfully created!</string>
     <string name="open_csv">Open CSV with</string>
     <string name="failed_load_audio">Failed to load TTS</string>
+    <string name="youtube_icon">Youtube Icon</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

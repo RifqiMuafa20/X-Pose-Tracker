@@ -1,12 +1,12 @@
 package com.rifqidev.x_posetracker.ui.tutorial
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.transition.TransitionManager
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.rifqidev.x_posetracker.databinding.ActivityTutorialBinding
 
 class TutorialActivity : AppCompatActivity() {
@@ -20,17 +20,23 @@ class TutorialActivity : AppCompatActivity() {
         supportActionBar?.hide()
         TransitionManager.beginDelayedTransition(binding.root as ViewGroup)
 
-        val youtubePlayerView = binding.youtubePlayerView
+        binding.youtubeIcon.setOnClickListener {
+            val videoId = "H6-kATEYaKU"
 
-        lifecycle.addObserver(youtubePlayerView)
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:$videoId"))
+            intent.putExtra("force_fullscreen", true)
+            intent.putExtra("finish_on_ended", true)
 
-        binding.youtubePlayerView.addYouTubePlayerListener(object :
-            AbstractYouTubePlayerListener() {
-            override fun onReady(youTubePlayer: YouTubePlayer) {
-                val videoId = "dQw4w9WgXcQ"
-                youTubePlayer.loadVideo(videoId, 0f)
+            try {
+                startActivity(intent)
+            } catch (e: Exception) {
+                val webIntent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.youtube.com/watch?v=$videoId")
+                )
+                startActivity(webIntent)
             }
-        })
+        }
 
         binding.backButton.setOnClickListener {
             finish()

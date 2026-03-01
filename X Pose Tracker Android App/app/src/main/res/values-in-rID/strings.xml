@@ -181,7 +181,7 @@
     <string name="answer1">X-Pose Tracker menggunakan teknologi pose estimation untuk memantau gerakan push-up, sit-up, pull-up, dan lunges secara real-time, koreksi kesalahan, dan capai hasil terbaik!</string>
     <string name="arrow_icon">arrow icon</string>
     <string name="tutorial_activity">Tutorial Penggunaan</string>
-    <string name="tutor">Tutorial Menggunakan Aplikasi X Pose Tracker</string>
+    <string name="tutor">Tekan untuk melihat Tutorial Menggunakan Aplikasi X Pose Tracker</string>
     <string name="cancel_activity_confirmation">Apakah Anda yakin ingin membatalkan aktivitas?</string>
     <string name="delete_event_confirmation">Apakah Anda yakin ingin menghapus kegiatan ini?</string>
     <string name="delete_record">Hapus Rekaman</string>
@@ -196,6 +196,7 @@
     <string name="csv_success">CSV berhasil dibuat!</string>
     <string name="open_csv">Buka CSV dengan</string>
     <string name="failed_load_audio">Gagal untuk mengambil TTS</string>
+    <string name="youtube_icon">Youtube Icon</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
