@@ -178,9 +178,6 @@ class EditProfileActivity : AppCompatActivity() {
             }
         }
         builder.setNegativeButton(R.string.no) { dialog, _ ->
-            if (type == 1){
-                showToast(getString(R.string.camera_permission))
-            }
             dialog.dismiss()
         }
         val dialog = builder.create()

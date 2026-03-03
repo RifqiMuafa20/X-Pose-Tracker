@@ -200,7 +200,8 @@
     <string name="permission_request_granted">Permission request granted</string>
     <string name="permission_request_denied">Permission request denied</string>
     <string name="choose_image">Choose Image</string>
-    <string name="failed_create_file">Gagal membuat file</string>
+    <string name="failed_create_file">Failed to create file</string>
+    <string name="camera_permission_dialog">Aktifkan izin kamera di pengaturan aplikasi</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

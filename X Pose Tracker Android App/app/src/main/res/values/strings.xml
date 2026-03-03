@@ -201,6 +201,7 @@
     <string name="permission_request_denied">Permission request denied</string>
     <string name="choose_image">Choose Image</string>
     <string name="failed_create_file">Failed to create file</string>
+    <string name="camera_permission_dialog">Activate camera permission in the application settings</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

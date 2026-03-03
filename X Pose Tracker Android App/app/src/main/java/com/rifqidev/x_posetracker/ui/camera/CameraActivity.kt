@@ -8,6 +8,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.hardware.camera2.CaptureRequest
 import android.media.SoundPool
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -40,8 +41,6 @@ import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.data.UiEvent
 import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.databinding.ActivityCameraBinding
-import com.rifqidev.x_posetracker.ui.editprofile.EditProfileActivity
-import com.rifqidev.x_posetracker.ui.editprofile.EditProfileActivity.Companion
 import com.rifqidev.x_posetracker.ui.result.ResultActivity
 import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
@@ -105,7 +104,7 @@ class CameraActivity : AppCompatActivity(),
                 showToast(getString(R.string.permission_request_granted))
             } else {
                 showToast(getString(R.string.permission_request_denied))
-                showToast(getString(R.string.camera_permission))
+                showConfirmationDialog(R.string.camera_permission_dialog, 1)
             }
         }
 
@@ -486,9 +485,22 @@ class CameraActivity : AppCompatActivity(),
         AlertDialog.Builder(this)
             .setMessage(message)
             .setPositiveButton(R.string.yes) { _, _ ->
-                if (type == 0) finish() else finishActivity()
+                if (type == 0) {
+                    finish()
+                } else if (type == 1) {
+                    val intent = Intent(
+                        android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    )
+                    intent.data = Uri.fromParts("package", packageName, null)
+                    startActivity(intent)
+                }
             }
-            .setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
+            .setNegativeButton(R.string.no) { dialog, _ ->
+                if (type == 1){
+                    showToast(getString(R.string.camera_permission))
+                }
+                dialog.dismiss()
+            }
             .create()
             .show()
     }
