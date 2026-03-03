@@ -564,7 +564,23 @@ class CameraActivity : AppCompatActivity(),
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            tts?.language = Locale("id", "ID")
+
+            val systemLocale = Locale.getDefault()
+
+            val targetLocale = if (systemLocale.language == "in" || systemLocale.language == "id") {
+                Locale("id", "ID")
+            } else {
+                Locale("en", "US")
+            }
+
+            val result = tts?.setLanguage(targetLocale)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA ||
+                result == TextToSpeech.LANG_NOT_SUPPORTED) {
+
+                tts?.setLanguage(Locale.US)
+            }
+
             tts?.setSpeechRate(2.0f)
             tts?.setPitch(1.0f)
         }

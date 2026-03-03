@@ -495,7 +495,12 @@ class CameraActivity : AppCompatActivity(),
                     startActivity(intent)
                 }
             }
-            .setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
+            .setNegativeButton(R.string.no) { dialog, _ ->
+                if (type == 1){
+                    showToast(getString(R.string.camera_permission))
+                }
+                dialog.dismiss()
+            }
             .create()
             .show()
     }
