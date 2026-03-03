@@ -48,9 +48,10 @@ class EditProfileActivity : AppCompatActivity() {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                showToast("Permission request granted")
+                showToast(getString(R.string.permission_request_granted))
+                openCameraOrGalleryChooser(this)
             } else {
-                showToast("Permission request denied")
+                showToast(getString(R.string.permission_request_denied))
             }
         }
 
@@ -157,7 +158,11 @@ class EditProfileActivity : AppCompatActivity() {
         }
 
         binding.cameraIcon.setOnClickListener {
-            openCameraOrGalleryChooser(this)
+            if (allPermissionsGranted()) {
+                openCameraOrGalleryChooser(this)
+            } else {
+                requestPermissionLauncher.launch(REQUIRED_PERMISSION)
+            }
         }
     }
 
@@ -231,7 +236,7 @@ class EditProfileActivity : AppCompatActivity() {
             addCategory(Intent.CATEGORY_OPENABLE)
         }
 
-        val chooser = Intent.createChooser(galleryIntent, "Pilih Sumber Gambar")
+        val chooser = Intent.createChooser(galleryIntent, getString(R.string.choose_image))
         chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
         startActivityForResult(chooser, REQUEST_CODE_CHOOSE_IMAGE)
     }

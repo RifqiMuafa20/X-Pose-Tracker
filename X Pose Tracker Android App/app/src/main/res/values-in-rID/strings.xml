@@ -197,6 +197,11 @@
     <string name="open_csv">Buka CSV dengan</string>
     <string name="failed_load_audio">Gagal untuk mengambil TTS</string>
     <string name="youtube_icon">Youtube Icon</string>
+    <string name="camera_permission">Izinkan akses kamera untuk menggunakan fitur ini</string>
+    <string name="permission_request_granted">Permintaan izin diterima</string>
+    <string name="permission_request_denied">Permintaan izin ditolak</string>
+    <string name="choose_image">Pilih Sumber Gambar</string>
+    <string name="failed_create_file">Gagal membuat file</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

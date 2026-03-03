@@ -135,7 +135,7 @@ class DetailEventActivity : AppCompatActivity() {
                         val uri = resolver.insert(
                             MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                             contentValues
-                        ) ?: throw Exception(getString(R.string.failed_create_file))
+                        ) ?: throw Exception("Gagal membuat file")
 
                         resolver.openOutputStream(uri)?.use { outputStream ->
                             OutputStreamWriter(outputStream).use { writer ->

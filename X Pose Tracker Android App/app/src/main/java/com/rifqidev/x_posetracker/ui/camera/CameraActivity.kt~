@@ -106,6 +106,7 @@ class CameraActivity : AppCompatActivity(),
             } else {
                 showToast(getString(R.string.permission_request_denied))
                 showToast(getString(R.string.camera_permission))
+                finish()
             }
         }
 
@@ -252,11 +253,7 @@ class CameraActivity : AppCompatActivity(),
         binding.type.text = activityType
 
         binding.startCamera.setOnClickListener {
-            if (allPermissionsGranted()) {
-                startSession(durationInSeconds)
-            } else {
-                requestPermissionLauncher.launch(REQUIRED_PERMISSION)
-            }
+            startSession(durationInSeconds)
         }
     }
 
