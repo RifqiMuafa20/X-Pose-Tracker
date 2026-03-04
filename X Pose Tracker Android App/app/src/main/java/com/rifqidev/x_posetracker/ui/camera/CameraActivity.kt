@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.hardware.camera2.CaptureRequest
 import android.media.SoundPool
 import android.net.Uri
@@ -22,6 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,6 +39,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.rifqidev.x_posetracker.R
@@ -48,6 +52,9 @@ import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
 import com.rifqidev.x_posetracker.utils.ValidationMessage
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.util.Locale
 import java.util.concurrent.ExecutorService
@@ -121,6 +128,8 @@ class CameraActivity : AppCompatActivity(),
         if (!allPermissionsGranted()) {
             requestPermissionLauncher.launch(REQUIRED_PERMISSION)
         }
+
+        showTutorialDialog()
 
         setupViewModel()
         setupIntentData()
@@ -515,6 +524,24 @@ class CameraActivity : AppCompatActivity(),
             .show()
     }
 
+    private fun showTutorialDialog() {
+
+        val view = layoutInflater.inflate(R.layout.tutorial_dialog, null)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(view)
+            .setCancelable(false)
+            .create()
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.show()
+
+        val button = view.findViewById<Button>(R.id.button_confirmation)
+        button.setOnClickListener {
+            dialog.dismiss()
+        }
+    }
+
     private fun showInvalidPopup(message: String) {
         if (message.isBlank() || activeMessages.contains(message)) return
         activeMessages.add(message)
@@ -538,28 +565,34 @@ class CameraActivity : AppCompatActivity(),
     }
 
     private fun showCountdown(onFinish: () -> Unit) {
-        val values = listOf("3", "2", "1")
-        var index = 0
         val countdownText = binding.countdownText
         countdownText.visibility = View.VISIBLE
 
-        fun showNext() {
-            if (index >= values.size) {
+        lifecycleScope.launch {
+            for (value in listOf("3", "2", "1")) {
+
+                if (!isActive) return@launch
+
+                countdownText.text = value
+                countdownText.alpha = 1f
+                countdownText.scaleX = 1f
+                countdownText.scaleY = 1f
+
+                countdownText.animate()
+                    .alpha(0f)
+                    .scaleX(2f)
+                    .scaleY(2f)
+                    .setDuration(800)
+                    .start()
+
+                delay(800)
+            }
+
+            if (!isFinishing && !isDestroyed) {
                 countdownText.visibility = View.GONE
                 onFinish()
-                return
             }
-            countdownText.text = values[index]
-            countdownText.alpha = 1f
-            countdownText.scaleX = 1f
-            countdownText.scaleY = 1f
-            countdownText.animate()
-                .alpha(0f).scaleX(2f).scaleY(2f)
-                .setDuration(800)
-                .withEndAction { index++; showNext() }
-                .start()
         }
-        showNext()
     }
 
     // Audio
