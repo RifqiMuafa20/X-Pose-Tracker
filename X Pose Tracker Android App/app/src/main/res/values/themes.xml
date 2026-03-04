@@ -21,6 +21,8 @@
 
         <!-- Optional: background color app -->
         <item name="android:colorBackground">@color/dark_gray_1</item>
+        <item name="colorOnSurface">@color/light_gray</item>
+        <item name="colorOutline">@color/light_gray</item>
     </style>
 
     <style name="TextLabel">
