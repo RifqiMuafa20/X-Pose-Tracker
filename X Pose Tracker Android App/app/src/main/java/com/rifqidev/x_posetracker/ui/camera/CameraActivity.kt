@@ -2,6 +2,7 @@ package com.rifqidev.x_posetracker.ui.camera
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -46,6 +47,7 @@ import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
+import com.rifqidev.x_posetracker.utils.ValidationMessage
 import java.io.ByteArrayOutputStream
 import java.util.Locale
 import java.util.concurrent.ExecutorService
@@ -226,7 +228,10 @@ class CameraActivity : AppCompatActivity(),
             } else {
                 binding.invalidStatus.text = "Invalid"
                 binding.invalidStatus.setTextColor(ContextCompat.getColor(this, R.color.red_accent))
-                showInvalidPopup(state.message)
+
+                state.message.forEach { msg ->
+                    showInvalidPopup(msg.toDisplayString(this))
+                }
             }
         }
 
@@ -234,8 +239,13 @@ class CameraActivity : AppCompatActivity(),
         viewModel.uiEvent.observe(this) { event ->
             event ?: return@observe
             when (event) {
-                is UiEvent.Speak -> speak(event.text)
+                is UiEvent.SpeakText -> speak(event.text)
+                is UiEvent.Speak -> speak(event.messages.joinToString(". ") { it.toDisplayString(this) })
                 is UiEvent.PlayErrorSound -> playErrorSound()
+                is UiEvent.InvalidFeedback -> {
+                    playErrorSound()
+                    speak(event.messages.joinToString(". ") { it.toDisplayString(this) })
+                }
             }
             viewModel.onEventConsumed()
         }
@@ -272,7 +282,7 @@ class CameraActivity : AppCompatActivity(),
 
     private fun setupClickListeners() {
         binding.stopCamera.setOnClickListener {
-            showConfirmationDialog(R.string.stop_record, type = 1)
+            showConfirmationDialog(R.string.stop_record, type = 0)
         }
 
         binding.switchCamera.setOnClickListener {
@@ -602,6 +612,23 @@ class CameraActivity : AppCompatActivity(),
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
+    private fun ValidationMessage.toDisplayString(context: Context): String = context.getString(
+        when (this) {
+            ValidationMessage.HIP_TOO_BENT        -> R.string.msg_hip_too_bent
+            ValidationMessage.KNEE_TOO_BENT       -> R.string.msg_knee_too_bent
+            ValidationMessage.TORSO_NOT_HORIZONTAL-> R.string.msg_torso_not_horizontal
+            ValidationMessage.KNEE_TOO_WIDE       -> R.string.msg_knee_too_wide
+            ValidationMessage.KNEE_NOT_STRAIGHT   -> R.string.msg_knee_not_straight
+            ValidationMessage.HIP_NOT_STRAIGHT    -> R.string.msg_hip_not_straight
+            ValidationMessage.TORSO_NOT_VERTICAL  -> R.string.msg_torso_not_vertical
+            ValidationMessage.TORSO_TOO_TILTED    -> R.string.msg_torso_too_tilted
+            ValidationMessage.NOT_START_FROM_UP   -> R.string.msg_not_start_from_up
+            ValidationMessage.NOT_REACH_UP        -> R.string.msg_not_reach_up
+            ValidationMessage.NOT_REACH_DOWN      -> R.string.msg_not_reach_down
+            ValidationMessage.NOT_START_FROM_DOWN -> R.string.msg_not_start_from_down
+        }
+    )
 
     companion object {
         private const val REQUIRED_PERMISSION = Manifest.permission.CAMERA

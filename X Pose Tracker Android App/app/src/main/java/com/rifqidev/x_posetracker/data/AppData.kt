@@ -6,6 +6,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.rifqidev.x_posetracker.utils.MovementState
+import com.rifqidev.x_posetracker.utils.ValidationMessage
 import kotlinx.parcelize.Parcelize
 
 data class WorkoutItem(
@@ -50,14 +52,28 @@ data class RepUiState(
     val lunges: Int
 )
 
+data class ValidationResult(
+    val isValid: Boolean,
+    val message: List<ValidationMessage>
+)
+
+data class CounterResult(
+    val count: Int,
+    val state: MovementState,
+    val validationResult: ValidationResult
+)
+
 data class ValidationUiState(
     val isValid: Boolean,
-    val message: String
+    val message: List<ValidationMessage>
 )
 
 sealed class UiEvent {
-    data class Speak(val text: String) : UiEvent()
+    data class Speak(val messages: List<ValidationMessage>) : UiEvent()
+    data class SpeakText(val text: String) : UiEvent()
     object PlayErrorSound : UiEvent()
+
+    data class InvalidFeedback(val messages: List<ValidationMessage>) : UiEvent()
 }
 
 data class WeeklyProgress(

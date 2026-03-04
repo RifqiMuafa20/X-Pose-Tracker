@@ -145,7 +145,8 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
             }
 
             if (!isValid && validationMessages != lastValidationMessages) {
-                emitEvent(UiEvent.InvalidFeedback(validationMessages))
+                emitEvent(UiEvent.PlayErrorSound)
+                emitEvent(UiEvent.Speak(validationMessages))
             }
 
             lastValidationMessages = validationMessages

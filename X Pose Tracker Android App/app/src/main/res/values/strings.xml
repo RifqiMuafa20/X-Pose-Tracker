@@ -203,6 +203,19 @@
     <string name="failed_create_file">Failed to create file</string>
     <string name="camera_permission_dialog">Activate camera permission in the application settings</string>
 
+    <string name="msg_hip_too_bent">Hip too bent</string>
+    <string name="msg_knee_too_bent">Knee too bent</string>
+    <string name="msg_torso_not_horizontal">Body should be horizontal</string>
+    <string name="msg_knee_too_wide">Knee too wide</string>
+    <string name="msg_knee_not_straight">Knee not straight</string>
+    <string name="msg_hip_not_straight">Hip not straight</string>
+    <string name="msg_torso_not_vertical">Body should be vertical</string>
+    <string name="msg_torso_too_tilted">Body too tilted</string>
+    <string name="msg_not_start_from_up">Should start from the top</string>
+    <string name="msg_not_reach_up">Not reached the top</string>
+    <string name="msg_not_reach_down">Not reached the bottom</string>
+    <string name="msg_not_start_from_down">Should start from the bottom</string>
+
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
         <item>GPU</item>

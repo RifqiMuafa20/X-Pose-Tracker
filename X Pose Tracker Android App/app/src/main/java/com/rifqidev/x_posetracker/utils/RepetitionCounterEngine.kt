@@ -1,5 +1,8 @@
 package com.rifqidev.x_posetracker.utils
 
+import com.rifqidev.x_posetracker.data.CounterResult
+import com.rifqidev.x_posetracker.data.ValidationResult
+
 object AngleIdx {
     const val LEFT_ELBOW = 1
     const val RIGHT_ELBOW = 7
@@ -18,16 +21,20 @@ enum class MovementState {
     UP
 }
 
-data class ValidationResult(
-    val isValid: Boolean,
-    val message: String
-)
-
-data class CounterResult(
-    val count: Int,
-    val state: MovementState,
-    val validationResult: ValidationResult
-)
+enum class ValidationMessage {
+    HIP_TOO_BENT,
+    KNEE_TOO_BENT,
+    TORSO_NOT_HORIZONTAL,
+    KNEE_TOO_WIDE,
+    KNEE_NOT_STRAIGHT,
+    HIP_NOT_STRAIGHT,
+    TORSO_NOT_VERTICAL,
+    TORSO_TOO_TILTED,
+    NOT_START_FROM_UP,
+    NOT_REACH_UP,
+    NOT_REACH_DOWN,
+    NOT_START_FROM_DOWN
+}
 
 interface IRepetitionCounter {
     val count: Int
@@ -71,7 +78,7 @@ class PushUpCounter : IRepetitionCounter {
         private set
 
     override var lastValidationResult: ValidationResult =
-        ValidationResult(true, "")
+        ValidationResult(true, emptyList())
         private set
 
     private var isInvalidCycle = false
@@ -110,7 +117,7 @@ class PushUpCounter : IRepetitionCounter {
 
     override fun resetStateOnly() {
         currentState = MovementState.CENTRE
-        lastValidationResult = ValidationResult(true, "")
+        lastValidationResult = ValidationResult(true, emptyList())
         isInvalidCycle = false
         reachedUp = false
         isGoingUp = false
@@ -153,7 +160,7 @@ class PushUpCounter : IRepetitionCounter {
         if (currentState == MovementState.DOWN && newIdx > oldIdx && !startedFromDown) {
             startedFromDown = true
             isInvalidCycle = false
-            lastValidationResult = ValidationResult(true, "")
+            lastValidationResult = ValidationResult(true, emptyList())
         }
 
         // Up
@@ -187,14 +194,14 @@ class PushUpCounter : IRepetitionCounter {
         // Go Up but go Down again before UP
         if (isGoingUp && newIdx < maxStateIdx-1) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi UP")
+            lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_UP))
             isGoingUp = false
         }
 
         // Go Down but go Up again before going Down
         if (isGoingDown && newIdx > minStateIdx+1) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi DOWN")
+            lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_DOWN))
             isGoingDown = false
         }
 
@@ -203,11 +210,11 @@ class PushUpCounter : IRepetitionCounter {
             when {
                 !isInvalidCycle && reachedUp && startedFromDown -> {
                     count++
-                    lastValidationResult = ValidationResult(true, "")
+                    lastValidationResult = ValidationResult(true, emptyList())
                 }
 
                 !startedFromDown -> {
-                    lastValidationResult = ValidationResult(false, "Tidak dimulai dari posisi DOWN")
+                    lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_START_FROM_DOWN))
                 }
             }
 
@@ -237,21 +244,21 @@ class PushUpCounter : IRepetitionCounter {
     }
 
     private fun validatePosture(hL: Float, hR: Float, kL: Float, kR: Float, torso: Float): ValidationResult {
-        val messages = mutableListOf<String>()
+        val messages = mutableListOf<ValidationMessage>()
 
         if (hL < HIP_MIN_VALID || hR < HIP_MIN_VALID)
-            messages.add("Pinggul terlalu ditekuk")
+            messages.add(ValidationMessage.HIP_TOO_BENT)
 
         if (kL < KNEE_MIN_VALID || kR < KNEE_MIN_VALID)
-            messages.add("Lutut terlalu ditekuk")
+            messages.add(ValidationMessage.KNEE_TOO_BENT)
 
         if (torso < TORSO_MIN_DEVIATION)
-            messages.add("Posisi badan harus horizontal")
+            messages.add(ValidationMessage.TORSO_NOT_HORIZONTAL)
 
         return if (messages.isEmpty()) {
-            ValidationResult(true, "")
+            ValidationResult(true, emptyList())
         } else {
-            ValidationResult(false, messages.joinToString(", "))
+            ValidationResult(false, messages)
         }
     }
 }
@@ -264,7 +271,7 @@ class SitUpCounter : IRepetitionCounter {
         private set
 
     override var lastValidationResult: ValidationResult =
-        ValidationResult(true, "")
+        ValidationResult(true, emptyList())
         private set
 
     private var isInvalidCycle = false
@@ -301,7 +308,7 @@ class SitUpCounter : IRepetitionCounter {
 
     override fun resetStateOnly() {
         currentState = MovementState.CENTRE
-        lastValidationResult = ValidationResult(true, "")
+        lastValidationResult = ValidationResult(true, emptyList())
         isInvalidCycle = false
         reachedUp = false
         isGoingUp = false
@@ -341,7 +348,7 @@ class SitUpCounter : IRepetitionCounter {
         if (currentState == MovementState.DOWN && newIdx > oldIdx && !startedFromDown) {
             startedFromDown = true
             isInvalidCycle = false
-            lastValidationResult = ValidationResult(true, "")
+            lastValidationResult = ValidationResult(true, emptyList())
         }
 
         // Up
@@ -375,14 +382,14 @@ class SitUpCounter : IRepetitionCounter {
         // Go Up but go Down again before UP
         if (isGoingUp && newIdx < maxStateIdx-1) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi UP")
+            lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_UP))
             isGoingUp = false
         }
 
         // Go down but go up again before going Down
         if (isGoingDown && newIdx > minStateIdx+1) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi DOWN")
+            lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_DOWN))
             isGoingDown = false
         }
 
@@ -391,11 +398,11 @@ class SitUpCounter : IRepetitionCounter {
             when {
                 !isInvalidCycle && reachedUp && startedFromDown -> {
                     count++
-                    lastValidationResult = ValidationResult(true, "")
+                    lastValidationResult = ValidationResult(true, emptyList())
                 }
 
                 !startedFromDown -> {
-                    lastValidationResult = ValidationResult(false, "Tidak dimulai dari posisi DOWN")
+                    lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_START_FROM_DOWN))
                 }
             }
 
@@ -426,9 +433,9 @@ class SitUpCounter : IRepetitionCounter {
 
     private fun validatePosture(kL: Float, kR: Float): ValidationResult {
         return if (kL > KNEE_MAX_VALID || kR > KNEE_MAX_VALID) {
-            ValidationResult(false, "Lutut terlalu dibuka")
+            ValidationResult(false, listOf(ValidationMessage.KNEE_TOO_WIDE))
         } else {
-            ValidationResult(true, "")
+            ValidationResult(true, emptyList())
         }
     }
 }
@@ -441,7 +448,7 @@ class PullUpCounter : IRepetitionCounter {
         private set
 
     override var lastValidationResult: ValidationResult =
-        ValidationResult(true, "")
+        ValidationResult(true, emptyList())
         private set
 
     private var isInvalidCycle = false
@@ -481,7 +488,7 @@ class PullUpCounter : IRepetitionCounter {
 
     override fun resetStateOnly() {
         currentState = MovementState.CENTRE
-        lastValidationResult = ValidationResult(true, "")
+        lastValidationResult = ValidationResult(true, emptyList())
         isInvalidCycle = false
         reachedUp = false
         isGoingUp = false
@@ -524,7 +531,7 @@ class PullUpCounter : IRepetitionCounter {
         if (currentState == MovementState.DOWN && newIdx > oldIdx && !startedFromDown) {
             startedFromDown = true
             isInvalidCycle = false
-            lastValidationResult = ValidationResult(true, "")
+            lastValidationResult = ValidationResult(true, emptyList())
         }
 
         // Up
@@ -558,14 +565,14 @@ class PullUpCounter : IRepetitionCounter {
         // Go Up but Go Down again before UP
         if (isGoingUp && newIdx < maxStateIdx-1) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi UP")
+            lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_UP))
             isGoingUp = false
         }
 
         // Go Down but Go Up again before DOWN
         if (isGoingDown && newIdx > minStateIdx+1) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi DOWN")
+            lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_DOWN))
             isGoingDown = false
         }
 
@@ -574,11 +581,11 @@ class PullUpCounter : IRepetitionCounter {
             when {
                 !isInvalidCycle && reachedUp && startedFromDown -> {
                     count++
-                    lastValidationResult = ValidationResult(true, "")
+                    lastValidationResult = ValidationResult(true, emptyList())
                 }
 
                 !startedFromDown -> {
-                    lastValidationResult = ValidationResult(false, "Tidak dimulai dari posisi DOWN")
+                    lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_START_FROM_DOWN))
                 }
             }
 
@@ -608,21 +615,21 @@ class PullUpCounter : IRepetitionCounter {
     }
 
     private fun validatePosture( kL: Float, kR: Float, hL: Float, hR: Float, torso: Float ): ValidationResult {
-        val messages = mutableListOf<String>()
+        val messages = mutableListOf<ValidationMessage>()
 
         if (kL < KNEE_MIN_VALID || kR < KNEE_MIN_VALID)
-            messages.add("Lutut tidak lurus")
+            messages.add(ValidationMessage.KNEE_NOT_STRAIGHT)
 
         if (hL < HIP_MIN_VALID || hR < HIP_MIN_VALID)
-            messages.add("Pinggul tidak lurus")
+            messages.add(ValidationMessage.HIP_NOT_STRAIGHT)
 
         if (torso > TORSO_MAX_DEVIATION)
-            messages.add("Posisi badan harus vertikal")
+            messages.add(ValidationMessage.TORSO_NOT_VERTICAL)
 
         return if (messages.isEmpty()) {
-            ValidationResult(true, "")
+            ValidationResult(true, emptyList())
         } else {
-            ValidationResult(false, messages.joinToString(", "))
+            ValidationResult(false, messages)
         }
     }
 }
@@ -635,7 +642,7 @@ class LungesCounter : IRepetitionCounter {
         private set
 
     override var lastValidationResult: ValidationResult =
-        ValidationResult(true, "")
+        ValidationResult(true, emptyList())
         private set
 
     private var isInvalidCycle = false
@@ -673,7 +680,7 @@ class LungesCounter : IRepetitionCounter {
 
     override fun resetStateOnly() {
         currentState = MovementState.CENTRE
-        lastValidationResult = ValidationResult(true, "")
+        lastValidationResult = ValidationResult(true, emptyList())
         isInvalidCycle = false
         reachedDown = false
         startedFromUp = false
@@ -712,7 +719,7 @@ class LungesCounter : IRepetitionCounter {
         if (currentState == MovementState.UP && newIdx < oldIdx && !startedFromUp) {
             startedFromUp = true
             isInvalidCycle = false
-            lastValidationResult = ValidationResult(true, "")
+            lastValidationResult = ValidationResult(true, emptyList())
         }
 
         // Going down
@@ -746,14 +753,14 @@ class LungesCounter : IRepetitionCounter {
         // Go Down but Go Up again before DOWN
         if (isGoingDown && newIdx > minStateIdx+2) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi DOWN")
+            lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_DOWN))
             isGoingDown = false
         }
 
         // Go Up but Go Down again before UP
         if (isGoingUp && newIdx < maxStateIdx-2) {
             isInvalidCycle = true
-            lastValidationResult = ValidationResult(false, "Tidak mencapai posisi UP")
+            lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_UP))
             isGoingUp = false
         }
 
@@ -762,11 +769,11 @@ class LungesCounter : IRepetitionCounter {
             when {
                 !isInvalidCycle && startedFromUp && reachedDown -> {
                     count++
-                    lastValidationResult = ValidationResult(true, "")
+                    lastValidationResult = ValidationResult(true, emptyList())
                 }
 
                 !startedFromUp -> {
-                    lastValidationResult = ValidationResult(false, "Tidak dimulai dari posisi UP")
+                    lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_START_FROM_UP))
                 }
             }
 
@@ -797,9 +804,9 @@ class LungesCounter : IRepetitionCounter {
 
     private fun validatePosture(torso: Float): ValidationResult {
         return if (kotlin.math.abs(torso) > TORSO_MAX_DEVIATION) {
-            ValidationResult(false, "Tubuh terlalu miring")
+            ValidationResult(false, listOf(ValidationMessage.TORSO_TOO_TILTED))
         } else {
-            ValidationResult(true, "")
+            ValidationResult(true, emptyList())
         }
     }
 }
