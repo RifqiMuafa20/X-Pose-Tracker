@@ -22,7 +22,6 @@ import android.util.Range
 import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.Button
@@ -292,7 +291,7 @@ class CameraActivity : AppCompatActivity(),
 
     private fun setupClickListeners() {
         binding.stopCamera.setOnClickListener {
-            showConfirmationDialog(R.string.stop_record, type = 0)
+            showConfirmationDialog(R.string.stop_record, type = 2)
         }
 
         binding.switchCamera.setOnClickListener {
@@ -465,20 +464,31 @@ class CameraActivity : AppCompatActivity(),
 
     // Photo capture
 
-    private fun capturePreviewFrame() {
+    private fun capturePreviewFrame(onDone: (() -> Unit)? = null) {
         val bitmap: Bitmap = binding.viewFinder.bitmap ?: return
+
         backgroundExecutor.execute {
             val stream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
             midRecordPhotoBytes = stream.toByteArray()
+
+            runOnUiThread {
+                onDone?.invoke()
+            }
         }
     }
 
-    // Finish & navigation
-
     private fun finishActivity() {
-        if (!midPhotoCaptured) capturePreviewFrame()
+        if (!midPhotoCaptured) {
+            capturePreviewFrame {
+                navigateToResult()
+            }
+        } else {
+            navigateToResult()
+        }
+    }
 
+    private fun navigateToResult() {
         val beratBadan = userProfile?.userWeight?.toFloat()
         val totalKalori = viewModel.calculateCalories(beratBadan)
 
@@ -513,6 +523,8 @@ class CameraActivity : AppCompatActivity(),
                     )
                     intent.data = Uri.fromParts("package", packageName, null)
                     startActivity(intent)
+                } else if (type == 2) {
+                    finishActivity()
                 }
             }
             .setNegativeButton(R.string.no) { dialog, _ ->

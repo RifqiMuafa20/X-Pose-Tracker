@@ -39,6 +39,8 @@ class PrivateRecordActivity : AppCompatActivity() {
                 }
 
                 else -> {
+                    showToast(getString(R.string.start_recording))
+
                     val activityType = binding.categoryOption.text.toString()
                     val durationText = binding.durationInput.text.toString()
                     val duration = durationText.toLongOrNull() ?: 0L

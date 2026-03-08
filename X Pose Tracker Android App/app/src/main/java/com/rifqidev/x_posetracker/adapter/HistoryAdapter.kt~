@@ -35,9 +35,7 @@ class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.ActivityViewHolder>()
         holder.title.text = item.recordName
         holder.date.text = item.recordDate?.let { DateHelper.formatDateToIndo(it) }
         holder.time.text = item.recordTime
-        item.recordPhotos?.let {
-            holder.image.setImageBitmap(it.toBitmap())
-        } ?: holder.image.setImageResource(R.drawable.gym_background)
+        holder.image.setImageBitmap(item.recordPhotos?.toBitmap())
 
         holder.itemView.setOnClickListener {
             val intent = Intent(it.context, ResultActivity::class.java)
