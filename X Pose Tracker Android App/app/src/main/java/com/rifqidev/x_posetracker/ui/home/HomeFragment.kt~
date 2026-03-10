@@ -221,12 +221,12 @@ class HomeFragment : Fragment() {
         binding.daysOption.setText(timeOptions[0], false)
 
         binding.daysOption.setOnItemClickListener { _, _, position, _ ->
-            when (position) {
-                0 -> homeViewModel.setTodayRange()
-                1 -> homeViewModel.setThisWeekRange()
-                2 -> homeViewModel.setThisMonthRange()
-                3 -> homeViewModel.setThisYearRange()
-                4 -> homeViewModel.setAllRange()
+            when (timeOptions[position]) {
+                "Hari ini"   -> homeViewModel.setTodayRange()
+                "Minggu ini"  -> homeViewModel.setThisWeekRange()
+                "Bulan ini"  -> homeViewModel.setThisMonthRange()
+                "Tahun ini"  -> homeViewModel.setThisYearRange()
+                "Semua"      -> homeViewModel.setAllRange()
             }
         }
 
