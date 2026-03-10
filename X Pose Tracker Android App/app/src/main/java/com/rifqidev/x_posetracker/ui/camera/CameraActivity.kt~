@@ -52,14 +52,14 @@ import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
 import com.rifqidev.x_posetracker.utils.ValidationMessage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.util.Locale
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class CameraActivity : AppCompatActivity(),
     PoseLandmarkerHelper.LandmarkerListener,
@@ -77,8 +77,13 @@ class CameraActivity : AppCompatActivity(),
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_BACK
 
-    // Single background thread
-    private lateinit var backgroundExecutor: ExecutorService
+    // PoseLandmark
+    @Volatile
+    private var isLandmarkerReady = false
+
+    // Coroutines and background threads
+    private val cameraScope = lifecycleScope
+    private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     // Session state
     private var activityType: String? = null
@@ -136,48 +141,54 @@ class CameraActivity : AppCompatActivity(),
         setupAudio()
         setupClickListeners()
 
-        // Background thread for camera analysis only
-        backgroundExecutor = Executors.newSingleThreadExecutor()
-
-        // Initialize PoseLandmarker on background thread (heavy native init)
-        backgroundExecutor.execute {
+        // Initialize PoseLandmark
+        cameraScope.launch(Dispatchers.IO) {
             poseLandmarkerHelper = PoseLandmarkerHelper(
-                context = this,
+                context = this@CameraActivity,
                 runningMode = RunningMode.LIVE_STREAM,
                 minPoseDetectionConfidence = viewModel.currentMinPoseDetectionConfidence,
                 minPoseTrackingConfidence = viewModel.currentMinPoseTrackingConfidence,
                 minPosePresenceConfidence = viewModel.currentMinPosePresenceConfidence,
                 currentDelegate = viewModel.currentDelegate,
-                poseLandmarkerHelperListener = this
+                poseLandmarkerHelperListener = this@CameraActivity
             )
-        }
+            isLandmarkerReady = true
 
-        binding.viewFinder.post { setUpCamera() }
+            withContext(Dispatchers.Main) {
+                binding.viewFinder.post { setUpCamera() }
+            }
+        }
     }
 
     public override fun onResume() {
         super.onResume()
         hideSystemUI()
-        setUpCamera()
 
-        backgroundExecutor.execute {
+        cameraScope.launch(Dispatchers.IO) {
             if (::poseLandmarkerHelper.isInitialized && poseLandmarkerHelper.isClose()) {
+                isLandmarkerReady = false
                 poseLandmarkerHelper.setupPoseLandmarker()
+                isLandmarkerReady = true
+            }
+            withContext(Dispatchers.Main) {
+                setUpCamera()
             }
         }
     }
 
     override fun onPause() {
         super.onPause()
+        isLandmarkerReady = false
+
         if (::poseLandmarkerHelper.isInitialized) {
-            // Persist config back to ViewModel (main thread — no I/O, just field reads)
             viewModel.setMinPoseDetectionConfidence(poseLandmarkerHelper.minPoseDetectionConfidence)
             viewModel.setMinPoseTrackingConfidence(poseLandmarkerHelper.minPoseTrackingConfidence)
             viewModel.setMinPosePresenceConfidence(poseLandmarkerHelper.minPosePresenceConfidence)
             viewModel.setDelegate(poseLandmarkerHelper.currentDelegate)
 
-            // Release native resources on background thread
-            backgroundExecutor.execute { poseLandmarkerHelper.clearPoseLandmarker() }
+            cameraScope.launch(Dispatchers.IO) {
+                poseLandmarkerHelper.clearPoseLandmarker()
+            }
         }
     }
 
@@ -187,10 +198,6 @@ class CameraActivity : AppCompatActivity(),
         tts?.shutdown()
 
         super.onDestroy()
-
-        // Block until background thread finishes — prevents use-after-free of native handle
-        backgroundExecutor.shutdown()
-        backgroundExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
 
         // poseClassifier is now owned by ViewModel; ViewModel.onCleared() cleans it up
         binding.overlay.clear()
@@ -370,7 +377,7 @@ class CameraActivity : AppCompatActivity(),
 
         imageAnalyzer = analysisBuilder.build().also {
             // Analysis runs on backgroundExecutor — never the main thread
-            it.setAnalyzer(backgroundExecutor) { image -> detectPose(image) }
+            it.setAnalyzer(cameraExecutor) { image -> detectPose(image) }
         }
 
         cameraProvider.unbindAll()
@@ -426,11 +433,13 @@ class CameraActivity : AppCompatActivity(),
     // Camera frame detection
 
     private fun detectPose(imageProxy: ImageProxy) {
-        if (::poseLandmarkerHelper.isInitialized) {
+        if (isLandmarkerReady) {
             poseLandmarkerHelper.detectLiveStream(
                 imageProxy = imageProxy,
                 isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT
             )
+        } else {
+            imageProxy.close() 
         }
     }
 
@@ -467,14 +476,15 @@ class CameraActivity : AppCompatActivity(),
     private fun capturePreviewFrame(onDone: (() -> Unit)? = null) {
         val bitmap: Bitmap = binding.viewFinder.bitmap ?: return
 
-        backgroundExecutor.execute {
-            val stream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
-            midRecordPhotoBytes = stream.toByteArray()
-
-            runOnUiThread {
-                onDone?.invoke()
+        cameraScope.launch {
+            val bytes = withContext(Dispatchers.Default) {
+                val stream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream)
+                stream.toByteArray()
             }
+
+            midRecordPhotoBytes = bytes
+            onDone?.invoke()
         }
     }
 
