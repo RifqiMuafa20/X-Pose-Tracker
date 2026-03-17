@@ -142,7 +142,7 @@ class CameraActivity : AppCompatActivity(),
         setupClickListeners()
 
         // Initialize PoseLandmark
-        cameraScope.launch(Dispatchers.IO) {
+        cameraExecutor.execute {
             poseLandmarkerHelper = PoseLandmarkerHelper(
                 context = this@CameraActivity,
                 runningMode = RunningMode.LIVE_STREAM,
@@ -154,7 +154,7 @@ class CameraActivity : AppCompatActivity(),
             )
             isLandmarkerReady = true
 
-            withContext(Dispatchers.Main) {
+            runOnUiThread {
                 binding.viewFinder.post { setUpCamera() }
             }
         }
@@ -164,13 +164,13 @@ class CameraActivity : AppCompatActivity(),
         super.onResume()
         hideSystemUI()
 
-        cameraScope.launch(Dispatchers.IO) {
+        cameraExecutor.execute {
             if (::poseLandmarkerHelper.isInitialized && poseLandmarkerHelper.isClose()) {
                 isLandmarkerReady = false
                 poseLandmarkerHelper.setupPoseLandmarker()
                 isLandmarkerReady = true
             }
-            withContext(Dispatchers.Main) {
+            runOnUiThread {
                 setUpCamera()
             }
         }
@@ -178,7 +178,9 @@ class CameraActivity : AppCompatActivity(),
 
     override fun onPause() {
         super.onPause()
+
         isLandmarkerReady = false
+        imageAnalyzer?.clearAnalyzer()
 
         if (::poseLandmarkerHelper.isInitialized) {
             viewModel.setMinPoseDetectionConfidence(poseLandmarkerHelper.minPoseDetectionConfidence)
@@ -186,7 +188,7 @@ class CameraActivity : AppCompatActivity(),
             viewModel.setMinPosePresenceConfidence(poseLandmarkerHelper.minPosePresenceConfidence)
             viewModel.setDelegate(poseLandmarkerHelper.currentDelegate)
 
-            cameraScope.launch(Dispatchers.IO) {
+            cameraExecutor.execute {
                 poseLandmarkerHelper.clearPoseLandmarker()
             }
         }
