@@ -627,7 +627,7 @@ class CameraActivity : AppCompatActivity(),
     }
 
     private fun playErrorSound() {
-        if (spLoaded) sp.play(soundId, 1f, 1f, 0, 0, 2f)
+        if (spLoaded) sp.play(soundId, 0.5f, 0.5f, 0, 0, 2f)
     }
 
     override fun onInit(status: Int) {
@@ -649,8 +649,8 @@ class CameraActivity : AppCompatActivity(),
                 tts?.setLanguage(Locale.US)
             }
 
-            tts?.setSpeechRate(2.0f)
-            tts?.setPitch(1.0f)
+            tts?.setSpeechRate(1.5f)
+            tts?.setPitch(1.2f)
         }
     }
 
