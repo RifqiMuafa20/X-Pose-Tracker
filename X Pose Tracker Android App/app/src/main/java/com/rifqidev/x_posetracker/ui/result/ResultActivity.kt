@@ -53,6 +53,8 @@ class ResultActivity : AppCompatActivity() {
 
         recordId = intent.getStringExtra("record_id") ?: ""
         recordType = intent.getIntExtra("record_type", 0)
+
+        val repCount = pushUp+sitUp+pullUp+lunges
         val recordPhotoBytes: ByteArray? = intent.getByteArrayExtra("record_photo_bytes")
 
         val names = resources.getStringArray(R.array.categories_menu)
@@ -66,51 +68,59 @@ class ResultActivity : AppCompatActivity() {
             binding.frameImage.setImageBitmap(recordPhotoBytes.toBitmap())
         }
 
+        if (repCount == 0) {
+            showConfirmationDialog(R.string.no_repetition, 2)
+        }
+
         if(recordType == 2){
             binding.continueButton.visibility = View.INVISIBLE
             binding.deleteButton.visibility = View.VISIBLE
         }
 
         binding.continueButton.setOnClickListener {
-            if(recordType == 0){
-                val userRecord = UserRecordEntity(
-                    idRecord = UUID.randomUUID().toString(),
-                    idUser = userId!!,
-                    recordName = "Latihan${UUID.randomUUID()}",
-                    recordDuration = duration,
-                    recordDate = date!!,
-                    recordTime = time!!,
-                    recordCalories = calorie,
-                    pushupCount = pushUp,
-                    situpCount = sitUp,
-                    pullupCount = pullUp,
-                    lungesCount = lunges,
-                    recordPhotos = recordPhotoBytes
-                )
+            if(repCount == 0){
+                showConfirmationDialog(R.string.no_repetition, 2)
+            } else {
+                if (recordType == 0) {
+                    val userRecord = UserRecordEntity(
+                        idRecord = UUID.randomUUID().toString(),
+                        idUser = userId!!,
+                        recordName = "Latihan${UUID.randomUUID()}",
+                        recordDuration = duration,
+                        recordDate = date!!,
+                        recordTime = time!!,
+                        recordCalories = calorie,
+                        pushupCount = pushUp,
+                        situpCount = sitUp,
+                        pullupCount = pullUp,
+                        lungesCount = lunges,
+                        recordPhotos = recordPhotoBytes
+                    )
 
-                viewModel.insertUserRecord(userRecord)
-                viewModel.onWorkoutCompleted()
+                    viewModel.insertUserRecord(userRecord)
+                    viewModel.onWorkoutCompleted()
 
-                showToast(getString(R.string.user_record_added))
+                    showToast(getString(R.string.user_record_added))
 
-                finish()
+                    finish()
 
-            } else if(recordType == 1){
-                val memberRecord = MemberRecordEntity(
-                    idRecord = UUID.randomUUID().toString(),
-                    idMember = memberId,
-                    recordDate = date,
-                    recordTime = time,
-                    recordDuration = duration,
-                    pushupCount = pushUp,
-                    situpCount = sitUp,
-                    pullupCount = pullUp,
-                    lungesCount = lunges
-                )
+                } else if (recordType == 1) {
+                    val memberRecord = MemberRecordEntity(
+                        idRecord = UUID.randomUUID().toString(),
+                        idMember = memberId,
+                        recordDate = date,
+                        recordTime = time,
+                        recordDuration = duration,
+                        pushupCount = pushUp,
+                        situpCount = sitUp,
+                        pullupCount = pullUp,
+                        lungesCount = lunges
+                    )
 
-                viewModel.insertMemberRecord(memberRecord)
-                showToast(getString(R.string.user_record_added))
-                finish()
+                    viewModel.insertMemberRecord(memberRecord)
+                    showToast(getString(R.string.user_record_added))
+                    finish()
+                }
             }
         }
 
@@ -148,16 +158,23 @@ class ResultActivity : AppCompatActivity() {
     private fun showConfirmationDialog(message: Int, type: Int) {
         val builder = AlertDialog.Builder(this)
         builder.setMessage(message)
-        builder.setPositiveButton(R.string.yes) { _, _ ->
-            if (type == 0) {
-                finish()
-            } else if (type == 1) {
-                viewModel.deleteUserRecord(recordId)
+
+        if(type == 2){
+            builder.setPositiveButton(R.string.ok) { _, _ ->
                 finish()
             }
-        }
-        builder.setNegativeButton(R.string.no) { dialog, _ ->
-            dialog.dismiss()
+        } else {
+            builder.setPositiveButton(R.string.yes) { _, _ ->
+                if (type == 0) {
+                    finish()
+                } else if (type == 1) {
+                    viewModel.deleteUserRecord(recordId)
+                    finish()
+                }
+            }
+            builder.setNegativeButton(R.string.no) { dialog, _ ->
+                dialog.dismiss()
+            }
         }
         val dialog = builder.create()
         dialog.show()

@@ -223,6 +223,8 @@
     <string name="day_streak">%d Day Streak!</string>
     <string name="keep_going">Keep Going!</string>
     <string name="no_streak">Let\'s Training!</string>
+    <string name="no_repetition">The workout is invalid because it has no repetitions</string>
+    <string name="ok">Okay</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

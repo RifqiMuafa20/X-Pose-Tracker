@@ -224,6 +224,8 @@
     <string name="day_streak">%d Hari Beruntunk!</string>
     <string name="keep_going">Tetap Semangat!</string>
     <string name="no_streak">Ayo Latihan!</string>
+    <string name="no_repetition">Latihan tidak valid karena tidak memiliki repetisi</string>
+    <string name="ok">Okey</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
