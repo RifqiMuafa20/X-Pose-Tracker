@@ -14,13 +14,16 @@
 
         <TextView
             android:id="@+id/title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:fontFamily="@font/poppins_semi_bold"
             android:text="@string/activity_title"
             android:textColor="@color/red_orange"
             android:textSize="12sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -37,15 +40,19 @@
 
         <TextView
             android:id="@+id/activity_date"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:fontFamily="@font/poppins_regular"
             android:text="@string/activity_date"
             android:textColor="@color/white"
             android:textSize="10sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginEnd="8dp"
             app:layout_constraintBottom_toBottomOf="@id/date_icon"
             app:layout_constraintStart_toEndOf="@+id/date_icon"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
             app:layout_constraintTop_toTopOf="@id/date_icon" />
 
         <ImageView
@@ -62,15 +69,19 @@
 
         <TextView
             android:id="@+id/activity_person"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:fontFamily="@font/poppins_regular"
             android:text="@string/person_count"
             android:textColor="@color/white"
             android:textSize="10sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginEnd="8dp"
             app:layout_constraintBottom_toBottomOf="@id/person_icon"
             app:layout_constraintStart_toEndOf="@+id/person_icon"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
             app:layout_constraintTop_toTopOf="@id/person_icon" />
 
         <androidx.constraintlayout.widget.Guideline
@@ -99,7 +110,7 @@
             android:textSize="10sp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:layout_marginEnd="32dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/icon_location"
             app:layout_constraintStart_toEndOf="@+id/icon_location"
@@ -126,7 +137,7 @@
             android:textSize="10sp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:layout_marginEnd="32dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/icon_supervisor"
             app:layout_constraintStart_toEndOf="@+id/icon_supervisor"

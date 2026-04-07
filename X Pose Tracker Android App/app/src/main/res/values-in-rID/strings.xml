@@ -220,6 +220,7 @@
     <string name="understand">Mengerti</string>
     <string name="record_scenario">Skenario Rekam Aktivitas</string>
     <string name="tutorial_message">1. Letakkan smartphone pada jarak 1–2 meter dari subjek dengan tinggi sejajar dengan tubuh subjek.\n\n2. Pastikan seluruh tubuh subjek masuk ke dalam frame kamera. \n\n3. Rekaman dilakukan dengan sudut pandang samping untuk push-up. sit-up, dan lunges, lalu sudut pandang depan untuk pull-up.</string>
+    <string name="activity_streak_icon">activity streak icon</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

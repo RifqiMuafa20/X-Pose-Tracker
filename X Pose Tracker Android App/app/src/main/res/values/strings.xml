@@ -219,6 +219,7 @@
     <string name="understand">Understand</string>
     <string name="record_scenario">Activity Record Scenario</string>
     <string name="tutorial_message">1. Place the smartphone at a distance of 1–2 meters from the subject, with the camera positioned at the same height as the subject’s body.\n\n2. Ensure that the subject’s entire body is fully visible within the camera frame.\n\n3. Recording should be done from a side view for push-ups, sit-ups, and lunges, and from a front view for pull-ups.</string>
+    <string name="activity_streak_icon">activity streak icon</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
