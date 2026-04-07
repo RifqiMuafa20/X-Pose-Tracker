@@ -97,6 +97,15 @@ data class UserProfileEntity(
     @ColumnInfo(name = "user_profile") val userProfile: ByteArray?
 )
 
+@Entity(tableName = "user_streak")
+data class UserStreakEntity(
+    @PrimaryKey
+    @ColumnInfo(name = "id_streak") val idStreak: String,
+    @ColumnInfo(name = "current_streak") val currentStreak: Int?,
+    @ColumnInfo(name = "last_activity_date") val lastActivityDate: String?,
+    @ColumnInfo(name = "longest_streak") val longestStreak: Int?
+)
+
 @Entity(
     tableName = "user_record",
     foreignKeys = [ForeignKey(

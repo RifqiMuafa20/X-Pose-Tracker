@@ -1,5 +1,6 @@
 package com.rifqidev.x_posetracker.ui.home
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -8,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -20,12 +23,14 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.adapter.ListWorkoutAdapter
+import com.rifqidev.x_posetracker.data.UserStreakEntity
 import com.rifqidev.x_posetracker.data.WeeklyProgress
 import com.rifqidev.x_posetracker.data.WorkoutItem
 import com.rifqidev.x_posetracker.databinding.FragmentHomeBinding
 import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.toBitmap
 import java.time.LocalDate
+import java.util.UUID
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -38,6 +43,9 @@ class HomeFragment : Fragment() {
 
     private lateinit var timeOptions: Array<String>
     private lateinit var timeAdapter: ArrayAdapter<String>
+
+    private var streakDay: Int = 0
+    private var workoutStatus: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,6 +74,43 @@ class HomeFragment : Fragment() {
                     binding.profileImage.setImageResource(R.drawable.account_icon)
                 }
             }
+        }
+
+        homeViewModel.getUserStreak().observe(viewLifecycleOwner) { streak ->
+            if (streak == null) {
+                val newStreak = UserStreakEntity(
+                    idStreak = "USER_STREAK",
+                    currentStreak = 0,
+                    lastActivityDate = null,
+                    longestStreak = 0
+                )
+                homeViewModel.insertUserStreak(newStreak)
+                return@observe
+            }
+
+            homeViewModel.checkAndUpdateStreakOnHomeOpen(streak)
+
+            val current = streak.currentStreak ?: 0
+            streakDay = current
+
+            binding.activityStreak.text = current.toString()
+
+            val today = DateHelper.getCurrentLocaleDate()
+            val lastDate = streak.lastActivityDate?.let {
+                DateHelper.parseDate(it)
+            }
+
+            val isTodayWorkout = lastDate?.isEqual(today) == true
+            workoutStatus = isTodayWorkout
+
+            val iconRes = when {
+                current == 0 -> R.drawable.fire_streak_grey
+                current > 0 && !isTodayWorkout -> R.drawable.fire_streak
+                current > 0 && isTodayWorkout -> R.drawable.fire_streak_orange
+                else -> R.drawable.fire_streak_grey
+            }
+
+            binding.iconStreak.setImageResource(iconRes)
         }
 
         val todayDate = DateHelper.getCurrentDate()
@@ -106,6 +151,10 @@ class HomeFragment : Fragment() {
         binding.categoryOptionLayout.setEndIconOnClickListener {
             categoryAdapter.filter.filter(null)
             binding.categoryOption.showDropDown()
+        }
+
+        binding.iconStreak.setOnClickListener {
+            showStreakDialog(streakDay)
         }
 
         val chart = binding.chart
@@ -265,6 +314,35 @@ class HomeFragment : Fragment() {
 
             adapter.notifyDataSetChanged()
         }
+    }
+
+    private fun showStreakDialog(streak: Int) {
+        val view = layoutInflater.inflate(R.layout.dialog_streak, null)
+        val text = view.findViewById<TextView>(R.id.streakText)
+        val hope = view.findViewById<TextView>(R.id.hopeText)
+        val icon = view.findViewById<ImageView>(R.id.streak_icon)
+
+        text.text = getString(R.string.day_streak, streak)
+
+        val iconRes = when {
+            streak == 0 -> R.drawable.fire_streak_grey
+            streak > 0 && !workoutStatus -> R.drawable.fire_streak
+            streak > 0 && workoutStatus -> R.drawable.fire_streak_orange
+            else -> R.drawable.fire_streak_grey
+        }
+
+        icon.setImageResource(iconRes)
+
+        if(streak == 0) {
+            hope.text = getString(R.string.no_streak)
+        } else if(streak > 0) {
+            hope.text = getString(R.string.keep_going)
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setView(view)
+            .setCancelable(true)
+            .show()
     }
 
     override fun onDestroyView() {

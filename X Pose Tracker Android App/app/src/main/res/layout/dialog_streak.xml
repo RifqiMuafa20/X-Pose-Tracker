@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="320dp"
+    android:layout_height="320dp"
+    android:orientation="vertical"
+    android:padding="18dp"
+    android:background="@color/dark_gray_2"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/streak_icon"
+        android:contentDescription="@string/activity_streak_icon"
+        android:src="@drawable/fire_streak_orange"
+        android:layout_width="100dp"
+        android:layout_marginBottom="8dp"
+        android:layout_height="100dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/streakText"
+        android:fontFamily="@font/poppins_extra_bold"
+        android:text="@string/day_streak"
+        android:textColor="@color/white"
+        android:textSize="24sp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/hopeText"
+        android:fontFamily="@font/poppins_semi_bold"
+        android:text="@string/keep_going"
+        android:textColor="@color/white"
+        android:textSize="18sp"/>
+</LinearLayout>

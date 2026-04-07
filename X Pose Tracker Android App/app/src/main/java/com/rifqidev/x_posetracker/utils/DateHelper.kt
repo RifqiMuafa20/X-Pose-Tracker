@@ -1,6 +1,8 @@
 package com.rifqidev.x_posetracker.utils
 
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -35,6 +37,15 @@ object DateHelper {
         val minutes = seconds / 60
         val remainingSeconds = seconds % 60
         return String.format("%02d:%02d", minutes, remainingSeconds)
+    }
+
+    fun getCurrentLocaleDate(): LocalDate {
+        return LocalDate.now()
+    }
+
+    fun parseDate(dateString: String): LocalDate {
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+        return LocalDate.parse(dateString, formatter)
     }
 
     fun getTodayRange(): Pair<String, String> {

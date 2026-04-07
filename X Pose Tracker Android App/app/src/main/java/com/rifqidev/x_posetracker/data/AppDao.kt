@@ -181,4 +181,14 @@ interface AppDao {
         ORDER BY am.member_name ASC
     """)
     suspend fun getMembersWithBestRecord(activityId: String): List<ActivityMemberExport>
+
+    //Activity Streak
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertUserStreak(streak: UserStreakEntity)
+
+    @Query("SELECT * FROM user_streak LIMIT 1")
+    fun getUserStreak(): LiveData<UserStreakEntity?>
+
+    @Update
+    fun updateUserStreak(streak: UserStreakEntity)
 }

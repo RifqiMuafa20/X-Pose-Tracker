@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import com.rifqidev.x_posetracker.data.BestCategoryAchievement
 import com.rifqidev.x_posetracker.data.UserProfileEntity
+import com.rifqidev.x_posetracker.data.UserStreakEntity
 import com.rifqidev.x_posetracker.repository.AppRepository
 import com.rifqidev.x_posetracker.utils.DateHelper
 
@@ -25,6 +26,53 @@ class HomeViewModel(mApplication: Application) : ViewModel() {
 
     fun getUserProfile(): LiveData<UserProfileEntity?> {
         return repository.getUserProfile()
+    }
+
+    fun insertUserStreak(userStreak: UserStreakEntity) {
+        return repository.insertUserStreak(userStreak)
+    }
+
+    fun getUserStreak(): LiveData<UserStreakEntity?> {
+        return repository.getUserStreak()
+    }
+
+    private fun updateUserStreak(streak: UserStreakEntity) {
+        repository.updateUserStreak(streak)
+    }
+
+    fun checkAndUpdateStreakOnHomeOpen(streak: UserStreakEntity) {
+        val today = DateHelper.getCurrentLocaleDate()
+        val yesterday = today.minusDays(1)
+
+        val lastDate = streak.lastActivityDate?.let {
+            DateHelper.parseDate(it)
+        }
+
+        var newStreak = streak.currentStreak ?: 0
+
+        when {
+            lastDate == null -> {
+                newStreak = 0
+            }
+
+            lastDate.isEqual(today) -> {
+                return
+            }
+
+            lastDate.isEqual(yesterday) -> {
+                return
+            }
+
+            lastDate.isBefore(yesterday) -> {
+                newStreak = 0
+            }
+        }
+
+        if (newStreak != streak.currentStreak) {
+            updateUserStreak(
+                streak.copy(currentStreak = newStreak)
+            )
+        }
     }
 
     fun getTodayCalories(date: String): LiveData<Double?> {

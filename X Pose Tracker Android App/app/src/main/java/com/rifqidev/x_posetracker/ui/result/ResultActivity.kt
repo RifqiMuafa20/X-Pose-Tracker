@@ -3,10 +3,12 @@ package com.rifqidev.x_posetracker.ui.result
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
 import com.rifqidev.x_posetracker.R
@@ -87,7 +89,10 @@ class ResultActivity : AppCompatActivity() {
                 )
 
                 viewModel.insertUserRecord(userRecord)
+                viewModel.onWorkoutCompleted()
+
                 showToast(getString(R.string.user_record_added))
+
                 finish()
 
             } else if(recordType == 1){
