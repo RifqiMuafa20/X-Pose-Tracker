@@ -149,9 +149,7 @@ fun saveToGallery(context: Context, bitmap: Bitmap): Uri? {
 
     uri?.let {
         val stream = resolver.openOutputStream(it)
-        if (stream != null) {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        }
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
         stream?.close()
     }
 

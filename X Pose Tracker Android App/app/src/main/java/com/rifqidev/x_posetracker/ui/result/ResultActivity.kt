@@ -1,5 +1,8 @@
 package com.rifqidev.x_posetracker.ui.result
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -16,6 +19,8 @@ import com.rifqidev.x_posetracker.data.WorkoutItem
 import com.rifqidev.x_posetracker.databinding.ActivityResultBinding
 import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.EditTextDialog
+import com.rifqidev.x_posetracker.utils.captureView
+import com.rifqidev.x_posetracker.utils.saveToGallery
 import com.rifqidev.x_posetracker.utils.toBitmap
 import java.util.UUID
 
@@ -193,6 +198,15 @@ class ResultActivity : AppCompatActivity() {
         binding.deleteButton.setOnClickListener(){
             showConfirmationDialog(R.string.delete_activity_confirmation, 1)
         }
+
+        binding.shareButton.setOnClickListener {
+            val bitmap = captureView(binding.resultLayout)
+            val uri = saveToGallery(this, bitmap)
+
+            uri?.let {
+                shareImage(this, it)
+            }
+        }
     }
 
     private fun showConfirmationDialog(message: Int, type: Int) {
@@ -229,6 +243,16 @@ class ResultActivity : AppCompatActivity() {
         val training = getString(R.string.training)
 
         return "$training $timeOfDay"
+    }
+
+    private fun shareImage(context: Context, uri: Uri) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        context.startActivity(Intent.createChooser(intent, "Share Result"))
     }
 
     @Deprecated("Deprecated in Java")

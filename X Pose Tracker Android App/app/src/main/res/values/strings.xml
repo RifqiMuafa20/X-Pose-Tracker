@@ -233,6 +233,7 @@
     <string name="workout_hint">Input workout name</string>
     <string name="edit_record_name">Edit Record Name</string>
     <string name="cancel">Cancel</string>
+    <string name="share_icon">Share Icon</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
