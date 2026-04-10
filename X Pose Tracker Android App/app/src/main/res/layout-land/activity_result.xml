@@ -121,6 +121,36 @@
                     app:layout_constraintTop_toTopOf="@id/calorie_icon" />
 
                 <!-- Kanan: Info + RecyclerView -->
+
+                <TextView
+                    android:id="@+id/record_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/record_activity"
+                    android:fontFamily="@font/poppins_semi_bold"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical"
+                    app:layout_constraintEnd_toStartOf="@id/edit_button"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp" />
+
+                <ImageView
+                    android:id="@+id/edit_button"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/edit"
+                    android:src="@drawable/icon_edit_white"
+                    android:background="@drawable/circle_icon_bg"
+                    android:layout_marginEnd="16dp"
+                    android:padding="4dp"
+                    app:layout_constraintTop_toTopOf="@+id/record_name"
+                    app:layout_constraintBottom_toBottomOf="@+id/record_name"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
                 <ImageView
                     android:id="@id/date_icon"
                     android:layout_width="20dp"
@@ -130,7 +160,7 @@
                     android:contentDescription="@string/date_icon"
                     android:src="@drawable/date_icon_white"
                     app:layout_constraintStart_toEndOf="@id/guideline_vertical"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@id/record_name" />
 
                 <TextView
                     android:id="@+id/date"
@@ -161,7 +191,7 @@
                     android:contentDescription="@string/date_icon"
                     android:src="@drawable/time_icon_white"
                     app:layout_constraintStart_toEndOf="@id/guideline3"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@id/record_name" />
 
                 <TextView
                     android:id="@+id/hour"

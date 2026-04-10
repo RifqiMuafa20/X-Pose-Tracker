@@ -1,5 +1,6 @@
 package com.rifqidev.x_posetracker.utils
 
+import com.rifqidev.x_posetracker.R
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -163,5 +164,16 @@ object DateHelper {
         }
 
         return dates
+    }
+
+    fun getTimeOfDay(): Int {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
+        return when (hour) {
+            in 5..10 -> R.string.morning
+            in 11..14 -> R.string.noon
+            in 15..17 -> R.string.afternoon
+            else -> R.string.evening
+        }
     }
 }

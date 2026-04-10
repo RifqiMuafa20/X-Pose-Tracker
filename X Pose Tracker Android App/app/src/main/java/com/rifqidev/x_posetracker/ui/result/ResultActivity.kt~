@@ -77,18 +77,31 @@ class ResultActivity : AppCompatActivity() {
             showConfirmationDialog(R.string.no_repetition, 2)
         }
 
-        if(recordType == 1){
-            binding.recordName.visibility = View.GONE
-            binding.editButton.visibility = View.GONE
-        } else {
-            binding.recordName.text = recordTitle
+        when (recordType) {
+            1 -> {
+                binding.recordName.visibility = View.GONE
+                binding.editButton.visibility = View.GONE
+            }
+            0 -> {
+                binding.recordName.text = recordTitle
 
-            binding.editButton.setOnClickListener {
-                val dialog = EditTextDialog(binding.recordName.text.toString()) { newText ->
-                    binding.recordName.text = newText
-                    recordTitle = newText
+                binding.editButton.setOnClickListener {
+                    val dialog = EditTextDialog(binding.recordName.text.toString()) { newText ->
+                        binding.recordName.text = newText
+                        recordTitle = newText
+                    }
 
-                    if (recordType == 2) {
+                    dialog.show(supportFragmentManager, "EditDialog")
+                }
+            }
+            2 -> {
+                binding.recordName.text = recordTitle
+
+                binding.editButton.setOnClickListener {
+                    val dialog = EditTextDialog(binding.recordName.text.toString()) { newText ->
+                        binding.recordName.text = newText
+                        recordTitle = newText
+
                         val userRecord = UserRecordEntity(
                             idRecord = recordId,
                             idUser = userId!!,
@@ -106,9 +119,9 @@ class ResultActivity : AppCompatActivity() {
 
                         viewModel.updateUserRecord(userRecord)
                     }
-                }
 
-                dialog.show(supportFragmentManager, "EditDialog")
+                    dialog.show(supportFragmentManager, "EditDialog")
+                }
             }
         }
 

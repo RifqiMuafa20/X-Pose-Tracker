@@ -225,6 +225,14 @@
     <string name="no_streak">Let\'s Training!</string>
     <string name="no_repetition">The workout is invalid because it has no repetitions</string>
     <string name="ok">Okay</string>
+    <string name="morning">Morning</string>
+    <string name="noon">Noon</string>
+    <string name="afternoon">Afternoon</string>
+    <string name="evening">Evening</string>
+    <string name="training">Training</string>
+    <string name="workout_hint">Input workout name</string>
+    <string name="edit_record_name">Edit Record Name</string>
+    <string name="cancel">Cancel</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

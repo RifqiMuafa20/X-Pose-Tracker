@@ -27,6 +27,9 @@ interface AppDao {
     @Query("DELETE FROM user_record WHERE id_record = :recordId")
     fun deleteUserRecordById(recordId: String)
 
+    @Update
+    fun updateUserRecord(record: UserRecordEntity)
+
     //Activity
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertActivity(activity: ActivityEntity)

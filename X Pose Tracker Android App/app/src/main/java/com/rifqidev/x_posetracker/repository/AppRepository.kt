@@ -53,6 +53,10 @@ class AppRepository(application: Application) {
         executorService.execute { mAppDao.deleteUserRecordById(recordId) }
     }
 
+    fun updateUserRecord(record: UserRecordEntity) {
+        executorService.execute { mAppDao.updateUserRecord(record) }
+    }
+
     // activity
 
     fun getAllActivities(): LiveData<List<ActivityEntity>> = mAppDao.getAllActivities()

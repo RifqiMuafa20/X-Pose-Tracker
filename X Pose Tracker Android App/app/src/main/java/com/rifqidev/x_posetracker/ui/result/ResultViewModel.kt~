@@ -26,10 +26,6 @@ class ResultViewModel(mApplication: Application) : ViewModel()  {
         repository.updateUserStreak(streak)
     }
 
-    fun updateUserRecord(record: UserRecordEntity) {
-        repository.updateUserRecord(record)
-    }
-
     fun onWorkoutCompleted() {
         getUserStreak().observeForever(object : Observer<UserStreakEntity?> {
             override fun onChanged(streak: UserStreakEntity?) {

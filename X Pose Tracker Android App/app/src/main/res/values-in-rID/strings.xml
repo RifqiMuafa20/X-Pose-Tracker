@@ -226,6 +226,14 @@
     <string name="no_streak">Ayo Latihan!</string>
     <string name="no_repetition">Latihan tidak valid karena tidak memiliki repetisi</string>
     <string name="ok">Okey</string>
+    <string name="morning">Morning</string>
+    <string name="noon">Noon</string>
+    <string name="afternoon">Afternoon</string>
+    <string name="evening">Evening</string>
+    <string name="training">Training</string>
+    <string name="workout_hint">Input workout name</string>
+    <string name="edit_record_name">Edit Record Name</string>
+    <string name="cancel">Cancel</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
