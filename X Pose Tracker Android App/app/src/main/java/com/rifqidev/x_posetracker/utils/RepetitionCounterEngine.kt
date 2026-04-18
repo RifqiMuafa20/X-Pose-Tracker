@@ -463,8 +463,8 @@ class PullUpCounter : IRepetitionCounter {
     private var isGoingUp = false
     private var isGoingDown = false
 
-    private val ELBOW_FULL_DOWN = 130f
-    private val ELBOW_NEAR_DOWN = 100f
+    private val ELBOW_FULL_DOWN = 150f
+    private val ELBOW_NEAR_DOWN = 120f
     private val ELBOW_CENTRE = 80f
     private val ELBOW_FULL_UP = 50f
 
