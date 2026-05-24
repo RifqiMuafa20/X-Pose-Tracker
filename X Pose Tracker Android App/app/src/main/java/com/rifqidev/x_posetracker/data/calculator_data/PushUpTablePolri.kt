@@ -1,0 +1,87 @@
+package com.rifqidev.x_posetracker.data.calculator_data
+
+import com.rifqidev.x_posetracker.data.ScorePoint
+
+object PushUpTablePolri {
+
+    // (PRIA)
+    val male = listOf(
+        ScorePoint(1, 3),
+        ScorePoint(2, 4),
+        ScorePoint(3, 5),
+        ScorePoint(4, 6),
+        ScorePoint(5, 7),
+        ScorePoint(6, 9),
+        ScorePoint(7, 11),
+        ScorePoint(8, 13),
+        ScorePoint(9, 15),
+        ScorePoint(10, 17),
+        ScorePoint(11, 19),
+        ScorePoint(12, 21),
+        ScorePoint(13, 23),
+        ScorePoint(14, 26),
+        ScorePoint(15, 29),
+        ScorePoint(16, 32),
+        ScorePoint(17, 34),
+        ScorePoint(18, 36),
+        ScorePoint(19, 38),
+        ScorePoint(20, 40),
+        ScorePoint(21, 42),
+        ScorePoint(22, 44),
+        ScorePoint(23, 46),
+        ScorePoint(24, 48),
+        ScorePoint(25, 50),
+        ScorePoint(26, 52),
+        ScorePoint(27, 55),
+        ScorePoint(28, 58),
+        ScorePoint(29, 61),
+        ScorePoint(30, 64),
+        ScorePoint(31, 67),
+        ScorePoint(32, 70),
+        ScorePoint(33, 73),
+        ScorePoint(34, 76),
+        ScorePoint(35, 79),
+        ScorePoint(36, 82),
+        ScorePoint(37, 85),
+        ScorePoint(38, 88),
+        ScorePoint(39, 91),
+        ScorePoint(40, 94),
+        ScorePoint(41, 97),
+        ScorePoint(42, 100),
+        ScorePoint(43, 100)
+    )
+
+    // (WANITA)
+    val female = listOf(
+        ScorePoint(1, 1),
+        ScorePoint(9, 2),
+        ScorePoint(10, 6),
+        ScorePoint(11, 9),
+        ScorePoint(12, 13),
+        ScorePoint(13, 16),
+        ScorePoint(14, 20),
+        ScorePoint(15, 23),
+        ScorePoint(16, 27),
+        ScorePoint(17, 30),
+        ScorePoint(18, 34),
+        ScorePoint(19, 37),
+        ScorePoint(20, 41),
+        ScorePoint(21, 44),
+        ScorePoint(22, 48),
+        ScorePoint(23, 51),
+        ScorePoint(24, 55),
+        ScorePoint(25, 58),
+        ScorePoint(26, 62),
+        ScorePoint(27, 65),
+        ScorePoint(28, 69),
+        ScorePoint(29, 72),
+        ScorePoint(30, 76),
+        ScorePoint(31, 79),
+        ScorePoint(32, 83),
+        ScorePoint(33, 86),
+        ScorePoint(34, 90),
+        ScorePoint(35, 93),
+        ScorePoint(36, 97),
+        ScorePoint(37, 100)
+    )
+}

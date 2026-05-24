@@ -7,6 +7,11 @@
         android:title="@string/title_home" />
 
     <item
+        android:id="@+id/navigation_calculator"
+        android:icon="@drawable/baseline_calculate_24"
+        android:title="@string/title_calculate" />
+
+    <item
         android:id="@+id/navigation_record"
         android:icon="@drawable/baseline_adjust_24"
         android:title="@string/title_record" />

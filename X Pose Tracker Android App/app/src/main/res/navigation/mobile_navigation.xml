@@ -12,6 +12,12 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/navigation_calculator"
+        android:name="com.rifqidev.x_posetracker.ui.calculator.CalculatorFragment"
+        android:label="@string/title_calculate"
+        tools:layout="@layout/fragment_calculator" />
+
+    <fragment
         android:id="@+id/navigation_record"
         android:name="com.rifqidev.x_posetracker.ui.record.RecordFragment"
         android:label="@string/title_record"

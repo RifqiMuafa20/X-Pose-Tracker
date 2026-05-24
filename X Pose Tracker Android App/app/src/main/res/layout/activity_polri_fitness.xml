@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.calculator.PolriFitnessActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginStart="32dp"
+            android:contentDescription="@string/back_button"
+            android:src="@drawable/back_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/calculator_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:fontFamily="@font/poppins_semi_bold"
+            android:text="@string/polri_calculator_title"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@id/back_button"
+            app:layout_constraintBottom_toBottomOf="@id/back_button"
+            app:layout_constraintTop_toTopOf="@id/back_button" />
+
+        <TextView
+            android:id="@+id/polri_calculator_explanation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/polri_calculator_explanation"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="32dp"
+            android:fontFamily="@font/poppins_regular"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/calculator_title"/>
+
+        <TextView
+            android:id="@+id/gender"
+            android:text="@string/jenis_kelamin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextLabel.BodyWhite"
+            app:layout_constraintStart_toStartOf="@+id/back_button"
+            app:layout_constraintTop_toBottomOf="@+id/polri_calculator_explanation" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/gender_option_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="32dp"
+            app:boxCornerRadiusTopStart="18dp"
+            app:boxCornerRadiusTopEnd="18dp"
+            app:boxCornerRadiusBottomStart="18dp"
+            app:boxCornerRadiusBottomEnd="18dp"
+            app:errorEnabled="true"
+            app:startIconDrawable="@drawable/gender_icon"
+            app:startIconTint="@color/lime_green"
+            app:boxBackgroundColor="@color/dark_gray_2"
+            app:boxStrokeWidthFocused="0dp"
+            app:boxStrokeWidth="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/gender"
+            app:layout_constraintStart_toStartOf="@id/gender">
+
+            <AutoCompleteTextView
+                android:id="@+id/gender_option"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/poppins_medium"
+                android:textSize="12sp"
+                android:padding="20dp"
+                android:textColor="@color/white"
+                android:inputType="none"
+                app:simpleItems="@array/gender_items"
+                tools:ignore="LabelFor" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/fitness_a"
+            android:text="@string/fitness_a"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextLabel.BodyWhite"
+            android:layout_marginTop="0dp"
+            app:layout_constraintStart_toStartOf="@+id/back_button"
+            app:layout_constraintTop_toBottomOf="@+id/gender_option_layout" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/InputField.RoundedIcon"
+            android:id="@+id/running_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:hint="@string/running_hint"
+            app:startIconDrawable="@drawable/running_icon_green"
+            app:layout_constraintStart_toStartOf="@id/fitness_a"
+            app:layout_constraintEnd_toStartOf="@+id/running_result"
+            app:layout_constraintTop_toBottomOf="@+id/fitness_a">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/running_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/running_result"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/CalculatorResult"
+            android:text="@string/result_example"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="@id/gender_option_layout"
+            app:layout_constraintStart_toEndOf="@id/running_input_layout"
+            app:layout_constraintTop_toBottomOf="@id/fitness_a" />
+
+        <TextView
+            android:id="@+id/fitness_b"
+            android:text="@string/fitness_b"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextLabel.BodyWhite"
+            android:layout_marginTop="0dp"
+            app:layout_constraintStart_toStartOf="@+id/back_button"
+            app:layout_constraintTop_toBottomOf="@+id/running_input_layout" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/InputField.RoundedIcon"
+            android:id="@+id/push_up_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:hint="@string/push_up_hint"
+            app:startIconDrawable="@drawable/push_up_icon_small"
+            app:layout_constraintStart_toStartOf="@id/fitness_b"
+            app:layout_constraintEnd_toStartOf="@+id/push_up_result"
+            app:layout_constraintTop_toBottomOf="@+id/fitness_b">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/push_up_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/push_up_result"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/CalculatorResult"
+            android:text="@string/result_example"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="@id/gender_option_layout"
+            app:layout_constraintStart_toEndOf="@id/push_up_input_layout"
+            app:layout_constraintTop_toBottomOf="@id/fitness_b" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/InputField.RoundedIcon"
+            android:id="@+id/sit_up_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:hint="@string/sit_up_hint"
+            app:startIconDrawable="@drawable/sit_up_icon_small"
+            app:layout_constraintStart_toStartOf="@id/fitness_b"
+            app:layout_constraintEnd_toStartOf="@+id/sit_up_result"
+            app:layout_constraintTop_toBottomOf="@+id/push_up_input_layout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sit_up_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/sit_up_result"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/CalculatorResult"
+            android:text="@string/result_example"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="@id/gender_option_layout"
+            app:layout_constraintStart_toEndOf="@id/sit_up_input_layout"
+            app:layout_constraintTop_toBottomOf="@id/push_up_input_layout" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/InputField.RoundedIcon"
+            android:id="@+id/pull_up_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:hint="@string/pull_up_hint"
+            app:startIconDrawable="@drawable/pull_up_icon_small"
+            app:layout_constraintStart_toStartOf="@id/fitness_b"
+            app:layout_constraintEnd_toStartOf="@+id/pull_up_result"
+            app:layout_constraintTop_toBottomOf="@+id/sit_up_input_layout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/pull_up_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/pull_up_result"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/CalculatorResult"
+            android:text="@string/result_example"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="@id/gender_option_layout"
+            app:layout_constraintStart_toEndOf="@id/pull_up_input_layout"
+            app:layout_constraintTop_toBottomOf="@id/sit_up_input_layout" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/InputField.RoundedIcon"
+            android:id="@+id/shuttle_run_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:hint="@string/shuttle_run_hint"
+            app:startIconDrawable="@drawable/shuttle_run_icon_small"
+            app:layout_constraintStart_toStartOf="@id/fitness_b"
+            app:layout_constraintEnd_toStartOf="@+id/shuttle_run_result"
+            app:layout_constraintTop_toBottomOf="@+id/pull_up_input_layout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/shuttle_run_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/shuttle_run_result"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/CalculatorResult"
+            android:text="@string/result_example"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="@id/gender_option_layout"
+            app:layout_constraintStart_toEndOf="@id/shuttle_run_input_layout"
+            app:layout_constraintTop_toBottomOf="@id/pull_up_input_layout" />
+
+        <TextView
+            android:id="@+id/fitness_c"
+            android:text="@string/fitness_c"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextLabel.BodyWhite"
+            android:layout_marginTop="0dp"
+            app:layout_constraintStart_toStartOf="@+id/back_button"
+            app:layout_constraintTop_toBottomOf="@+id/shuttle_run_input_layout" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/InputField.RoundedIcon"
+            android:id="@+id/swimming_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:hint="@string/swimming_hint"
+            app:startIconDrawable="@drawable/swimming_icon_small"
+            app:layout_constraintStart_toStartOf="@id/fitness_c"
+            app:layout_constraintEnd_toStartOf="@+id/swimming_result"
+            app:layout_constraintTop_toBottomOf="@+id/fitness_c">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/swimming_input"
+                style="@style/EditText.WhiteInput"
+                android:inputType="time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/swimming_result"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/CalculatorResult"
+            android:text="@string/result_example"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="@id/gender_option_layout"
+            app:layout_constraintStart_toEndOf="@id/swimming_input_layout"
+            app:layout_constraintTop_toBottomOf="@id/fitness_c" />
+
+        <Button
+            android:id="@+id/submit_button"
+            style="@style/RoundedGreenButton"
+            android:layout_marginTop="16dp"
+            android:text="@string/hitung"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/swimming_input_layout" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/result_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="16dp"
+            android:layout_marginHorizontal="32dp"
+            app:cardElevation="16dp"
+            app:cardBackgroundColor="@color/gray"
+            app:cardCornerRadius="32dp"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/submit_button">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/fitness_a_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fitness_a_result"
+                    android:paddingHorizontal="24dp"
+                    android:layout_marginTop="24dp"
+                    style="@style/TextLabel.BodyWhite.Desc"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/fitness_b_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fitness_b_result"
+                    android:paddingHorizontal="24dp"
+                    android:layout_marginTop="16dp"
+                    style="@style/TextLabel.BodyWhite.Desc"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/fitness_a_result" />
+
+                <TextView
+                    android:id="@+id/fitness_c_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fitness_c_result"
+                    android:paddingHorizontal="24dp"
+                    android:layout_marginTop="16dp"
+                    style="@style/TextLabel.BodyWhite.Desc"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/fitness_b_result" />
+
+                <TextView
+                    android:id="@+id/final_result"
+                    android:layout_width="0dp"
+                    android:textAlignment="center"
+                    android:layout_height="wrap_content"
+                    android:text="@string/final_result"
+                    android:paddingHorizontal="24dp"
+                    android:layout_marginVertical="24dp"
+                    style="@style/TextLabel.BodyWhite"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/fitness_c_result" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

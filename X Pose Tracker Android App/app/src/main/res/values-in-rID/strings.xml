@@ -68,6 +68,11 @@
         <item>Lunges</item>
     </string-array>
 
+    <string-array name="gender_items">
+        <item>Pria</item>
+        <item>Wanita</item>
+    </string-array>
+
     <string-array name="categories_menu">
         <item>Push-Up</item>
         <item>Sit-Up</item>
@@ -235,6 +240,27 @@
     <string name="edit_record_name">Edit Nama Aktivitas</string>
     <string name="cancel">Batal</string>
     <string name="share_icon">Ikon Bagikan</string>
+    <string name="title_calculate">Penilaian</string>
+    <string name="fitness_calculator">Kalkulator Jasmani</string>
+    <string name="tni_calculator">TNI</string>
+    <string name="polri_calculator">POLRI</string>
+    <string name="polri_calculator_title">Kalkulator Jasmani POLRI</string>
+    <string name="polri_calculator_explanation">Perhitungan nilai kesamaptaan jasmani POLRI ini mengacu pada Keputusan Kapolri Nomor Kep/698/XII/2011 tentang Pedoman Administrasi Ujian Kemampuan Jasmani dan Pemeriksaan Antropometrik untuk Penerimaan Pegawai Negeri pada POLRI.</string>
+    <string name="fitness_a">Jasmani A</string>
+    <string name="result_example">0</string>
+    <string name="running_hint">Lari 12 Menit</string>
+    <string name="fitness_b">Jasmani B (1 Menit)</string>
+    <string name="push_up_hint">Push Up</string>
+    <string name="sit_up_hint">Sit Up</string>
+    <string name="pull_up_hint">Pull Up</string>
+    <string name="shuttle_run_hint">Shuttle Run</string>
+    <string name="fitness_c">Jasmani C</string>
+    <string name="swimming_hint">Berenang 25 Meter</string>
+    <string name="hitung">Hitung</string>
+    <string name="fitness_a_result">Nilai Jasmani A: %.2f</string>
+    <string name="fitness_b_result">Nilai Jasmani B: %.2f</string>
+    <string name="fitness_c_result">Nilai Jasmani C: %.2f</string>
+    <string name="final_result">Nilai Jasmani Akhir: %.2f</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

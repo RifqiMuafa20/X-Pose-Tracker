@@ -19,6 +19,12 @@
         android:theme="@style/Theme.XPoseTracker"
         tools:targetApi="31">
         <activity
+            android:name=".ui.calculator.PolriFitnessActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.calculator.TniFitnessActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.tutorial.TutorialActivity"
             android:exported="false" />
         <activity
@@ -30,8 +36,8 @@
         <activity
             android:name=".ui.camera.CameraActivity"
             android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.edit_member.EditMemberActivity"
             android:exported="false" />

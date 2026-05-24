@@ -44,6 +44,16 @@ data class ActivityMemberExport(
     val maxLunges: Int?
 )
 
+data class ScorePoint(
+    val distance: Int,
+    val score: Int
+)
+
+data class ScorePointDouble(
+    val time: Double,
+    val score: Int
+)
+
 data class RepUiState(
     val current: Int,
     val pushUp: Int,

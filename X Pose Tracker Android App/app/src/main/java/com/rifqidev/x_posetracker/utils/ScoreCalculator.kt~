@@ -1,0 +1,87 @@
+package com.rifqidev.x_posetracker.utils
+
+import com.rifqidev.x_posetracker.data.ScorePoint
+import com.rifqidev.x_posetracker.data.ScorePointDouble
+
+object ScoreCalculator {
+
+    fun getScore(
+        value: Int,
+        table: List<ScorePoint>
+    ): Int {
+
+        if (table.isEmpty())
+            return 0
+
+        if (value < table.first().distance)
+            return 0
+
+        if (value >= table.last().distance)
+            return table.last().score
+
+        var left = 0
+        var right = table.lastIndex
+
+        while (left <= right) {
+
+            val mid = (left + right) / 2
+
+            when {
+
+                value == table[mid].distance -> {
+                    return table[mid].score
+                }
+
+                value > table[mid].distance -> {
+                    left = mid + 1
+                }
+
+                else -> {
+                    right = mid - 1
+                }
+            }
+        }
+
+        return table[right].score
+    }
+
+    fun getScore(
+        value: Double,
+        table: List<ScorePointDouble>
+    ): Int {
+
+        if (table.isEmpty())
+            return 0
+
+        if (value < table.first().time)
+            return 0
+
+        if (value >= table.last().time)
+            return table.last().score
+
+        var left = 0
+        var right = table.lastIndex
+
+        while (left <= right) {
+
+            val mid = (left + right) / 2
+
+            when {
+
+                value == table[mid].time -> {
+                    return table[mid].score
+                }
+
+                value > table[mid].time -> {
+                    left = mid + 1
+                }
+
+                else -> {
+                    right = mid - 1
+                }
+            }
+        }
+
+        return table[right].score
+    }
+}

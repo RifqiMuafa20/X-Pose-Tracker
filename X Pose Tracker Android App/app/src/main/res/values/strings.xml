@@ -67,6 +67,11 @@
         <item>Lunges</item>
     </string-array>
 
+    <string-array name="gender_items">
+        <item>Man</item>
+        <item>Woman</item>
+    </string-array>
+
     <string-array name="categories_menu">
         <item>Push-Up</item>
         <item>Sit-Up</item>
@@ -234,6 +239,27 @@
     <string name="edit_record_name">Edit Record Name</string>
     <string name="cancel">Cancel</string>
     <string name="share_icon">Share Icon</string>
+    <string name="title_calculate">Calculate</string>
+    <string name="fitness_calculator">Fitness Calculator</string>
+    <string name="tni_calculator">TNI</string>
+    <string name="polri_calculator">POLRI</string>
+    <string name="polri_calculator_title">Fitness Calculator POLRI</string>
+    <string name="polri_calculator_explanation">The calculation of the Indonesian National Police’s physical fitness score is based on the Chief of the Indonesian National Police’s Decision No. Kep/698/XII/2011 regarding Administrative Guidelines for Physical Fitness Tests and Anthropometric Examinations for the Recruitment of Civil Servants in the Indonesian National Police.</string>
+    <string name="fitness_a">Fitness A</string>
+    <string name="result_example">0</string>
+    <string name="running_hint">Running 12 Minutes</string>
+    <string name="fitness_b">Fitness B (1 Minute)</string>
+    <string name="push_up_hint">Push Up</string>
+    <string name="sit_up_hint">Sit Up</string>
+    <string name="pull_up_hint">Pull Up</string>
+    <string name="shuttle_run_hint">Shuttle Run</string>
+    <string name="fitness_c">Fitness C</string>
+    <string name="swimming_hint">Swimming 25 Meters</string>
+    <string name="hitung">Count</string>
+    <string name="fitness_a_result">Fitness A Result: %.2f</string>
+    <string name="fitness_b_result">Fitness B Result: %.2f</string>
+    <string name="fitness_c_result">Fitness C Result: %.2f</string>
+    <string name="final_result">Final Result: %.2f</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
