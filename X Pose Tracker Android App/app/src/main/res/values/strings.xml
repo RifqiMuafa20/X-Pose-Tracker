@@ -248,18 +248,23 @@
     <string name="fitness_a">Fitness A</string>
     <string name="result_example">0</string>
     <string name="running_hint">Running 12 Minutes</string>
-    <string name="fitness_b">Fitness B (1 Minute)</string>
+    <string name="fitness_b">Fitness B</string>
     <string name="push_up_hint">Push Up</string>
     <string name="sit_up_hint">Sit Up</string>
     <string name="pull_up_hint">Pull Up</string>
-    <string name="shuttle_run_hint">Shuttle Run</string>
+    <string name="shuttle_run_hint">Shuttle Run (Seconds)</string>
     <string name="fitness_c">Fitness C</string>
-    <string name="swimming_hint">Swimming 25 Meters</string>
+    <string name="swimming_hint">Swim (Seconds)</string>
     <string name="hitung">Count</string>
     <string name="fitness_a_result">Fitness A Result: %.2f</string>
     <string name="fitness_b_result">Fitness B Result: %.2f</string>
     <string name="fitness_c_result">Fitness C Result: %.2f</string>
     <string name="final_result">Final Result: %.2f</string>
+    <string name="tni_calculator_title">Fitness Calculator TNI</string>
+    <string name="tni_calculator_explanation">The basis for calculating the scores is the Army Chief of Staff’s Technical Manual, in accordance with Army Chief of Staff Directive No. Skep/590/XII/2005 regarding Physical Fitness Tests for Soldiers and Soldier Candidates.</string>
+    <string name="age">Age</string>
+    <string name="age_hint">Age</string>
+    <string name="swimming_tni_hint">Swim (Seconds)</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

@@ -4,12 +4,12 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.rifqidev.x_posetracker.data.calculator_data.PullUpChinningTablePolri
-import com.rifqidev.x_posetracker.data.calculator_data.PushUpTablePolri
-import com.rifqidev.x_posetracker.data.calculator_data.RenangTablePolri
-import com.rifqidev.x_posetracker.data.calculator_data.Run12MinuteTablePolri
-import com.rifqidev.x_posetracker.data.calculator_data.ShuttleRunTablePolri
-import com.rifqidev.x_posetracker.data.calculator_data.SitUpTablePolri
+import com.rifqidev.x_posetracker.data.calculator_data.polri.PullUpChinningTablePolri
+import com.rifqidev.x_posetracker.data.calculator_data.polri.PushUpTablePolri
+import com.rifqidev.x_posetracker.data.calculator_data.polri.RenangTablePolri
+import com.rifqidev.x_posetracker.data.calculator_data.polri.Run12MinuteTablePolri
+import com.rifqidev.x_posetracker.data.calculator_data.polri.ShuttleRunTablePolri
+import com.rifqidev.x_posetracker.data.calculator_data.polri.SitUpTablePolri
 import com.rifqidev.x_posetracker.utils.ScoreCalculator
 
 class CalculatorPolriViewModel(

@@ -253,14 +253,19 @@
     <string name="push_up_hint">Push Up</string>
     <string name="sit_up_hint">Sit Up</string>
     <string name="pull_up_hint">Pull Up</string>
-    <string name="shuttle_run_hint">Shuttle Run</string>
+    <string name="shuttle_run_hint">Shuttle Run (Detik)</string>
     <string name="fitness_c">Jasmani C</string>
-    <string name="swimming_hint">Berenang 25 Meter</string>
+    <string name="swimming_hint">Renang (Detik)</string>
     <string name="hitung">Hitung</string>
     <string name="fitness_a_result">Nilai Jasmani A: %.2f</string>
     <string name="fitness_b_result">Nilai Jasmani B: %.2f</string>
     <string name="fitness_c_result">Nilai Jasmani C: %.2f</string>
     <string name="final_result">Nilai Jasmani Akhir: %.2f</string>
+    <string name="tni_calculator_title">Kalkulator Jasmani TNI</string>
+    <string name="tni_calculator_explanation">Sumber perhitungan nilai mengacu pada Buku Petunjuk Teknik Kasad berdasarkan Skep Kasad Nomor Skep/590/XII/2005 tentang Tes Kesegaran Jasmani Prajurit dan Calon Prajurit.</string>
+    <string name="age">Usia</string>
+    <string name="age_hint">Usia</string>
+    <string name="swimming_tni_hint">Renang (Detik)</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

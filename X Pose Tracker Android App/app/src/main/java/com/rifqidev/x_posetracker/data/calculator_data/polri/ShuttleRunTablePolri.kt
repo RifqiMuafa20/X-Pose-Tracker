@@ -1,4 +1,4 @@
-package com.rifqidev.x_posetracker.data.calculator_data
+package com.rifqidev.x_posetracker.data.calculator_data.polri
 
 import com.rifqidev.x_posetracker.data.ScorePointDouble
 

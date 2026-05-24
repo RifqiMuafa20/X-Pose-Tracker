@@ -54,6 +54,16 @@ data class ScorePointDouble(
     val score: Int
 )
 
+data class TniScorePoint(
+    val value: Int,
+    val scores: List<Int>
+)
+
+data class TniScorePointDouble(
+    val time: Double,
+    val scores: List<Int>
+)
+
 data class RepUiState(
     val current: Int,
     val pushUp: Int,

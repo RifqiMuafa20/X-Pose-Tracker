@@ -132,7 +132,7 @@ class PolriFitnessActivity : AppCompatActivity() {
         if (time != null) {
             viewModel.calculateShuttleRunPolri(time)
         } else {
-            viewModel.calculateShuttleRunPolri(0.0)
+            viewModel.calculateShuttleRunPolri(100.0)
         }
     }
 
@@ -145,7 +145,7 @@ class PolriFitnessActivity : AppCompatActivity() {
         if (time != null) {
             viewModel.calculateRenangPolri(time)
         } else {
-            viewModel.calculateRenangPolri(0.0)
+            viewModel.calculateRenangPolri(100.0)
         }
     }
 
