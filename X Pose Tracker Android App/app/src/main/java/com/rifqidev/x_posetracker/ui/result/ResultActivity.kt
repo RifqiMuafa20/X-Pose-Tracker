@@ -35,6 +35,7 @@ class ResultActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         binding = ActivityResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

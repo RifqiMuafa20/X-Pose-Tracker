@@ -67,20 +67,37 @@ class DetailEventActivity : AppCompatActivity() {
 
         if (activityId != null) {
             lifecycleScope.launch {
+
                 viewModel.getActivityById(activityId!!)
                     .collect { activity ->
 
-                        activity.let {
+                        if (activity == null) {
+                            showToast(getString(R.string.deleted))
 
-                            binding.activityName.text = it.activityName
-                            binding.activityDate.text = it.activityDate?.let { date ->
+                            finish()
+
+                            return@collect
+                        }
+
+                        binding.activityName.text =
+                            activity.activityName
+
+                        binding.activityDate.text =
+                            activity.activityDate?.let { date ->
                                 DateHelper.formatDateToIndo(date)
                             }
-                            binding.activityLocation.text = it.activityLocation
-                            binding.activitySupervisor.text = it.activitySupervisor
-                            binding.activityCount.text =
-                                getString(R.string.person_format, it.memberAmount)
-                        }
+
+                        binding.activityLocation.text =
+                            activity.activityLocation
+
+                        binding.activitySupervisor.text =
+                            activity.activitySupervisor
+
+                        binding.activityCount.text =
+                            getString(
+                                R.string.person_format,
+                                activity.memberAmount
+                            )
                     }
             }
 
@@ -135,7 +152,7 @@ class DetailEventActivity : AppCompatActivity() {
                         val uri = resolver.insert(
                             MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                             contentValues
-                        ) ?: throw Exception("Gagal membuat file")
+                        ) ?: throw Exception(getString(R.string.failed_create_file))
 
                         resolver.openOutputStream(uri)?.use { outputStream ->
                             OutputStreamWriter(outputStream).use { writer ->

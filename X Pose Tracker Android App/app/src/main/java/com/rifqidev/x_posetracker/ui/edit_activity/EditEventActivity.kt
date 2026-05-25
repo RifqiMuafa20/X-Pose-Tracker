@@ -22,6 +22,7 @@ class EditEventActivity : AppCompatActivity() {
     private lateinit var viewModel: EditEventViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         binding = ActivityAddEventBinding.inflate(layoutInflater)
@@ -91,8 +92,6 @@ class EditEventActivity : AppCompatActivity() {
                 }
             }
         }
-
-        enableEdgeToEdge()
 
         supportActionBar?.hide()
     }

@@ -67,20 +67,37 @@ class DetailEventActivity : AppCompatActivity() {
 
         if (activityId != null) {
             lifecycleScope.launch {
+
                 viewModel.getActivityById(activityId!!)
                     .collect { activity ->
 
-                        activity.let {
+                        if (activity == null) {
+                            showToast(getString(R.string.deleted))
 
-                            binding.activityName.text = it.activityName
-                            binding.activityDate.text = it.activityDate?.let { date ->
+                            finish()
+
+                            return@collect
+                        }
+
+                        binding.activityName.text =
+                            activity.activityName
+
+                        binding.activityDate.text =
+                            activity.activityDate?.let { date ->
                                 DateHelper.formatDateToIndo(date)
                             }
-                            binding.activityLocation.text = it.activityLocation
-                            binding.activitySupervisor.text = it.activitySupervisor
-                            binding.activityCount.text =
-                                getString(R.string.person_format, it.memberAmount)
-                        }
+
+                        binding.activityLocation.text =
+                            activity.activityLocation
+
+                        binding.activitySupervisor.text =
+                            activity.activitySupervisor
+
+                        binding.activityCount.text =
+                            getString(
+                                R.string.person_format,
+                                activity.memberAmount
+                            )
                     }
             }
 
@@ -197,9 +214,6 @@ class DetailEventActivity : AppCompatActivity() {
         builder.setPositiveButton(R.string.yes) { _, _ ->
             if (type == 0) {
                 viewModel.deleteActivityById(activityId!!)
-
-                showToast(getString(R.string.deleted))
-                finish()
             }
         }
         builder.setNegativeButton(R.string.no) { dialog, _ ->

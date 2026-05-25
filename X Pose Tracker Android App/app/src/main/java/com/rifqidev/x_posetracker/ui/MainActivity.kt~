@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
                 WindowInsetsCompat.Type.systemBars()
             )
 
-            view.setPadding(0, bars.top/3, 0, 0)
+            view.setPadding(0, bars.top, 0, 0)
 
             insets
         }
