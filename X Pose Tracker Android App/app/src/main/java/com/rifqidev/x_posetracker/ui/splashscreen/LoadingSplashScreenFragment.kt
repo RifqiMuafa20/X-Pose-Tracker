@@ -1,5 +1,6 @@
 package com.rifqidev.x_posetracker.ui.splashscreen
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
@@ -10,7 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.rifqidev.x_posetracker.R
 import com.rifqidev.x_posetracker.databinding.FragmentLoadingSplashScreenBinding
-import com.rifqidev.x_posetracker.ui.welcome.WelcomeFragment
+import com.rifqidev.x_posetracker.ui.welcome.WelcomeActivity
 
 class LoadingSplashScreenFragment : Fragment() {
 
@@ -33,13 +34,19 @@ class LoadingSplashScreenFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(1000)
 
-            if (isAdded) {
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, WelcomeFragment())
-                    .commit()
-            }
+            delay(delay)
+
+            if (!isAdded) return@launch
+
+            val intent = Intent(
+                requireContext(),
+                WelcomeActivity::class.java
+            )
+
+            startActivity(intent)
+
+            requireActivity().finish()
         }
     }
 

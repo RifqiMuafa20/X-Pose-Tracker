@@ -1,0 +1,78 @@
+package com.rifqidev.x_posetracker.ui.welcome
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.ViewModelProvider
+import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
+import com.rifqidev.x_posetracker.R
+import com.rifqidev.x_posetracker.databinding.ActivityWelcomeBinding
+import com.rifqidev.x_posetracker.ui.MainActivity
+
+class WelcomeActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityWelcomeBinding
+    private lateinit var viewModel: WelcomeViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityWelcomeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        AppCompatDelegate.setDefaultNightMode(
+            AppCompatDelegate.MODE_NIGHT_YES
+        )
+
+        supportActionBar?.hide()
+
+        val factory = ViewModelFactory.getInstance(application)
+
+        viewModel = ViewModelProvider(
+            this,
+            factory
+        )[WelcomeViewModel::class.java]
+
+        binding.startButton.setOnClickListener {
+
+            viewModel.getUserProfile()
+                .observe(this) { user ->
+
+                    if (user != null) {
+
+                        val intent = Intent(
+                            this,
+                            MainActivity::class.java
+                        )
+
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or
+                                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+                        startActivity(intent)
+
+                        showToast(getString(R.string.welcome))
+
+                    } else {
+
+                        binding.fragmentContainer.visibility = View.VISIBLE
+
+                        supportFragmentManager.beginTransaction()
+                            .replace(
+                                R.id.fragment_container,
+                                StepOneFragment()
+                            )
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                }
+        }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+}
