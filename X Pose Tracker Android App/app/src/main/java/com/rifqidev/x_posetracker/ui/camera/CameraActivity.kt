@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -143,6 +144,14 @@ class CameraActivity : AppCompatActivity(),
             view.setPadding(0, bars.top/3, 0, bars.bottom/3)
 
             insets
+        }
+
+        val isTablet =
+            resources.configuration.smallestScreenWidthDp >= 600
+
+        if (!isTablet) {
+            requestedOrientation =
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
         if (!allPermissionsGranted()) {
