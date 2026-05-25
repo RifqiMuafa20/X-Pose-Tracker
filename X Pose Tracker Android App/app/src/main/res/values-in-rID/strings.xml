@@ -266,6 +266,11 @@
     <string name="age">Usia</string>
     <string name="age_hint">Usia</string>
     <string name="swimming_tni_hint">Renang (Detik)</string>
+    <string name="donate">Donasi</string>
+    <string name="donate_message">Dukungan Anda membantu pengembangan aplikasi:\n• Meningkatkan akurasi pose\n• Menambahkan fitur latihan baru\n• Mengembangkan sistem analisis cedera\n• Mendukung pengembangan aplikasi lebih lanjut\n\nTerima kasih telah mendukung developer 🙌</string>
+    <string name="donate_title">Support X Pose Tracker ❤️</string>
+    <string name="later">Nanti</string>
+    <string name="no_browser_found">Browser tidak ditemukan</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

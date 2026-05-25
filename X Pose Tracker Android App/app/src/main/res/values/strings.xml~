@@ -269,7 +269,6 @@
     <string name="donate_message">Your support helps improve:\n• Pose accuracy\n• New exercise features\n• Injury analysis system\n• Better app development\n\nThank you for supporting the developer 🙌</string>
     <string name="donate_title">Support X Pose Tracker ❤️</string>
     <string name="later">Later</string>
-    <string name="no_browser_found">No browser found</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
