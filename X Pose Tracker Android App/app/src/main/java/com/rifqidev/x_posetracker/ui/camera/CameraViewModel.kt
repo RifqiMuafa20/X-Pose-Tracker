@@ -63,6 +63,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     private var lastCountMap = mutableMapOf<String, Int>()
     private var lastMessage: String? = ""
     private var lastValidationMessages: List<ValidationMessage> = emptyList()
+    private var lastWarningMessages: List<ValidationMessage> = emptyList()
 
     // Exposed UI LiveData
 
@@ -74,6 +75,9 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _validationState = MutableLiveData<ValidationUiState>()
     val validationState: LiveData<ValidationUiState> = _validationState
+
+    private val _warningState = MutableLiveData<ValidationUiState>()
+    val warningState: LiveData<ValidationUiState> = _warningState
 
     private val _uiEvent = MutableLiveData<UiEvent?>()
     val uiEvent: LiveData<UiEvent?> = _uiEvent
@@ -121,7 +125,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
             }
 
             // Rep engine update
-            repEngine.update(currentPrediction, angles13)
+            repEngine.update(currentPrediction, angles13, poseLandmarks)
             val count = repEngine.getCount(currentPrediction)
 
             // Speak rep count on increment
@@ -132,23 +136,32 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
             // Validation
             val validationResult = repEngine.getLastValidation(currentPrediction)
+            val warningResult = repEngine.getLastWarning(currentPrediction)
 
             val isValid: Boolean
             val validationMessages: List<ValidationMessage>
+            val warningMessages: List<ValidationMessage>
 
             if (currentPrediction == autoLabel || currentPrediction == "Unknown") {
                 isValid = true
                 validationMessages = emptyList()
+                warningMessages = emptyList()
             } else {
                 isValid = validationResult?.isValid == true
                 validationMessages = validationResult?.message ?: emptyList()
+                warningMessages = warningResult?.message ?: emptyList()
             }
 
             if (!isValid && validationMessages != lastValidationMessages) {
                 emitEvent(UiEvent.InvalidFeedback(validationMessages))
             }
 
+            if (warningMessages != lastWarningMessages){
+                emitEvent(UiEvent.WarningFeedback(warningMessages))
+            }
+
             lastValidationMessages = validationMessages
+            lastWarningMessages = warningMessages
 
             _prediction.postValue(currentPrediction)
 
@@ -166,6 +179,13 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
                 ValidationUiState(
                     isValid = isValid,
                     message = validationMessages
+                )
+            )
+
+            _warningState.postValue(
+                ValidationUiState(
+                    isValid = true,
+                    message = warningMessages
                 )
             )
         }

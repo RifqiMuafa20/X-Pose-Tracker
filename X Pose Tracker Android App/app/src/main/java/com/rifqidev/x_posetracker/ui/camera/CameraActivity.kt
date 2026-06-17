@@ -47,6 +47,7 @@ import androidx.lifecycle.lifecycleScope
 import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.rifqidev.x_posetracker.R
+import com.rifqidev.x_posetracker.data.MessageType
 import com.rifqidev.x_posetracker.data.UiEvent
 import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.databinding.ActivityCameraBinding
@@ -101,6 +102,8 @@ class CameraActivity : AppCompatActivity(),
     private var midRecordPhotoBytes: ByteArray? = null
     private var midPhotoCaptured: Boolean = false
     private var elapsedSeconds: Long = 0L
+
+    private var currentPrediction: String = ""
 
     private var lastOverlayTs = 0L
     private val OVERLAY_INTERVAL_MS = 100L
@@ -250,6 +253,8 @@ class CameraActivity : AppCompatActivity(),
         }
 
         viewModel.prediction.observe(this) { label ->
+            currentPrediction = label
+
             binding.type.text = label
         }
 
@@ -272,8 +277,15 @@ class CameraActivity : AppCompatActivity(),
                 binding.invalidStatus.setTextColor(ContextCompat.getColor(this, R.color.red_accent))
 
                 state.message.forEach { msg ->
-                    showInvalidPopup(msg.toDisplayString(this))
+                    showInvalidPopup(msg.toDisplayString(this), MessageType.ERROR)
                 }
+            }
+        }
+
+        // Observe warning state
+        viewModel.warningState.observe(this) { state ->
+            state.message.forEach { msg ->
+                showInvalidPopup(msg.toDisplayString(this), MessageType.WARNING)
             }
         }
 
@@ -282,8 +294,9 @@ class CameraActivity : AppCompatActivity(),
             event ?: return@observe
             when (event) {
                 is UiEvent.SpeakText -> speak(event.text)
-                is UiEvent.Speak -> speak(event.messages.joinToString(". ") { it.toDisplayString(this) })
-                is UiEvent.PlayErrorSound -> playErrorSound()
+                is UiEvent.WarningFeedback -> {
+                    speak(event.messages.joinToString(". ") { it.toDisplayString(this) })
+                }
                 is UiEvent.InvalidFeedback -> {
                     playErrorSound()
                     speak(event.messages.joinToString(". ") { it.toDisplayString(this) })
@@ -426,11 +439,14 @@ class CameraActivity : AppCompatActivity(),
         // Schedule overlay update on main thread
         if (shouldDrawOverlay) {
             runOnUiThread {
+                val isPullUp = currentPrediction == "Pull-Up"
+
                 binding.overlay.setResults(
                     resultBundle.results.first(),
                     resultBundle.inputImageHeight,
                     resultBundle.inputImageWidth,
-                    RunningMode.LIVE_STREAM
+                    RunningMode.LIVE_STREAM,
+                    isPullUp
                 )
                 binding.overlay.invalidate()
             }
@@ -591,25 +607,34 @@ class CameraActivity : AppCompatActivity(),
         }
     }
 
-    private fun showInvalidPopup(message: String) {
+    private fun showInvalidPopup(message: String, messageType: MessageType) {
         if (message.isBlank() || activeMessages.contains(message)) return
         activeMessages.add(message)
 
         val container = binding.invalidMessageContainer
-        if (container.childCount >= 3) {
+        if (container.childCount >= 2) {
             val removed = container.getChildAt(0) as TextView
             activeMessages.remove(removed.text.toString())
             container.removeViewAt(0)
         }
 
+        val layoutRes = when (messageType) {
+            MessageType.WARNING -> R.layout.item_warning_message
+            MessageType.ERROR -> R.layout.item_invalid_message
+        }
+
         val textView = LayoutInflater.from(this)
-            .inflate(R.layout.item_invalid_message, container, false) as TextView
+            .inflate(layoutRes, container, false) as TextView
+
         textView.text = message
         container.addView(textView)
 
         textView.postDelayed({
             activeMessages.remove(message)
-            container.removeView(textView)
+
+            if (textView.parent != null) {
+                container.removeView(textView)
+            }
         }, 1000)
     }
 
@@ -709,6 +734,8 @@ class CameraActivity : AppCompatActivity(),
             ValidationMessage.NOT_REACH_UP        -> R.string.msg_not_reach_up
             ValidationMessage.NOT_REACH_DOWN      -> R.string.msg_not_reach_down
             ValidationMessage.NOT_START_FROM_DOWN -> R.string.msg_not_start_from_down
+            ValidationMessage.BODY_NOT_HIGH_ENOUGH -> R.string.msg_body_not_high_enough
+            ValidationMessage.LEG_NOT_SWITCHED   -> R.string.msg_leg_not_switched
         }
     )
 

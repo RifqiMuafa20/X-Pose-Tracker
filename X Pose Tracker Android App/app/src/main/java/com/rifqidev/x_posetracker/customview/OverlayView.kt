@@ -8,6 +8,7 @@ import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
+import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
@@ -41,11 +42,22 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
 
+    private val pullUpBarPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.RED
+        strokeWidth = LANDMARK_STROKE_WIDTH
+        style = Paint.Style.STROKE
+    }
+
     private var scaleFactor = 1f
     private var imageWidth = 1
     private var imageHeight = 1
     private var offsetX = 0f
     private var offsetY = 0f
+    private var isPullUpMode = false
+
+    // Coordinate transform functions
+    private fun tx(xNorm: Float) = xNorm * imageWidth * scaleFactor + offsetX
+    private fun ty(yNorm: Float) = yNorm * imageHeight * scaleFactor + offsetY
 
     private val angleState = AngleFallbackState()
 
@@ -63,8 +75,18 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         val res = results ?: return
         val first = res.landmarks().firstOrNull() ?: return
 
-        fun tx(xNorm: Float) = xNorm * imageWidth * scaleFactor + offsetX
-        fun ty(yNorm: Float) = yNorm * imageHeight * scaleFactor + offsetY
+        // Draw pull-up bar
+        if (isPullUpMode) {
+            val leftWrist = first.getOrNull(21)
+            val rightWrist = first.getOrNull(22)
+            if (leftWrist != null && rightWrist != null) {
+                canvas.drawLine(
+                    tx(leftWrist.x()-(rightWrist.x() - leftWrist.x())), ty(leftWrist.y()),
+                    tx(rightWrist.x()+(rightWrist.x() - leftWrist.x())), ty(rightWrist.y()),
+                    pullUpBarPaint
+                )
+            }
+        }
 
         for (landmarkList in res.landmarks()) {
             for (nl in landmarkList) {
@@ -114,11 +136,13 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         poseLandmarkerResults: PoseLandmarkerResult,
         imageHeight: Int,
         imageWidth: Int,
-        runningMode: RunningMode = RunningMode.IMAGE
+        runningMode: RunningMode = RunningMode.IMAGE,
+        isPullUpMode: Boolean = false
     ) {
         results = poseLandmarkerResults
         this.imageHeight = imageHeight
         this.imageWidth = imageWidth
+        this.isPullUpMode = isPullUpMode
 
         if (width == 0 || height == 0) {
             post { setResults(poseLandmarkerResults, imageHeight, imageWidth, runningMode) }

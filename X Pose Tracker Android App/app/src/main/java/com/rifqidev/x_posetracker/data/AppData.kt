@@ -88,11 +88,14 @@ data class ValidationUiState(
     val message: List<ValidationMessage>
 )
 
-sealed class UiEvent {
-    data class Speak(val messages: List<ValidationMessage>) : UiEvent()
-    data class SpeakText(val text: String) : UiEvent()
-    object PlayErrorSound : UiEvent()
+enum class MessageType {
+    ERROR,
+    WARNING
+}
 
+sealed class UiEvent {
+    data class SpeakText(val text: String) : UiEvent()
+    data class WarningFeedback(val messages: List<ValidationMessage>) : UiEvent()
     data class InvalidFeedback(val messages: List<ValidationMessage>) : UiEvent()
 }
 

@@ -221,6 +221,9 @@
     <string name="msg_not_reach_up">Tidak mencapai posisi atas</string>
     <string name="msg_not_reach_down">Tidak mencapai posisi bawah</string>
     <string name="msg_not_start_from_down">Tidak dimulai dari posisi bawah</string>
+    <string name="msg_body_not_high_enough">Badan harus diangkat</string>
+    <string name="msg_leg_not_switched">Ganti kaki untuk lunges bergantian</string>
+
     <string name="tutorial_image">Tutorial Image</string>
     <string name="understand">Mengerti</string>
     <string name="record_scenario">Skenario Rekam Aktivitas</string>

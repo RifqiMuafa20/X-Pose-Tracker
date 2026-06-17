@@ -1,5 +1,6 @@
 package com.rifqidev.x_posetracker.utils
 
+import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.rifqidev.x_posetracker.data.CounterResult
 import com.rifqidev.x_posetracker.data.ValidationResult
 
@@ -21,6 +22,12 @@ enum class MovementState {
     UP
 }
 
+enum class FrontLegState {
+    NONE,
+    LEFT_FRONT,
+    RIGHT_FRONT
+}
+
 enum class ValidationMessage {
     HIP_TOO_BENT,
     KNEE_TOO_BENT,
@@ -33,17 +40,20 @@ enum class ValidationMessage {
     NOT_START_FROM_UP,
     NOT_REACH_UP,
     NOT_REACH_DOWN,
-    NOT_START_FROM_DOWN
+    NOT_START_FROM_DOWN,
+    BODY_NOT_HIGH_ENOUGH,
+    LEG_NOT_SWITCHED,
 }
 
 interface IRepetitionCounter {
     val count: Int
     val currentState: MovementState
     val lastValidationResult: ValidationResult
+    val lastWarningResult: ValidationResult
 
     fun resetAll()
     fun resetStateOnly()
-    fun update(angles13: FloatArray): CounterResult
+    fun update(angles13: FloatArray, landmarks: List<NormalizedLandmark>): CounterResult
 }
 
 class RepetitionCounterEngine(
@@ -57,17 +67,18 @@ class RepetitionCounterEngine(
         activeLabel = null
     }
 
-    fun update(label: String, angles13: FloatArray): CounterResult? {
+    fun update(label: String, angles13: FloatArray, landmarks: List<NormalizedLandmark>): CounterResult? {
         if (label != activeLabel) {
             counters[label]?.resetStateOnly()
             activeLabel = label
         }
-        return counters[label]?.update(angles13)
+        return counters[label]?.update(angles13, landmarks)
     }
 
     fun getCount(label: String): Int = counters[label]?.count ?: 0
     fun getState(label: String): MovementState? = counters[label]?.currentState
     fun getLastValidation(label: String): ValidationResult? = counters[label]?.lastValidationResult
+    fun getLastWarning(label: String): ValidationResult? = counters[label]?.lastWarningResult
 }
 
 class PushUpCounter : IRepetitionCounter {
@@ -78,6 +89,10 @@ class PushUpCounter : IRepetitionCounter {
         private set
 
     override var lastValidationResult: ValidationResult =
+        ValidationResult(true, emptyList())
+        private set
+
+    override var lastWarningResult: ValidationResult =
         ValidationResult(true, emptyList())
         private set
 
@@ -118,6 +133,7 @@ class PushUpCounter : IRepetitionCounter {
     override fun resetStateOnly() {
         currentState = MovementState.CENTRE
         lastValidationResult = ValidationResult(true, emptyList())
+        lastWarningResult = ValidationResult(true, emptyList())
         isInvalidCycle = false
         reachedUp = false
         isGoingUp = false
@@ -128,7 +144,7 @@ class PushUpCounter : IRepetitionCounter {
         maxStateIdx = -1
     }
 
-    override fun update(angles13: FloatArray): CounterResult {
+    override fun update(angles13: FloatArray, landmarks: List<NormalizedLandmark>): CounterResult {
         val eL = angles13[AngleIdx.LEFT_ELBOW]
         val eR = angles13[AngleIdx.RIGHT_ELBOW]
         val hL = angles13[AngleIdx.LEFT_HIP]
@@ -274,6 +290,10 @@ class SitUpCounter : IRepetitionCounter {
         ValidationResult(true, emptyList())
         private set
 
+    override var lastWarningResult: ValidationResult =
+        ValidationResult(true, emptyList())
+        private set
+
     private var isInvalidCycle = false
     private var isInitialized = false
 
@@ -288,10 +308,11 @@ class SitUpCounter : IRepetitionCounter {
 
     private val HIP_FULL_DOWN = 110f
     private val HIP_NEAR_DOWN = 90f
-    private val HIP_CENTRE = 70f
-    private val HIP_FULL_UP = 50f
+    private val HIP_CENTRE = 65f
+    private val HIP_FULL_UP = 45f
 
     private val KNEE_MAX_VALID = 100f
+    private val TORSO_MIN_FOR_DOWN = 80f
 
     private val stateOrder = listOf(
         MovementState.DOWN,
@@ -309,6 +330,7 @@ class SitUpCounter : IRepetitionCounter {
     override fun resetStateOnly() {
         currentState = MovementState.CENTRE
         lastValidationResult = ValidationResult(true, emptyList())
+        lastWarningResult = ValidationResult(true, emptyList())
         isInvalidCycle = false
         reachedUp = false
         isGoingUp = false
@@ -319,11 +341,12 @@ class SitUpCounter : IRepetitionCounter {
         maxStateIdx = -1
     }
 
-    override fun update(angles13: FloatArray): CounterResult {
+    override fun update(angles13: FloatArray, landmarks: List<NormalizedLandmark>): CounterResult {
         val hL = angles13[AngleIdx.LEFT_HIP]
         val hR = angles13[AngleIdx.RIGHT_HIP]
         val kL = angles13[AngleIdx.LEFT_KNEE]
         val kR = angles13[AngleIdx.RIGHT_KNEE]
+        val torso = angles13[AngleIdx.TORSO]
 
         // Posture Validation
         val postureValidation = validatePosture(kL, kR)
@@ -334,7 +357,7 @@ class SitUpCounter : IRepetitionCounter {
         }
 
         // State Determination
-        val newState = determineState(hL, hR)
+        val newState = determineState(hL, hR, torso)
 
         if(!isInitialized) {
             currentState = newState
@@ -420,13 +443,19 @@ class SitUpCounter : IRepetitionCounter {
         return CounterResult(count, currentState, lastValidationResult)
     }
 
-    private fun determineState(hL: Float, hR: Float): MovementState {
+    private fun determineState(hL: Float, hR: Float, torso: Float): MovementState {
+        val isDownPosition = hL >= HIP_FULL_DOWN && hR >= HIP_FULL_DOWN && torso >= TORSO_MIN_FOR_DOWN
+        val isNearDownPosition = hL >= HIP_NEAR_DOWN && hR >= HIP_NEAR_DOWN
+
+        val isUpPosition = hL <= HIP_FULL_UP && hR <= HIP_FULL_UP
+        val isNearUpPosition = hL > HIP_FULL_UP && hR > HIP_FULL_UP
+
         return when {
-            hL >= HIP_FULL_DOWN && hR >= HIP_FULL_DOWN -> MovementState.DOWN
-            hL >= HIP_NEAR_DOWN && hR >= HIP_NEAR_DOWN -> MovementState.NEAR_DOWN
+            isDownPosition -> MovementState.DOWN
+            isNearDownPosition -> MovementState.NEAR_DOWN
             hL >= HIP_CENTRE && hR >= HIP_CENTRE -> MovementState.CENTRE
-            hL > HIP_FULL_UP && hR > HIP_FULL_UP -> MovementState.NEAR_UP
-            hL <= HIP_FULL_UP && hR <= HIP_FULL_UP -> MovementState.UP
+            isNearUpPosition -> MovementState.NEAR_UP
+            isUpPosition -> MovementState.UP
             else -> currentState
         }
     }
@@ -451,10 +480,15 @@ class PullUpCounter : IRepetitionCounter {
         ValidationResult(true, emptyList())
         private set
 
+    override var lastWarningResult: ValidationResult =
+        ValidationResult(true, emptyList())
+        private set
+
     private var isInvalidCycle = false
     private var isInitialized = false
 
     private var reachedUp = false
+    private var reachedCentre = false
     private var startedFromDown = false
 
     private var minStateIdx = Int.MAX_VALUE
@@ -463,10 +497,13 @@ class PullUpCounter : IRepetitionCounter {
     private var isGoingUp = false
     private var isGoingDown = false
 
+    private var downElbowY: Float? = null
+    private var bodyRoseEnough: Boolean = false
+
     private val ELBOW_FULL_DOWN = 150f
-    private val ELBOW_NEAR_DOWN = 120f
+    private val ELBOW_NEAR_DOWN = 110f
     private val ELBOW_CENTRE = 80f
-    private val ELBOW_FULL_UP = 50f
+    private val ELBOW_FULL_UP = 40f
 
     private val KNEE_MIN_VALID = 120f
     private val HIP_MIN_VALID = 120f
@@ -481,6 +518,15 @@ class PullUpCounter : IRepetitionCounter {
         MovementState.UP
     )
 
+    // Landmark indices
+    private val NOSE = 0
+    private val LEFT_INDEX = 21
+    private val RIGHT_INDEX = 22
+    private val LEFT_ELBOW_IDX = 13
+    private val RIGHT_ELBOW_IDX = 14
+    private val LEFT_SHOULDER = 11
+    private val RIGHT_SHOULDER = 12
+
     override fun resetAll() {
         count = 0
         resetStateOnly()
@@ -489,6 +535,7 @@ class PullUpCounter : IRepetitionCounter {
     override fun resetStateOnly() {
         currentState = MovementState.CENTRE
         lastValidationResult = ValidationResult(true, emptyList())
+        lastWarningResult = ValidationResult(true, emptyList())
         isInvalidCycle = false
         reachedUp = false
         isGoingUp = false
@@ -497,9 +544,12 @@ class PullUpCounter : IRepetitionCounter {
         isInitialized = false
         minStateIdx = Int.MAX_VALUE
         maxStateIdx = -1
+        downElbowY = null
+        bodyRoseEnough = false
+        reachedCentre = false
     }
 
-    override fun update(angles13: FloatArray): CounterResult {
+    override fun update(angles13: FloatArray, landmarks: List<NormalizedLandmark>): CounterResult {
         val eL = angles13[AngleIdx.LEFT_ELBOW]
         val eR = angles13[AngleIdx.RIGHT_ELBOW]
         val kL = angles13[AngleIdx.LEFT_KNEE]
@@ -507,14 +557,6 @@ class PullUpCounter : IRepetitionCounter {
         val hL = angles13[AngleIdx.LEFT_HIP]
         val hR = angles13[AngleIdx.RIGHT_HIP]
         val torso = angles13[AngleIdx.TORSO]
-
-        // Posture Validation
-        val postureValidation = validatePosture(kL, kR, hL, hR, torso)
-
-        if (!postureValidation.isValid) {
-            isInvalidCycle = true
-            lastValidationResult = postureValidation
-        }
 
         // Determine state
         val newState = determineState(eL, eR)
@@ -528,10 +570,30 @@ class PullUpCounter : IRepetitionCounter {
         val newIdx = stateOrder.indexOf(newState)
 
         // Initial Start
-        if (currentState == MovementState.DOWN && newIdx > oldIdx && !startedFromDown) {
-            startedFromDown = true
+        if (!startedFromDown && newState == MovementState.DOWN && currentState == MovementState.DOWN) {
             isInvalidCycle = false
             lastValidationResult = ValidationResult(true, emptyList())
+            startedFromDown = true
+        }
+
+        // Track elbow Y position when in DOWN state
+        if (newState == MovementState.DOWN && downElbowY == null) {
+            val leftElbowY = landmarks.getOrNull(LEFT_ELBOW_IDX)?.y() ?: 0f
+            val rightElbowY = landmarks.getOrNull(RIGHT_ELBOW_IDX)?.y() ?: 0f
+            downElbowY = (leftElbowY + rightElbowY) / 2f
+        }
+
+        // Posture Validation
+        val postureValidation = validatePosture(kL, kR, hL, hR, torso)
+
+        if (!postureValidation.isValid) {
+            isInvalidCycle = true
+            lastValidationResult = postureValidation
+        }
+
+        // Reach Centre
+        if (!reachedCentre && newIdx >= stateOrder.indexOf(MovementState.CENTRE)) {
+            reachedCentre = true
         }
 
         // Up
@@ -542,10 +604,25 @@ class PullUpCounter : IRepetitionCounter {
 
         // Reach Up
         if (newState == MovementState.UP && !reachedUp) {
-            reachedUp = true
-            isGoingUp = false
-            isGoingDown = false
-            minStateIdx = Int.MAX_VALUE
+            val mouthY = landmarks.getOrNull(NOSE)?.y() ?: 0f
+            val leftIndexY = landmarks.getOrNull(LEFT_INDEX)?.y() ?: 0f
+            val rightIndexY = landmarks.getOrNull(RIGHT_INDEX)?.y() ?: 0f
+            val minIndexY = minOf(leftIndexY, rightIndexY)
+
+            if (mouthY <= minIndexY) {
+                reachedUp = true
+                isGoingUp = false
+                isGoingDown = false
+                minStateIdx = Int.MAX_VALUE
+
+                if(!bodyRoseEnough && downElbowY != null){
+                    val shoulderY = ((landmarks.getOrNull(LEFT_SHOULDER)?.y() ?: 0f) + (landmarks.getOrNull(RIGHT_SHOULDER)?.y() ?: 0f)) / 2f
+
+                    if (shoulderY <= downElbowY!!) {
+                        bodyRoseEnough = true
+                    }
+                }
+            }
         }
 
         // Down
@@ -577,15 +654,19 @@ class PullUpCounter : IRepetitionCounter {
         }
 
         // Repetition Count
-        if (newState == MovementState.DOWN && newIdx < oldIdx) {
+        if (newState == MovementState.DOWN && newIdx < oldIdx && reachedCentre) {
             when {
-                !isInvalidCycle && reachedUp && startedFromDown -> {
+                !isInvalidCycle && reachedUp && startedFromDown && bodyRoseEnough -> {
                     count++
                     lastValidationResult = ValidationResult(true, emptyList())
                 }
 
                 !startedFromDown -> {
                     lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_START_FROM_DOWN))
+                }
+
+                !bodyRoseEnough -> {
+                    lastValidationResult = ValidationResult(false, listOf(ValidationMessage.BODY_NOT_HIGH_ENOUGH))
                 }
             }
 
@@ -597,6 +678,9 @@ class PullUpCounter : IRepetitionCounter {
             startedFromDown = false
             minStateIdx = Int.MAX_VALUE
             maxStateIdx = -1
+            downElbowY = null
+            bodyRoseEnough = false
+            reachedCentre = false
         }
 
         currentState = newState
@@ -645,6 +729,10 @@ class LungesCounter : IRepetitionCounter {
         ValidationResult(true, emptyList())
         private set
 
+    override var lastWarningResult: ValidationResult =
+        ValidationResult(true, emptyList())
+        private set
+
     private var isInvalidCycle = false
     private var isInitialized = false
 
@@ -657,8 +745,12 @@ class LungesCounter : IRepetitionCounter {
     private var isGoingDown = false
     private var isGoingUp = false
 
+    // Alternating leg validation
+    private var lastValidFrontLeg: FrontLegState = FrontLegState.NONE
+    private var hadInvalidRepSinceLastValid = false
+
     // Knee thresholds
-    private val KNEE_FULL_UP = 160f
+    private val KNEE_FULL_UP = 150f
     private val KNEE_NEAR_UP = 130f
     private val KNEE_CENTRE = 120f
     private val KNEE_FULL_DOWN = 100f
@@ -681,6 +773,7 @@ class LungesCounter : IRepetitionCounter {
     override fun resetStateOnly() {
         currentState = MovementState.CENTRE
         lastValidationResult = ValidationResult(true, emptyList())
+        lastWarningResult = ValidationResult(true, emptyList())
         isInvalidCycle = false
         reachedDown = false
         startedFromUp = false
@@ -689,9 +782,11 @@ class LungesCounter : IRepetitionCounter {
         isInitialized = false
         minStateIdx = Int.MAX_VALUE
         maxStateIdx = -1
+        lastValidFrontLeg = FrontLegState.NONE
+        hadInvalidRepSinceLastValid = false
     }
 
-    override fun update(angles13: FloatArray): CounterResult {
+    override fun update(angles13: FloatArray, landmarks: List<NormalizedLandmark>): CounterResult {
         val kL = angles13[AngleIdx.LEFT_KNEE]
         val kR = angles13[AngleIdx.RIGHT_KNEE]
         val torso = angles13[AngleIdx.TORSO]
@@ -734,6 +829,41 @@ class LungesCounter : IRepetitionCounter {
             isGoingDown = false
             isGoingUp = false
             maxStateIdx = -1
+
+            // Front leg detection for alternating lunges validation
+            if (!isInvalidCycle) {
+                val leftHip = landmarks.getOrNull(24)
+                val rightHip = landmarks.getOrNull(23)
+                val leftAnkle = landmarks.getOrNull(28)
+                val rightAnkle = landmarks.getOrNull(27)
+
+                if (leftHip != null && rightHip != null && leftAnkle != null && rightAnkle != null) {
+                    val hipCenterX = (leftHip.x() + rightHip.x()) / 2f
+                    val currentFrontLeg = if (leftAnkle.x() > hipCenterX) {
+                        FrontLegState.LEFT_FRONT
+                    } else if (rightAnkle.x() > hipCenterX) {
+                        FrontLegState.RIGHT_FRONT
+                    } else {
+                        FrontLegState.NONE
+                    }
+
+                    // Check leg switching warning
+                    if (currentFrontLeg != FrontLegState.NONE) {
+                        if (!hadInvalidRepSinceLastValid && lastValidFrontLeg != FrontLegState.NONE) {
+                            if (currentFrontLeg == lastValidFrontLeg) {
+                                lastWarningResult = ValidationResult(true, listOf(ValidationMessage.LEG_NOT_SWITCHED))
+                            } else {
+                                lastWarningResult = ValidationResult(true, emptyList())
+                            }
+                        } else {
+                            lastWarningResult = ValidationResult(true, emptyList())
+                        }
+
+                        lastValidFrontLeg = currentFrontLeg
+                        hadInvalidRepSinceLastValid = false
+                    }
+                }
+            }
         }
 
         // Going up
@@ -755,6 +885,7 @@ class LungesCounter : IRepetitionCounter {
             isInvalidCycle = true
             lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_DOWN))
             isGoingDown = false
+            hadInvalidRepSinceLastValid = true
         }
 
         // Go Up but Go Down again before UP
@@ -762,6 +893,7 @@ class LungesCounter : IRepetitionCounter {
             isInvalidCycle = true
             lastValidationResult = ValidationResult(false, listOf(ValidationMessage.NOT_REACH_UP))
             isGoingUp = false
+            hadInvalidRepSinceLastValid = true
         }
 
         // Count repetition when back to UP
