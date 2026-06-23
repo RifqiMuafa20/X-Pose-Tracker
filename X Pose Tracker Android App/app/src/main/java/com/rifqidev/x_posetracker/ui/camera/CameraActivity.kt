@@ -47,15 +47,15 @@ import androidx.lifecycle.lifecycleScope
 import com.dicoding.picodiploma.mynoteapps.helper.ViewModelFactory
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.rifqidev.x_posetracker.R
-import com.rifqidev.x_posetracker.data.MessageType
-import com.rifqidev.x_posetracker.data.UiEvent
 import com.rifqidev.x_posetracker.data.UserProfileEntity
 import com.rifqidev.x_posetracker.databinding.ActivityCameraBinding
 import com.rifqidev.x_posetracker.ui.result.ResultActivity
 import com.rifqidev.x_posetracker.utils.DateHelper
 import com.rifqidev.x_posetracker.utils.DateHelper.formatTime
+import com.rifqidev.x_posetracker.utils.MessageType
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
+import com.rifqidev.x_posetracker.utils.UiEvent
 import com.rifqidev.x_posetracker.utils.ValidationMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -276,16 +276,32 @@ class CameraActivity : AppCompatActivity(),
                 binding.invalidStatus.text = "Invalid"
                 binding.invalidStatus.setTextColor(ContextCompat.getColor(this, R.color.red_accent))
 
-                state.message.forEach { msg ->
-                    showInvalidPopup(msg.toDisplayString(this), MessageType.ERROR)
+                val highestPriority =
+                    validationPriority.firstOrNull {
+                        state.message.contains(it)
+                    }
+
+                highestPriority?.let {
+                    showInvalidPopup(
+                        it.toDisplayString(this),
+                        MessageType.ERROR
+                    )
                 }
             }
         }
 
         // Observe warning state
         viewModel.warningState.observe(this) { state ->
-            state.message.forEach { msg ->
-                showInvalidPopup(msg.toDisplayString(this), MessageType.WARNING)
+            val highestPriority =
+                validationPriority.firstOrNull {
+                    state.message.contains(it)
+                }
+
+            highestPriority?.let {
+                showInvalidPopup(
+                    it.toDisplayString(this),
+                    MessageType.WARNING
+                )
             }
         }
 
@@ -294,13 +310,6 @@ class CameraActivity : AppCompatActivity(),
             event ?: return@observe
             when (event) {
                 is UiEvent.SpeakText -> speak(event.text)
-                is UiEvent.WarningFeedback -> {
-                    speak(event.messages.joinToString(". ") { it.toDisplayString(this) })
-                }
-                is UiEvent.InvalidFeedback -> {
-                    playErrorSound()
-                    speak(event.messages.joinToString(". ") { it.toDisplayString(this) })
-                }
             }
             viewModel.onEventConsumed()
         }
@@ -607,12 +616,20 @@ class CameraActivity : AppCompatActivity(),
         }
     }
 
-    private fun showInvalidPopup(message: String, messageType: MessageType) {
+    private fun showInvalidPopup(message: String, messageType: MessageType, speakMessage: Boolean = true) {
         if (message.isBlank() || activeMessages.contains(message)) return
         activeMessages.add(message)
 
+        if (speakMessage) {
+            if (messageType == MessageType.ERROR) {
+                playErrorSound()
+            }
+
+            speak(message)
+        }
+
         val container = binding.invalidMessageContainer
-        if (container.childCount >= 2) {
+        if (container.childCount >= 3) {
             val removed = container.getChildAt(0) as TextView
             activeMessages.remove(removed.text.toString())
             container.removeViewAt(0)
@@ -736,7 +753,37 @@ class CameraActivity : AppCompatActivity(),
             ValidationMessage.NOT_START_FROM_DOWN -> R.string.msg_not_start_from_down
             ValidationMessage.BODY_NOT_HIGH_ENOUGH -> R.string.msg_body_not_high_enough
             ValidationMessage.LEG_NOT_SWITCHED   -> R.string.msg_leg_not_switched
+            ValidationMessage.HIP_NOT_FOLLOWING   -> R.string.msg_hip_not_following
+            ValidationMessage.BODY_SWAYING        -> R.string.msg_body_swaying
+            ValidationMessage.ELBOW_NOT_TOUCH_KNEE -> R.string.msg_elbow_not_touch_knee
+            ValidationMessage.ELBOW_NOT_TOUCH_FLOOR -> R.string.msg_elbow_not_touch_floor
         }
+    )
+
+    private val validationPriority = listOf(
+        // Validation
+        ValidationMessage.NOT_START_FROM_DOWN,
+        ValidationMessage.NOT_START_FROM_UP,
+        ValidationMessage.NOT_REACH_UP,
+        ValidationMessage.NOT_REACH_DOWN,
+        ValidationMessage.BODY_NOT_HIGH_ENOUGH,
+        ValidationMessage.HIP_NOT_FOLLOWING,
+        ValidationMessage.BODY_SWAYING,
+        ValidationMessage.LEG_NOT_SWITCHED,
+
+        ValidationMessage.KNEE_TOO_WIDE,
+        ValidationMessage.HIP_TOO_BENT,
+        ValidationMessage.KNEE_TOO_BENT,
+        ValidationMessage.KNEE_NOT_STRAIGHT,
+        ValidationMessage.HIP_NOT_STRAIGHT,
+
+        ValidationMessage.TORSO_NOT_HORIZONTAL,
+        ValidationMessage.TORSO_NOT_VERTICAL,
+        ValidationMessage.TORSO_TOO_TILTED,
+
+        // warning
+        ValidationMessage.ELBOW_NOT_TOUCH_KNEE,
+        ValidationMessage.ELBOW_NOT_TOUCH_FLOOR,
     )
 
     companion object {

@@ -222,6 +222,10 @@
     <string name="msg_not_start_from_down">Should start from the bottom</string>
     <string name="msg_body_not_high_enough">Body should be high enough</string>
     <string name="msg_leg_not_switched">Switch legs for alternating lunges</string>
+    <string name="msg_hip_not_following">Hip not following</string>
+    <string name="msg_body_swaying">Body swaying</string>
+    <string name="msg_elbow_not_touch_knee">Elbow not touch the knee</string>
+    <string name="msg_elbow_not_touch_floor">Elbow not touch the floor</string>
 
     <string name="tutorial_image">Tutorial Image</string>
     <string name="understand">Understand</string>

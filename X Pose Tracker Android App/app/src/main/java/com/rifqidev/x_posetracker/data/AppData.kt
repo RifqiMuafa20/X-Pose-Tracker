@@ -64,41 +64,6 @@ data class TniScorePointDouble(
     val scores: List<Int>
 )
 
-data class RepUiState(
-    val current: Int,
-    val pushUp: Int,
-    val sitUp: Int,
-    val pullUp: Int,
-    val lunges: Int
-)
-
-data class ValidationResult(
-    val isValid: Boolean,
-    val message: List<ValidationMessage>
-)
-
-data class CounterResult(
-    val count: Int,
-    val state: MovementState,
-    val validationResult: ValidationResult
-)
-
-data class ValidationUiState(
-    val isValid: Boolean,
-    val message: List<ValidationMessage>
-)
-
-enum class MessageType {
-    ERROR,
-    WARNING
-}
-
-sealed class UiEvent {
-    data class SpeakText(val text: String) : UiEvent()
-    data class WarningFeedback(val messages: List<ValidationMessage>) : UiEvent()
-    data class InvalidFeedback(val messages: List<ValidationMessage>) : UiEvent()
-}
-
 data class WeeklyProgress(
     @ColumnInfo(name = "date")
     val date: String,

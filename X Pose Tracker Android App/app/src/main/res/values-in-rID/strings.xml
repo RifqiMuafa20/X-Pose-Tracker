@@ -223,6 +223,10 @@
     <string name="msg_not_start_from_down">Tidak dimulai dari posisi bawah</string>
     <string name="msg_body_not_high_enough">Badan harus diangkat</string>
     <string name="msg_leg_not_switched">Ganti kaki untuk lunges bergantian</string>
+    <string name="msg_hip_not_following">Pinggang tidak ikut bergerak</string>
+    <string name="msg_body_swaying">Badan Berayun</string>
+    <string name="msg_elbow_not_touch_knee">Siku tidak menyentuh lutut</string>
+    <string name="msg_elbow_not_touch_floor">Siku tidak menyentuh lantai</string>
 
     <string name="tutorial_image">Tutorial Image</string>
     <string name="understand">Mengerti</string>

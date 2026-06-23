@@ -7,15 +7,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.rifqidev.x_posetracker.data.AktivitasLatihan
-import com.rifqidev.x_posetracker.data.RepUiState
-import com.rifqidev.x_posetracker.data.UiEvent
 import com.rifqidev.x_posetracker.data.UserProfileEntity
-import com.rifqidev.x_posetracker.data.ValidationUiState
 import com.rifqidev.x_posetracker.repository.AppRepository
 import com.rifqidev.x_posetracker.utils.AngleFallbackState
 import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
+import com.rifqidev.x_posetracker.utils.RepUiState
+import com.rifqidev.x_posetracker.utils.UiEvent
 import com.rifqidev.x_posetracker.utils.ValidationMessage
+import com.rifqidev.x_posetracker.utils.ValidationUiState
 import com.rifqidev.x_posetracker.utils.calculateTotalCalories
 import com.rifqidev.x_posetracker.utils.createDefaultRepetitionEngine
 import com.rifqidev.x_posetracker.utils.estimateDuration
@@ -61,9 +61,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
     private var lastPrediction: String? = null
     private var lastCountMap = mutableMapOf<String, Int>()
-    private var lastMessage: String? = ""
-    private var lastValidationMessages: List<ValidationMessage> = emptyList()
-    private var lastWarningMessages: List<ValidationMessage> = emptyList()
 
     // Exposed UI LiveData
 
@@ -135,9 +132,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
             }
 
             // Validation
-            val validationResult = repEngine.getLastValidation(currentPrediction)
-            val warningResult = repEngine.getLastWarning(currentPrediction)
-
             val isValid: Boolean
             val validationMessages: List<ValidationMessage>
             val warningMessages: List<ValidationMessage>
@@ -147,21 +141,11 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
                 validationMessages = emptyList()
                 warningMessages = emptyList()
             } else {
-                isValid = validationResult?.isValid == true
-                validationMessages = validationResult?.message ?: emptyList()
-                warningMessages = warningResult?.message ?: emptyList()
-            }
+                isValid = repEngine.getIsValid(currentPrediction)
 
-            if (!isValid && validationMessages != lastValidationMessages) {
-                emitEvent(UiEvent.InvalidFeedback(validationMessages))
+                validationMessages = repEngine.getLastValidationMessages(currentPrediction)
+                warningMessages = repEngine.getLastWarningMessages(currentPrediction)
             }
-
-            if (warningMessages != lastWarningMessages){
-                emitEvent(UiEvent.WarningFeedback(warningMessages))
-            }
-
-            lastValidationMessages = validationMessages
-            lastWarningMessages = warningMessages
 
             _prediction.postValue(currentPrediction)
 
@@ -184,7 +168,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
             _warningState.postValue(
                 ValidationUiState(
-                    isValid = true,
+                    isValid = isValid,
                     message = warningMessages
                 )
             )
@@ -201,7 +185,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         clsTick = 0
         lastPrediction = null
         lastCountMap.clear()
-        lastMessage = ""
     }
 
     private fun buildAktivitasList(): List<AktivitasLatihan> = listOf(
