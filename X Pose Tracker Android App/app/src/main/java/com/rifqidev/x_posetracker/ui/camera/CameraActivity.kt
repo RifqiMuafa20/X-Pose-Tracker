@@ -57,6 +57,8 @@ import com.rifqidev.x_posetracker.utils.PoseClassificationHelper
 import com.rifqidev.x_posetracker.utils.PoseLandmarkerHelper
 import com.rifqidev.x_posetracker.utils.UiEvent
 import com.rifqidev.x_posetracker.utils.ValidationMessage
+import com.rifqidev.x_posetracker.utils.text_to_speech.SpeechManager
+import com.rifqidev.x_posetracker.utils.text_to_speech.SpeechType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -109,11 +111,13 @@ class CameraActivity : AppCompatActivity(),
     private val OVERLAY_INTERVAL_MS = 100L
 
     // Audio TTS
+    private lateinit var speechManager: SpeechManager
     private var tts: TextToSpeech? = null
     private lateinit var sp: SoundPool
     private var soundId: Int = 0
     private var spLoaded = false
 
+    private var previousIsValid = true
     private val activeMessages = mutableSetOf<String>()
 
     // Permission launcher
@@ -269,6 +273,12 @@ class CameraActivity : AppCompatActivity(),
 
         // Observe validation state
         viewModel.validationState.observe(this) { state ->
+            if (!previousIsValid && state.isValid) {
+                activeMessages.clear()
+            }
+
+            previousIsValid = state.isValid
+
             if (state.isValid) {
                 binding.invalidStatus.text = "Valid"
                 binding.invalidStatus.setTextColor(ContextCompat.getColor(this, R.color.lime_green))
@@ -309,7 +319,19 @@ class CameraActivity : AppCompatActivity(),
         viewModel.uiEvent.observe(this) { event ->
             event ?: return@observe
             when (event) {
-                is UiEvent.SpeakText -> speak(event.text)
+                is UiEvent.SpeakText -> {
+                    if(event.text.toIntOrNull() != null){
+                        speechManager.speak(
+                            event.text,
+                            SpeechType.REPETITION
+                        )
+                    } else {
+                        speechManager.speak(
+                            event.text,
+                            SpeechType.ACTIVITY
+                        )
+                    }
+                }
             }
             viewModel.onEventConsumed()
         }
@@ -625,7 +647,10 @@ class CameraActivity : AppCompatActivity(),
                 playErrorSound()
             }
 
-            speak(message)
+            speechManager.speak(
+                message,
+                SpeechType.FEEDBACK
+            )
         }
 
         val container = binding.invalidMessageContainer
@@ -688,10 +713,6 @@ class CameraActivity : AppCompatActivity(),
 
     // Audio
 
-    private fun speak(text: String) {
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, text)
-    }
-
     private fun playErrorSound() {
         if (spLoaded) sp.play(soundId, 0.5f, 0.5f, 0, 0, 2f)
     }
@@ -717,6 +738,10 @@ class CameraActivity : AppCompatActivity(),
 
             tts?.setSpeechRate(1.5f)
             tts?.setPitch(1.2f)
+
+            tts?.let {
+                speechManager = SpeechManager(it)
+            }
         }
     }
 
