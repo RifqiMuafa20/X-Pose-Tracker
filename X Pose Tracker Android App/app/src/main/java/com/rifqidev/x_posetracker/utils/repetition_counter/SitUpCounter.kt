@@ -3,7 +3,6 @@ package com.rifqidev.x_posetracker.utils.repetition_counter
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.rifqidev.x_posetracker.utils.AngleIdx
 import com.rifqidev.x_posetracker.utils.IRepetitionCounter
-import com.rifqidev.x_posetracker.utils.LandmarkIdx
 import com.rifqidev.x_posetracker.utils.MovementState
 import com.rifqidev.x_posetracker.utils.ValidationMessage
 import com.rifqidev.x_posetracker.utils.ValidationResult
@@ -49,10 +48,6 @@ class SitUpCounter : IRepetitionCounter {
     private val TORSO_MIN_FOR_DOWN = 80f
 
     private var kneeInvalidFrames = 0
-    private var handNotBehindHeadFrames = 0
-
-    private var elbowTouchedFloor = false
-    private var elbowTouchedKnee = false
 
     private val stateOrder = listOf(
         MovementState.DOWN,
@@ -82,9 +77,6 @@ class SitUpCounter : IRepetitionCounter {
         minStateIdx = Int.MAX_VALUE
         maxStateIdx = -1
         kneeInvalidFrames = 0
-        handNotBehindHeadFrames = 0
-        elbowTouchedFloor = false
-        elbowTouchedKnee = false
     }
 
     override fun update(angles13: FloatArray, landmarks: List<NormalizedLandmark>) {
@@ -108,17 +100,10 @@ class SitUpCounter : IRepetitionCounter {
         val oldIdx = stateOrder.indexOf(currentState)
         val newIdx = stateOrder.indexOf(newState)
 
-        // Warnings Validation
-        updateSitUpWarnings(landmarks)
-
         // Initial Start
         if (currentState == MovementState.DOWN && newIdx > oldIdx && !startedFromDown) {
             startedFromDown = true
             isValid = true
-
-            if (!elbowTouchedFloor) {
-                warningRep(listOf(ValidationMessage.ELBOW_NOT_TOUCH_FLOOR))
-            }
         }
 
         // Posture Validation
@@ -148,10 +133,6 @@ class SitUpCounter : IRepetitionCounter {
         if (reachedUp && newIdx < oldIdx && !isGoingDown) {
             isGoingDown = true
             isGoingUp = false
-
-            if (!elbowTouchedKnee) {
-                warningRep(listOf(ValidationMessage.ELBOW_NOT_TOUCH_KNEE))
-            }
         }
 
         if (isGoingUp) {
@@ -194,10 +175,6 @@ class SitUpCounter : IRepetitionCounter {
             minStateIdx = Int.MAX_VALUE
             maxStateIdx = -1
             kneeInvalidFrames = 0
-            handNotBehindHeadFrames = 0
-
-            elbowTouchedFloor = false
-            elbowTouchedKnee = false
         }
 
         currentState = newState
@@ -239,31 +216,6 @@ class SitUpCounter : IRepetitionCounter {
         }
     }
 
-    private fun updateSitUpWarnings(landmarks: List<NormalizedLandmark>) {
-        // DOWN position -> elbow touch floor
-        if (newState == MovementState.DOWN) {
-            val leftElbowY = landmarks[LandmarkIdx.LEFT_ELBOW].y()
-            val rightElbowY = landmarks[LandmarkIdx.RIGHT_ELBOW].y()
-
-            val avgShoulderY = (landmarks[LandmarkIdx.LEFT_SHOULDER].y() + landmarks[LandmarkIdx.RIGHT_SHOULDER].y()) / 2f
-
-            if ( leftElbowY >= avgShoulderY || rightElbowY >= avgShoulderY) {
-                elbowTouchedFloor = true
-            }
-        }
-
-        // UP position -> elbow touch knee
-        if (newState == MovementState.UP) {
-            val minElbowX = minOf(landmarks[LandmarkIdx.LEFT_ELBOW].x(), landmarks[LandmarkIdx.RIGHT_ELBOW].x())
-
-            val maxKneeX = maxOf(landmarks[LandmarkIdx.LEFT_KNEE].x(), landmarks[LandmarkIdx.RIGHT_KNEE].x())
-
-            if (minElbowX <= maxKneeX) {
-                elbowTouchedKnee = true
-            }
-        }
-    }
-
     private fun invalidateRep(messages: List<ValidationMessage>) {
         lastValidationResult =
             ValidationResult(
@@ -272,13 +224,5 @@ class SitUpCounter : IRepetitionCounter {
             )
 
         isValid = false
-    }
-
-    private fun warningRep(message: List<ValidationMessage>) {
-        lastWarningResult =
-            ValidationResult(
-                (lastWarningResult.message + message)
-                    .distinct()
-            )
     }
 }
