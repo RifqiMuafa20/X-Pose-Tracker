@@ -278,6 +278,7 @@
     <string name="donate_title">Support X Pose Tracker ❤️</string>
     <string name="later">Nanti</string>
     <string name="no_browser_found">Browser tidak ditemukan</string>
+    <string name="version_app">Versi 2.2</string>
 
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>

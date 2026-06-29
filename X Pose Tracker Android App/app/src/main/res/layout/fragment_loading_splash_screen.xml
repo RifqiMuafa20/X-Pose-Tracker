@@ -48,6 +48,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/loading_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingHorizontal="32dp"
@@ -60,5 +61,17 @@
         app:layout_constraintBottom_toBottomOf="@+id/view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/version_app"
+        android:fontFamily="@font/poppins_medium_metalic"
+        android:textSize="12sp"
+        android:textColor="@color/lime_green"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/loading_desc"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
