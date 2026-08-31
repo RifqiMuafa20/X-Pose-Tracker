@@ -3,7 +3,7 @@ import java.net.URI
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.ksp)
     id("kotlin-parcelize")
 }
 
@@ -48,14 +48,14 @@ val downloadFlexDelegate by tasks.registering {
 
 android {
     namespace = "com.rifqidev.x_posetracker"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.rifqidev.x_posetracker"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 9
-        versionName = "2.2"
+        targetSdk = 36
+        versionCode = 10
+        versionName = "2.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
